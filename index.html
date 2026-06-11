@@ -353,7 +353,7 @@
                     </div>
                     <div class="form-group">
                         <label>Observações do Item:</label>
-                        <textarea id="descricao" placeholder="Ex: Sem cebola, Coca normal, detalhe do prato do dia..."></textarea>
+                        <textarea id="descricao" placeholder="Ex: Sem cebola, Coca normal, observações gerais do prato..."></textarea>
                     </div>
 
                     <button type="submit" class="btn btn-add">＋ Incluir Item</button>
@@ -555,9 +555,10 @@
                     `;
                 });
                 
+                // Mapeia a cronologia para a engine do dashboard fechar o dia na ordem correta
                 historicoGeralPedidos.reverse();
             } catch (erro) {
-                console.error("Aviso: Banco operando local.", erro);
+                console.error("Aviso: Sincronização offline ou Firestore indisponível.", erro);
             }
         }
 
@@ -689,7 +690,6 @@
             const documentoPedido = {
                 numero: contadorPedidos,
                 data: dataFormatada,
-                hour: horaSimples,
                 hora: horaSimples,
                 clienteHtml: stringClienteHistorico,
                 clienteA4: detalheClienteRelatorio,
@@ -704,7 +704,7 @@
                 await addDoc(collection(db, "pedidos"), documentoPedido);
                 await carregarHistoricoDoFirebase();
             } catch (erro) {
-                console.warn("Computando local temporário.", erro);
+                console.warn("Computando de forma local em contingência.", erro);
                 historicoGeralPedidos.push(documentoPedido);
                 await carregarHistoricoDoFirebase();
             }

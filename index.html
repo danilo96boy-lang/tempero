@@ -311,27 +311,40 @@
                         <input type="text" id="cliente-endereco" placeholder="Rua, número, bairro...">
                     </div>
 
-                    <div class="secao-titulo">2. Itens da Venda</div>
+                    <div class="secao-titulo">2. Itens da Venda (Cardápio Otimizado)</div>
                     <div class="form-row dois-campos">
                         <div class="form-group">
-                            <label>Item / Produto:</label>
-                            <select id="tipo" required>
-                                <option value="Tamanho P">Tamanho P</option>
-                                <option value="Tamanho M">Tamanho M</option>
-                                <option value="Tamanho G">Tamanho G</option>
-                                <option value="PRATO">PRATO</option>
-                                <option value="REFRIGERANTE LATA">REFRIGERANTE LATA</option>
-                                <option value="REFRIGERANTE 2L">REFRIGERANTE 2L</option>
+                            <label>Prato / Categoria:</label>
+                            <select id="categoria-prato" onchange="atualizarOpcoesMenu()" required>
+                                <option value="">-- Selecione o Prato --</option>
+                                <option value="Parmegiana de Frango">🍗 Parmegiana de Frango</option>
+                                <option value="Frango à Milanesa">🍗 Frango à Milanesa</option>
+                                <option value="Parmegiana de Berinjela">🍆 Parmegiana de Berinjela</option>
+                                <option value="Feijoada">🥘 Feijoada</option>
+                                <option value="Marmitex">🍛 Marmitex Simples</option>
+                                <option value="Prato Feito">🍽️ Prato Feito Tradicional</option>
+                                <option value="Bebidas">🥤 Bebidas</option>
                             </select>
                         </div>
+                        <div class="form-group">
+                            <label>Tamanho / Opção:</label>
+                            <select id="tipo" required>
+                                <option value="">-- Selecione primeiro o prato --</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row dois-campos">
                         <div class="form-group">
                             <label>Preço (R$):</label>
                             <input type="number" id="valor" step="0.01" min="0" placeholder="0,00" required>
                         </div>
+                        <div class="form-group">
+                            <label>&nbsp;</label>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label>Observações do Item:</label>
-                        <textarea id="descricao" placeholder="Ex: Sem cebola, Coca normal..." required></textarea>
+                        <textarea id="descricao" placeholder="Ex: Sem cebola, Coca normal, caprichar na batata..." required></textarea>
                     </div>
 
                     <button type="submit" class="btn btn-add">＋ Incluir Item</button>
@@ -435,13 +448,37 @@
         let contadorPedidos = 1;
         let dadosFechamentoRelatorio = null;
 
-        // --- SISTEMA DE AUTENTICAÇÃO LOCAL CRIPTOGRAFADO ---
+        // --- DICIONÁRIO DO NOVO CARDÁPIO DINÂMICO ---
+        const cardapioEstruturado = {
+            "Parmegiana de Frango": ["Marmita (P)", "Marmita (M)", "Marmita (G)", "Prato Feito (PF)"],
+            "Frango à Milanesa": ["Marmita (P)", "Marmita (M)", "Marmita (G)", "Prato Feito (PF)"],
+            "Parmegiana de Berinjela": ["Marmita (P)", "Marmita (M)", "Marmita (G)", "Prato Feito (PF)"],
+            "Feijoada": ["Marmita (P)", "Marmita (M)", "Marmita (G)", "Prato Feito (PF)"],
+            "Marmitex": ["Marmitex P", "Marmitex M", "Marmitex G"],
+            "Prato Feito": ["Prato Feito Único"],
+            "Bebidas": ["Refrigerante Lata", "Refrigerante 2L", "Agua Normal", "Agua com Gas", "Outros"]
+        };
+
+        window.atualizarOpcoesMenu = function() {
+            const categoriaSel = document.getElementById('categoria-prato').value;
+            const selectTipo = document.getElementById('tipo');
+            
+            selectTipo.innerHTML = '';
+            
+            if (!categoriaSel || !cardapioEstruturado[categoriaSel]) {
+                selectTipo.innerHTML = '<option value="">-- Selecione primeiro o prato --</option>';
+                return;
+            }
+            
+            cardapioEstruturado[categoriaSel].forEach(opcao => {
+                selectTipo.innerHTML += `<option value="${opcao}">${opcao}</option>`;
+            });
+        };
+
         window.validarAcessoSeguro = function(event) {
             event.preventDefault();
             const usuarioInput = document.getElementById('login-usuario').value.trim();
             const senhaInput = document.getElementById('login-senha').value.trim();
-
-            // Hash em Base64 correspondente à senha "190620"
             const hashValido = "MTkwNjIw"; 
 
             if (usuarioInput.toLowerCase() === "gabriele" && btoa(senhaInput) === hashValido) {
@@ -449,9 +486,8 @@
                 document.getElementById('conteudo-sistema').style.display = 'block';
                 carregarHistoricoDoFirebase();
             } else {
-                alert("Usuário ou Senha incorretos! Verifique os dados.");
+                alert("Usuário ou Senha incorretos!");
                 document.getElementById('login-senha').value = '';
-                document.getElementById('login-senha').focus();
             }
         };
 
@@ -472,7 +508,7 @@
                         contadorPedidos = dados.numero + 1;
                     }
 
-                    let resumoItens = dados.itens.map(i => `<span style="color:var(--cor-principal); font-weight:600;">[${i.tipo}]</span> ${i.descricao}`).join('<br>');
+                    let resumoItens = dados.itens.map(i => `<span style="color:var(--cor-principal); font-weight:600;">[${i.prato}]</span> ${i.tipo} - <small>${i.descricao}</small>`).join('<br>');
                     
                     corpoHistorico.innerHTML += `
                         <tr>
@@ -487,22 +523,25 @@
                 
                 historicoGeralPedidos.reverse();
             } catch (erro) {
-                console.error("Aviso: Firestore operando local ou offline.", erro);
+                console.error("Aviso: Banco operando local.", erro);
             }
         }
 
         window.adicionarItem = function(event) {
             event.preventDefault();
+            const prato = document.getElementById('categoria-prato').value;
             const tipo = document.getElementById('tipo').value;
             const descricao = document.getElementById('descricao').value;
             const valor = parseFloat(document.getElementById('valor').value);
 
-            pedidoAtual.push({ id: Date.now(), tipo: tipo, descricao: descricao, valor: valor });
+            pedidoAtual.push({ id: Date.now(), prato: prato, tipo: tipo, descricao: descricao, valor: valor });
             atualizarInterface();
 
             document.getElementById('descricao').value = '';
             document.getElementById('valor').value = '';
-            document.getElementById('tipo').focus();
+            document.getElementById('categoria-prato').value = '';
+            document.getElementById('tipo').innerHTML = '<option value="">-- Selecione primeiro o prato --</option>';
+            document.getElementById('categoria-prato').focus();
         };
 
         window.removerItem = function(id) {
@@ -520,8 +559,8 @@
                 lista.innerHTML += `
                     <li class="item-carrinho">
                         <div>
-                            <strong>[${item.tipo}]</strong> ${item.descricao}<br>
-                            <small style="color: var(--cor-texto-secundario)">R$ ${item.valor.toFixed(2)}</small>
+                            <strong>${item.prato}</strong> (${item.tipo})<br>
+                            <small style="color: var(--cor-texto-secundario)">Obs: ${item.descricao} - R$ ${item.valor.toFixed(2)}</small>
                         </div>
                         <button class="btn-del" onclick="removerItem(${item.id})">X</button>
                     </li>
@@ -582,12 +621,12 @@
 
             pedidoAtual.forEach((item, index) => {
                 totalPedido += item.valor;
-                itensListaSimples.push(`[${item.tipo}] ${item.descricao}`);
+                itensListaSimples.push(`[${item.prato}] ${item.tipo} - ${item.descricao}`);
 
                 containerItensPrint.innerHTML += `
                     <div class="ticket-item">
                         <div class="ticket-item-main">
-                            <span>${index + 1}. ${item.tipo}</span>
+                            <span>${index + 1}. ${item.prato} (${item.tipo})</span>
                             <span>R$ ${item.valor.toFixed(2)}</span>
                         </div>
                         <div class="ticket-item-obs">${item.descricao}</div>
@@ -613,11 +652,11 @@
                 await addDoc(collection(db, "pedidos"), documentoPedido);
                 await carregarHistoricoDoFirebase();
             } catch (erro) {
-                console.warn("Aviso: Computado de forma local temporária.", erro);
+                console.warn("Computando de forma local temporária.", erro);
                 historicoGeralPedidos.push(documentoPedido);
                 const corpoHistorico = document.getElementById('corpo-historico');
-                let resumoItensLocal = documentoPedido.itens.map(i => `<span style="color:var(--cor-principal); font-weight:600;">[${i.tipo}]</span> ${i.descricao}`).join('<br>');
-                corpoHistorico.innerHTML = `<tr><td><strong>#${String(documentoPedido.numero).padStart(2, '0')}</strong></td><td>${documentoPedido.hora}</td><td>${documentoPedido.clienteHtml}</td><td>${resumoItensLocal}</td><td>exportarFechamentoPDF<strong>R$ ${documentoPedido.total.toFixed(2)}</strong></td></tr>` + corpoHistorico.innerHTML;
+                let resumoItensLocal = documentoPedido.itens.map(i => `[${i.prato}] ${i.tipo}`).join('<br>');
+                corpoHistorico.innerHTML = `<tr><td><strong>#${String(documentoPedido.numero).padStart(2, '0')}</strong></td><td>${documentoPedido.hora}</td><td>${documentoPedido.clienteHtml}</td><td>${resumoItensLocal}</td><td><strong>R$ ${documentoPedido.total.toFixed(2)}</strong></td></tr>` + corpoHistorico.innerHTML;
             }
 
             document.body.className = "modo-impressao-ticket";
@@ -639,13 +678,17 @@
 
             let faturamentoTotal = 0;
             let totalItens = 0;
-            let porCategoria = { "Tamanho P": 0, "Tamanho M": 0, "Tamanho G": 0, "PRATO": 0, "REFRIGERANTE LATA": 0, "REFRIGERANTE 2L": 0 };
+            let porCategoria = { "Marmitas / Pratos": 0, "Bebidas / Outros": 0 };
 
             historicoGeralPedidos.forEach(p => {
                 faturamentoTotal += p.total;
                 p.itens.forEach(i => {
                     totalItens++;
-                    if (porCategoria[i.tipo] !== undefined) porCategoria[i.tipo] += i.valor;
+                    if (i.prato === "Bebidas") {
+                        porCategoria["Bebidas / Outros"] += i.valor;
+                    } else {
+                        porCategoria["Marmitas / Pratos"] += i.valor;
+                    }
                 });
             });
 
@@ -672,10 +715,7 @@
         };
 
         window.exportarFechamentoPDF = function() {
-            if (!dadosFechamentoRelatorio) {
-                alert("Gere o fechamento antes de exportar!");
-                return;
-            }
+            if (!dadosFechamentoRelatorio) return;
 
             const divPDF = document.createElement('div');
             divPDF.style.width = '800px'; divPDF.style.padding = '30px';
@@ -694,13 +734,13 @@
                 <div style="font-size: 14px; font-weight: bold; background-color: #edf2f7; padding: 10px; margin-top: 20px; margin-bottom: 12px; border-left: 4px solid #cc1d1d; text-transform: uppercase; color: #2d3748;">Resumo Financeiro Geral</div>
                 <table style="width: 100%; border-collapse: collapse; margin-bottom: 25px;">
                     <tr><td style="padding: 10px 14px; border: 1px solid #cbd5e0; background-color: #f7fafc; font-weight: bold; width: 45%; font-size: 13px;">Faturamento Bruto Acumulado:</td><td style="padding: 10px 14px; border: 1px solid #cbd5e0; font-weight: bold; color: #cc1d1d; font-size: 16px;">${dadosFechamentoRelatorio.faturamento}</td></tr>
-                    <tr><td style="padding: 10px 14px; border: 1px solid #cbd5e0; background-color: #f7fafc; font-weight: bold; font-size: 13px;">Quantidade de Pedidos Atendidos:</td><td style="padding: 10px 14px; border: 1px solid #cbd5e0; font-size: 13px;">${dadosFechamentoRelatorio.pedidos}</td></tr>
+                    <tr><td style="padding: 10px 14px; border: 1px solid #cbd5e0; background-color: #f7fafc; font-weight: bold; font-size: 13px;">Quantidade de Pedidos Atendidos:</td><td style="padding: 10px 14px; border: 1px solid #cbd5e0;">${dadosFechamentoRelatorio.pedidos}</td></tr>
                     <tr><td style="padding: 10px 14px; border: 1px solid #cbd5e0; background-color: #f7fafc; font-weight: bold; font-size: 13px;">Valor do Ticket Médio Geral:</td><td style="padding: 10px 14px; border: 1px solid #cbd5e0; font-weight: bold; font-size: 13px;">${dadosFechamentoRelatorio.ticket}</td></tr>
                 </table>
 
-                <div style="font-size: 14px; font-weight: bold; background-color: #edf2f7; padding: 10px; margin-top: 20px; margin-bottom: 12px; border-left: 4px solid #cc1d1d; text-transform: uppercase; color: #2d3748;">Faturamento por Linha de Produto</div>
+                <div style="font-size: 14px; font-weight: bold; background-color: #edf2f7; padding: 10px; margin-top: 20px; margin-bottom: 12px; border-left: 4px solid #cc1d1d; text-transform: uppercase; color: #2d3748;">Resumo Simplificado por Segmento</div>
                 <table style="width: 100%; border-collapse: collapse; margin-bottom: 25px;">
-                    <thead><tr style="background-color: #f7fafc; font-weight: bold;"><th style="padding: 10px 14px; border: 1px solid #cbd5e0; text-align: left; font-size: 13px;">Categoria de Produto</th><th style="padding: 10px 14px; border: 1px solid #cbd5e0; text-align: left; font-size: 13px;">Total Faturado</th></tr></thead>
+                    <thead><tr style="background-color: #f7fafc; font-weight: bold;"><th style="padding: 10px 14px; border: 1px solid #cbd5e0; text-align: left; font-size: 13px;">Divisão</th><th style="padding: 10px 14px; border: 1px solid #cbd5e0; text-align: left; font-size: 13px;">Faturamento Bruto</th></tr></thead>
                     <tbody>
             `;
 
@@ -740,10 +780,10 @@
                 document.getElementById('btn-pdf-id').style.display = 'none';
                 document.getElementById('btn-reset-id').style.display = 'none';
                 
-                alert("Caixa zerado com sucesso!\nO contador retornou para o Pedido #01 e o painel está limpo.");
+                alert("Caixa zerado com sucesso!\nO contador retornou para o Pedido #01.");
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             } else if (senhaDigitada !== null) {
-                alert("Senha incorreta! Operação cancelada.");
+                alert("Senha incorreta!");
             }
         };
     </script>

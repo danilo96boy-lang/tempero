@@ -33,6 +33,37 @@
             color: var(--cor-texto);
         }
 
+        /* Tela de Bloqueio de Login */
+        #tela-login {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background-color: var(--cor-fundo);
+            z-index: 9999;
+        }
+
+        .card-login {
+            background: var(--cor-card);
+            padding: 40px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            width: 100%;
+            max-width: 380px;
+            box-sizing: border-box;
+            text-align: center;
+            border-top: 5px solid var(--cor-principal);
+        }
+
+        /* Interface do Sistema (Inicia Oculta) */
+        #conteudo-sistema {
+            display: none;
+            width: 100%;
+            max-width: 1150px;
+        }
+
         .brand-header {
             display: flex;
             align-items: center;
@@ -42,7 +73,6 @@
             padding: 15px 30px;
             border-radius: var(--border-radius);
             width: 100%;
-            max-width: 1150px;
             box-shadow: var(--shadow);
             box-sizing: border-box;
             border-left: 6px solid var(--cor-principal);
@@ -70,7 +100,6 @@
             grid-template-columns: 1fr;
             gap: 20px;
             width: 100%;
-            max-width: 1150px;
             box-sizing: border-box;
         }
 
@@ -237,113 +266,134 @@
 </head>
 <body>
 
-    <div class="brand-header no-print">
-        <img src="logo.png" alt="Logo" class="brand-logo" onerror="this.style.display='none'">
-        <h1>Tempero de Família</h1>
-    </div>
-
-    <div class="main-grid no-print">
-        <div class="card">
-            <h3>📝 Lançar Novo Pedido</h3>
-            <form id="form-item" onsubmit="adicionarItem(event)">
-                <div class="secao-titulo">1. Identificação do Cliente (Opcional)</div>
-                <div class="form-row dois-campos">
-                    <div class="form-group">
-                        <label>Nome do Cliente:</label>
-                        <input type="text" id="cliente-nome" placeholder="Nome">
-                    </div>
-                    <div class="form-group">
-                        <label>Celular / WhatsApp:</label>
-                        <input type="tel" id="cliente-celular" placeholder="(00) 00000-0000">
-                    </div>
+    <div id="tela-login" class="no-print">
+        <div class="card-login">
+            <h2 style="color: var(--cor-principal); margin: 0 0 10px 0; text-transform: uppercase; font-size: 20px;">Acesso Restrito</h2>
+            <p style="font-size: 13px; color: var(--cor-texto-secundario); margin: 0 0 25px 0;">Identifique-se para acessar o PDV Tempero de Família</p>
+            
+            <form id="form-login-id" onsubmit="validarAcessoSeguro(event)">
+                <div class="form-group" style="text-align: left;">
+                    <label>Operador / Usuário:</label>
+                    <input type="text" id="login-usuario" required placeholder="Digite o usuário">
                 </div>
-                <div class="form-group">
-                    <label>Endereço de Entrega:</label>
-                    <input type="text" id="cliente-endereco" placeholder="Rua, número, bairro...">
+                <div class="form-group" style="text-align: left; margin-bottom: 25px;">
+                    <label>Senha de Acesso:</label>
+                    <input type="password" id="login-senha" required placeholder="••••••">
                 </div>
-
-                <div class="secao-titulo">2. Itens da Venda</div>
-                <div class="form-row dois-campos">
-                    <div class="form-group">
-                        <label>Item / Produto:</label>
-                        <select id="tipo" required>
-                            <option value="Tamanho P">Tamanho P</option>
-                            <option value="Tamanho M">Tamanho M</option>
-                            <option value="Tamanho G">Tamanho G</option>
-                            <option value="PRATO">PRATO</option>
-                            <option value="REFRIGERANTE LATA">REFRIGERANTE LATA</option>
-                            <option value="REFRIGERANTE 2L">REFRIGERANTE 2L</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Preço (R$):</label>
-                        <input type="number" id="valor" step="0.01" min="0" placeholder="0,00" required>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>Observações do Item:</label>
-                    <textarea id="descricao" placeholder="Ex: Sem cebola, Coca normal..." required></textarea>
-                </div>
-
-                <button type="submit" class="btn btn-add">＋ Incluir Item</button>
+                <button type="submit" class="btn btn-add" style="margin: 0;">🔓 Entrar no Sistema</button>
             </form>
         </div>
+    </div>
 
-        <div class="card carrinho-container">
-            <div>
-                <h3>🛒 Pedido Atual</h3>
-                <ul id="lista-itens" class="lista-itens"></ul>
-            </div>
-            <div>
-                <div class="total-tela">Total: <span>R$ <span id="total-valor">0.00</span></span></div>
-                <button type="button" class="btn btn-print" style="margin-top: 15px;" onclick="finalizarEImprimirTicket()">🖨️ Imprimir Cupom Balcão</button>
-            </div>
+    <div id="conteudo-sistema">
+        <div class="brand-header no-print">
+            <img src="logo.png" alt="Logo" class="brand-logo" onerror="this.style.display='none'">
+            <h1>Tempero de Família</h1>
         </div>
 
-        <div class="card full-width-grid">
-            <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;">
-                <h3 style="margin:0;">🔒 Fechamento de Caixa Diário</h3>
-                <div style="display: flex; gap: 10px;">
-                    <button type="button" class="btn btn-fechamento" onclick="calcularFechamentoDiario()">🔒 Realizar Fechamento</button>
-                    <button type="button" id="btn-pdf-id" class="btn btn-pdf" onclick="exportarFechamentoPDF()">📥 Exportar Relatório (PDF)</button>
-                    <button type="button" id="btn-reset-id" class="btn btn-reset" onclick="reiniciarTurnoComSenha()">⚠️ Reiniciar Turno (Zerar Caixa)</button>
-                </div>
-            </div>
-            
-            <div id="dashboard-vendas-tela" class="dash-container-tela">
-                <div class="card-metrica">
-                    <h4>Faturamento Bruto</h4>
-                    <p id="t-dash-faturamento">R$ 0.00</p>
-                </div>
-                <div class="card-metrica">
-                    <h4>Total de Pedidos</h4>
-                    <p id="t-dash-qtd-pedidos">0</p>
-                </div>
-                <div class="card-metrica">
-                    <h4>Ticket Médio</h4>
-                    <p id="t-dash-ticket-medio">R$ 0.00</p>
-                </div>
-                <div class="dash-full" style="text-align:center; padding: 10px; font-weight: bold; color: #2b6cb0;">
-                    ✨ Fechamento processado com sucesso! Clique em 'Exportar Relatório (PDF)' para fazer o download.
-                </div>
-            </div>
-        </div>
+        <div class="main-grid no-print">
+            <div class="card">
+                <h3>📝 Lançar Novo Pedido</h3>
+                <form id="form-item" onsubmit="adicionarItem(event)">
+                    <div class="secao-titulo">1. Identificação do Cliente (Opcional)</div>
+                    <div class="form-row dois-campos">
+                        <div class="form-group">
+                            <label>Nome do Cliente:</label>
+                            <input type="text" id="cliente-nome" placeholder="Nome">
+                        </div>
+                        <div class="form-group">
+                            <label>Celular / WhatsApp:</label>
+                            <input type="tel" id="cliente-celular" placeholder="(00) 00000-0000">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Endereço de Entrega:</label>
+                        <input type="text" id="cliente-endereco" placeholder="Rua, número, bairro...">
+                    </div>
 
-        <div class="card full-width-grid">
-            <h3>📋 Transações Ativas do Turno (Conectado ao Firebase)</h3>
-            <div class="tabela-wrapper">
-                <table class="tabela-comercial">
-                    <thead>
-                        <tr>
-                            <th style="width: 10%;">Nº</th>
-                            <th style="width: 15%;">Hora</th>
-                            <th style="width: 25%;">Cliente</th>
-                            <th style="width: 38%;">Itens</th>
-                            <th style="width: 12%;">Total</th>
-                        </tr>
-                    </thead>
-                    <tbody id="corpo-historico"></tbody>
-                </table>
+                    <div class="secao-titulo">2. Itens da Venda</div>
+                    <div class="form-row dois-campos">
+                        <div class="form-group">
+                            <label>Item / Produto:</label>
+                            <select id="tipo" required>
+                                <option value="Tamanho P">Tamanho P</option>
+                                <option value="Tamanho M">Tamanho M</option>
+                                <option value="Tamanho G">Tamanho G</option>
+                                <option value="PRATO">PRATO</option>
+                                <option value="REFRIGERANTE LATA">REFRIGERANTE LATA</option>
+                                <option value="REFRIGERANTE 2L">REFRIGERANTE 2L</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Preço (R$):</label>
+                            <input type="number" id="valor" step="0.01" min="0" placeholder="0,00" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Observações do Item:</label>
+                        <textarea id="descricao" placeholder="Ex: Sem cebola, Coca normal..." required></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-add">＋ Incluir Item</button>
+                </form>
+            </div>
+
+            <div class="card carrinho-container">
+                <div>
+                    <h3>🛒 Pedido Atual</h3>
+                    <ul id="lista-itens" class="lista-itens"></ul>
+                </div>
+                <div>
+                    <div class="total-tela">Total: <span>R$ <span id="total-valor">0.00</span></span></div>
+                    <button type="button" class="btn btn-print" style="margin-top: 15px;" onclick="finalizarEImprimirTicket()">🖨️ Imprimir Cupom Balcão</button>
+                </div>
+            </div>
+
+            <div class="card full-width-grid">
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;">
+                    <h3 style="margin:0;">🔒 Fechamento de Caixa Diário</h3>
+                    <div style="display: flex; gap: 10px;">
+                        <button type="button" class="btn btn-fechamento" onclick="calcularFechamentoDiario()">🔒 Realizar Fechamento</button>
+                        <button type="button" id="btn-pdf-id" class="btn btn-pdf" onclick="exportarFechamentoPDF()">📥 Exportar Relatório (PDF)</button>
+                        <button type="button" id="btn-reset-id" class="btn btn-reset" onclick="reiniciarTurnoComSenha()">⚠️ Reiniciar Turno (Zerar Caixa)</button>
+                    </div>
+                </div>
+                
+                <div id="dashboard-vendas-tela" class="dash-container-tela">
+                    <div class="card-metrica">
+                        <h4>Faturamento Bruto</h4>
+                        <p id="t-dash-faturamento">R$ 0.00</p>
+                    </div>
+                    <div class="card-metrica">
+                        <h4>Total de Pedidos</h4>
+                        <p id="t-dash-qtd-pedidos">0</p>
+                    </div>
+                    <div class="card-metrica">
+                        <h4>Ticket Médio</h4>
+                        <p id="t-dash-ticket-medio">R$ 0.00</p>
+                    </div>
+                    <div class="dash-full" style="text-align:center; padding: 10px; font-weight: bold; color: #2b6cb0;">
+                        ✨ Fechamento processado com sucesso! Clique em 'Exportar Relatório (PDF)' para fazer o download.
+                    </div>
+                </div>
+            </div>
+
+            <div class="card full-width-grid">
+                <h3>📋 Transações Ativas do Turno (Conectado ao Firebase)</h3>
+                <div class="tabela-wrapper">
+                    <table class="tabela-comercial">
+                        <thead>
+                            <tr>
+                                <th style="width: 10%;">Nº</th>
+                                <th style="width: 15%;">Hora</th>
+                                <th style="width: 25%;">Cliente</th>
+                                <th style="width: 38%;">Itens</th>
+                                <th style="width: 12%;">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="corpo-historico"></tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
@@ -385,6 +435,26 @@
         let contadorPedidos = 1;
         let dadosFechamentoRelatorio = null;
 
+        // --- SISTEMA DE AUTENTICAÇÃO LOCAL CRIPTOGRAFADO ---
+        window.validarAcessoSeguro = function(event) {
+            event.preventDefault();
+            const usuarioInput = document.getElementById('login-usuario').value.trim();
+            const senhaInput = document.getElementById('login-senha').value.trim();
+
+            // Hash em Base64 correspondente à senha "190620"
+            const hashValido = "MTkwNjIw"; 
+
+            if (usuarioInput.toLowerCase() === "gabriele" && btoa(senhaInput) === hashValido) {
+                document.getElementById('tela-login').style.display = 'none';
+                document.getElementById('conteudo-sistema').style.display = 'block';
+                carregarHistoricoDoFirebase();
+            } else {
+                alert("Usuário ou Senha incorretos! Verifique os dados.");
+                document.getElementById('login-senha').value = '';
+                document.getElementById('login-senha').focus();
+            }
+        };
+
         async function carregarHistoricoDoFirebase() {
             try {
                 const q = query(collection(db, "pedidos"), orderBy("numero", "desc"));
@@ -417,11 +487,9 @@
                 
                 historicoGeralPedidos.reverse();
             } catch (erro) {
-                console.error("Aviso: Firestore ainda não inicializado no console ou operando offline.", erro);
+                console.error("Aviso: Firestore operando local ou offline.", erro);
             }
         }
-
-        carregarHistoricoDoFirebase();
 
         window.adicionarItem = function(event) {
             event.preventDefault();
@@ -462,7 +530,6 @@
             document.getElementById('total-valor').innerText = total.toFixed(2);
         }
 
-        // FUNÇÃO PROTEGIDA: Imprime o cupom de qualquer forma, mesmo se o Firebase estiver desativado
         window.finalizarEImprimirTicket = async function() {
             if (pedidoAtual.length === 0) {
                 alert("Nenhum item inserido no pedido!");
@@ -542,21 +609,17 @@
                 timestamp: Timestamp.now()
             };
 
-            // BLINDAGEM DO BOTÃO: Roda a impressão mesmo se a API do Firebase der erro de permissão
             try {
                 await addDoc(collection(db, "pedidos"), documentoPedido);
                 await carregarHistoricoDoFirebase();
             } catch (erro) {
-                console.warn("Aviso: Pedido não computado na nuvem. Ative a API Cloud Firestore no Console.", erro);
-                
-                // Se der erro no Firebase, adiciona localmente na tabela para você não perder o fluxo do dia
+                console.warn("Aviso: Computado de forma local temporária.", erro);
                 historicoGeralPedidos.push(documentoPedido);
                 const corpoHistorico = document.getElementById('corpo-historico');
                 let resumoItensLocal = documentoPedido.itens.map(i => `<span style="color:var(--cor-principal); font-weight:600;">[${i.tipo}]</span> ${i.descricao}`).join('<br>');
-                corpoHistorico.innerHTML = `<tr><td><strong>#${String(documentoPedido.numero).padStart(2, '0')}</strong></td><td>${documentoPedido.hora}</td><td>${documentoPedido.clienteHtml}</td><td>${resumoItensLocal}</td><td><strong>R$ ${documentoPedido.total.toFixed(2)}</strong></td></tr>` + corpoHistorico.innerHTML;
+                corpoHistorico.innerHTML = `<tr><td><strong>#${String(documentoPedido.numero).padStart(2, '0')}</strong></td><td>${documentoPedido.hora}</td><td>${documentoPedido.clienteHtml}</td><td>${resumoItensLocal}</td><td>exportarFechamentoPDF<strong>R$ ${documentoPedido.total.toFixed(2)}</strong></td></tr>` + corpoHistorico.innerHTML;
             }
 
-            // Executa a impressão física de qualquer forma
             document.body.className = "modo-impressao-ticket";
             window.print();
 

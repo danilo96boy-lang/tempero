@@ -201,6 +201,7 @@
 
         .btn-reprint {
             background-color: #007bff; color: white; padding: 6px 10px; font-size: 12px; border-radius: 6px;
+            font-weight: bold; cursor: pointer; border: none;
         }
         .btn-reprint:hover { background-color: #0056b3; }
 
@@ -246,28 +247,44 @@
         .card-metrica p { margin: 8px 0 0 0; font-size: 22px; font-weight: bold; color: var(--cor-principal); }
 
         /* ==========================================================================
-           --- ESTILIZAÇÃO ULTRA COMPACTA PARA IMPRESSÃO DE 58MM ---
+           --- LAYOUT PROFISSIONAL ULTRA COMPACTADO PARA BOBINA DE 58MM ---
            ========================================================================== */
         #ticket-print { display: none; }
         @media print {
             @page { size: 58mm auto; margin: 0mm; }
             .no-print { display: none !important; }
             body { background: #fff; padding: 0; margin: 0; display: block; width: 58mm; }
+            
             #ticket-print {
                 display: block !important;
                 font-family: 'Courier New', Courier, monospace;
-                width: 48mm; max-width: 48mm; padding: 3mm 1mm; margin: 0; font-size: 11px; color: #000; line-height: 1.3;
+                width: 48mm;
+                max-width: 48mm;
+                padding: 4mm 1mm;
+                margin: 0;
+                font-size: 11px;
+                color: #000;
+                line-height: 1.3;
                 word-wrap: break-word;
             }
-            .ticket-header { text-align: center; margin-bottom: 8px; border-bottom: 1px dashed #000; padding-bottom: 4px; }
-            .ticket-header-title { font-size: 12px; font-weight: bold; }
-            .ticket-header-num { font-size: 16px; font-weight: bold; margin: 3px 0; }
-            .ticket-client-info { font-size: 10.5px; border-bottom: 1px dashed #000; padding-bottom: 4px; margin-bottom: 6px; }
-            .ticket-item { margin: 5px 0; border-bottom: 1px dotted #000; padding-bottom: 4px; page-break-inside: avoid; }
-            .ticket-item-main { font-weight: bold; display: flex; justify-content: space-between; gap: 2px; }
-            .ticket-item-obs { font-size: 10px; padding-left: 2ch; margin-top: 2px; white-space: pre-wrap; }
-            .ticket-total-container { border-top: 1px dashed #000; margin-top: 8px; padding-top: 4px; font-size: 13px; font-weight: bold; display: flex; justify-content: space-between; }
-            .ticket-footer { margin-top: 10px; padding-top: 4px; text-align: center; font-size: 9.5px; border-top: 1px dashed #000; padding-bottom: 15mm; }
+            
+            .ticket-header { text-align: center; margin-bottom: 5px; }
+            .ticket-header-title { font-size: 13px; font-weight: bold; letter-spacing: 0.5px; }
+            .ticket-header-num { font-size: 18px; font-weight: bold; margin: 4px 0; }
+            .ticket-divider { text-align: center; margin: 4px 0; font-weight: bold; }
+            
+            .ticket-client-info { font-size: 10.5px; margin-bottom: 5px; line-height: 1.3; }
+            
+            .ticket-item { margin: 4px 0; page-break-inside: avoid; }
+            .ticket-item-main { display: flex; justify-content: space-between; font-weight: bold; gap: 4px; }
+            .ticket-item-name { text-align: left; width: 70%; }
+            .ticket-item-price { text-align: right; width: 30%; white-space: nowrap; }
+            .ticket-item-obs { font-size: 10px; padding-left: 1.5ch; margin-top: 1px; color: #333; font-style: italic; }
+            
+            .ticket-total-container { font-size: 14px; font-weight: bold; display: flex; justify-content: space-between; margin-top: 6px; }
+            
+            /* Margem de segurança de 15mm para a faca cortar sem mutilar o rodapé */
+            .ticket-footer { margin-top: 8px; text-align: center; font-size: 10px; padding-bottom: 15mm; }
         }
     </style>
 </head>
@@ -432,16 +449,20 @@
 
     <div id="ticket-print">
         <div class="ticket-header">
-            <div class="ticket-header-title">** TEMPERO DE FAMÍLIA **</div>
+            <div class="ticket-header-title">TEMPERO DE FAMÍLIA</div>
             <div class="ticket-header-num" id="print-numero-pedido">PEDIDO #00</div>
-            <div id="print-data"></div>
+            <div id="print-data" style="font-size: 10px;"></div>
         </div>
+        <div class="ticket-divider">--------------------------------</div>
         <div id="print-dados-cliente" class="ticket-client-info"></div>
+        <div class="ticket-divider">--------------------------------</div>
         <div id="print-itens-lista"></div>
+        <div class="ticket-divider">--------------------------------</div>
         <div class="ticket-total-container">
             <span>TOTAL:</span>
             <span id="print-total">R$ 0.00</span>
         </div>
+        <div class="ticket-divider">================================</div>
         <div class="ticket-footer">Obrigado pela preferência!</div>
     </div>
 
@@ -502,7 +523,7 @@
             }
             
             cardapioEstruturado[categoriaSel].forEach(opcao => {
-                selectTipo.innerHTML += `<option value="${opcao}">${opcao}</option>';`;
+                selectTipo.innerHTML += `<option value="${opcao}">${opcao}</option>`;
             });
             inserirPrecoSugerido();
         };
@@ -551,7 +572,6 @@
                     const milisegundosDoc = dados.timestamp ? dados.timestamp.toMillis() : 0;
 
                     if (milisegundosDoc > horarioCorteTurno) {
-                        // Injeta o ID único do Firestore no objeto para conseguirmos localizá-lo na reimpressão
                         dados.firebaseId = doc.id;
                         historicoGeralPedidos.push(dados);
                         
@@ -597,14 +617,12 @@
                 return;
             }
 
-            // Alimenta a div do Cupom Oculto com os dados históricos mapeados
             document.getElementById('print-numero-pedido').innerText = 'PEDIDO #' + String(pedidoMestre.numero).padStart(2, '0');
             document.getElementById('print-data').innerText = pedidoMestre.data;
 
             const containerClientePrint = document.getElementById('print-dados-cliente');
             containerClientePrint.innerHTML = '';
             
-            // Tratamento contra logs antigos ou strings de HTML salvas
             if (pedidoMestre.clienteA4 && pedidoMestre.clienteA4 !== 'Consumidor Final') {
                 containerClientePrint.innerHTML = pedidoMestre.clienteHtml;
                 containerClientePrint.style.display = 'block';
@@ -615,7 +633,7 @@
             const containerItensPrint = document.getElementById('print-itens-lista');
             containerItensPrint.innerHTML = '';
 
-            pedidoMestre.itens.forEach((item, index) => {
+            pedidoMestre.itens.forEach((item) => {
                 let itemQtd = item.qtd || 1;
                 let itemPrato = item.prato || "Marmita";
                 let itemTipo = item.tipo || "Opção";
@@ -624,20 +642,21 @@
                 containerItensPrint.innerHTML += `
                     <div class="ticket-item">
                         <div class="ticket-item-main">
-                            <span>${itemQtd}x ${itemPrato} (${itemTipo})</span>
-                            <span>R$ ${itemValor.toFixed(2)}</span>
+                            <span class="ticket-item-name">${itemQtd}x ${itemPrato} (${itemTipo})</span>
+                            <span class="ticket-item-price">R$ ${itemValor.toFixed(2)}</span>
                         </div>
-                        <div class="ticket-item-obs">${item.descricao || ''}</div>
+                        <div class="ticket-item-obs">${item.descricao && item.descricao !== 'Sem obs' ? 'Obs: ' + item.descricao : ''}</div>
                     </div>
                 `;
             });
 
             document.getElementById('print-total').innerText = 'R$ ' + parseFloat(pedidoMestre.total || 0).toFixed(2);
 
-            // Dispara a janela nativa do Windows calibrada para 58mm
             document.body.className = "modo-impressao-ticket";
             window.print();
         };
+
+        window.reimprimirTicketPorId = window.reimprimirTicketPorId;
 
         window.adicionarItem = function(event) {
             event.preventDefault();
@@ -727,12 +746,12 @@
                     detalheClienteRelatorio += `<strong>${nomeCliente}</strong> `;
                 }
                 if (celularCliente) {
-                    containerClientePrint.innerHTML += `<strong>CELULAR:</strong> ${celularCliente}<br>`;
+                    containerClientePrint.innerHTML += `<strong>TEL:</strong> ${celularCliente}<br>`;
                     stringClienteHistorico += `Tel: ${celularCliente}<br>`;
                     detalheClienteRelatorio += `<br>Tel: ${celularCliente}`;
                 }
                 if (enderecoCliente) {
-                    containerClientePrint.innerHTML += `<strong>ENDEREÇO:</strong> ${enderecoCliente}<br>`;
+                    containerClientePrint.innerHTML += `<strong>END:</strong> ${enderecoCliente}<br>`;
                     stringClienteHistorico += `<small>${enderecoCliente}</small>`;
                     detalheClienteRelatorio += `<br><small>End: ${enderecoCliente}</small>`;
                 }
@@ -747,17 +766,17 @@
             let itensListaSimples = [];
             let formaPagamentoFinal = pedidoAtual[0].pagamento;
 
-            pedidoAtual.forEach((item, index) => {
+            pedidoAtual.forEach((item) => {
                 totalPedido += item.valor;
                 itensListaSimples.push(`(${item.qtd}x) [${item.prato}] ${item.tipo} - ${item.descricao}`);
 
                 containerItensPrint.innerHTML += `
                     <div class="ticket-item">
                         <div class="ticket-item-main">
-                            <span>${item.qtd}x ${item.prato} (${item.tipo})</span>
-                            <span>R$ ${item.valor.toFixed(2)}</span>
+                            <span class="ticket-item-name">${item.qtd}x ${item.prato} (${item.tipo})</span>
+                            <span class="ticket-item-price">R$ ${item.valor.toFixed(2)}</span>
                         </div>
-                        <div class="ticket-item-obs">Obs: ${item.descricao}</div>
+                        <div class="ticket-item-obs">${item.descricao && item.descricao !== 'Sem obs' ? 'Obs: ' + item.descricao : ''}</div>
                     </div>
                 `;
             });
@@ -870,20 +889,20 @@
             let conteudoHTML = `
                 <div style="border-bottom: 3px solid #cc1d1d; padding-bottom: 12px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: flex-end;">
                     <div>
-                        <h2 style="margin: 0; color: #cc1d1d; font-size: 24px; text-transform: uppercase; letter-spacing: 0.5px;">Tempero de Família</h2>
-                        <div style="font-size: 13px; font-weight: bold; color: #4a5568; margin-top: 5px;">Resumo Consolidado de Vendas Diárias</div>
+                        <h2 style="margin: 0; color: #cc1d1d; font-size: 26px; text-transform: uppercase; letter-spacing: 0.5px;">Tempero de Família</h2>
+                        <div style="font-size: 14px; font-weight: bold; color: #4a5568; margin-top: 5px;">Resumo Consolidado de Vendas Diárias</div>
                     </div>
-                    <div style="font-size: 11px; color: #718096; text-align: right; font-weight: 600;">${dadosFechamentoRelatorio.dataHora}</div>
+                    <div style="font-size: 12px; color: #718096; text-align: right; font-weight: 600;">${dadosFechamentoRelatorio.dataHora}</div>
                 </div>
 
-                <div style="font-size: 13px; font-weight: bold; background-color: #edf2f7; padding: 8px; margin-top: 15px; margin-bottom: 10px; border-left: 4px solid #cc1d1d; text-transform: uppercase; color: #2d3748;">Resumo Financeiro Geral</div>
+                <div style="font-size: 14px; font-weight: bold; background-color: #edf2f7; padding: 10px; margin-top: 20px; margin-bottom: 12px; border-left: 4px solid #cc1d1d; text-transform: uppercase; color: #2d3748;">Resumo Financeiro Geral</div>
                 <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13px; table-layout: fixed;">
                     <tr><td style="padding: 8px 12px; border: 1px solid #cbd5e0; background-color: #f7fafc; font-weight: bold; width: 40%;">Faturamento Bruto Acumulado:</td><td style="padding: 8px 12px; border: 1px solid #cbd5e0; font-weight: bold; color: #cc1d1d; font-size: 15px;">${dadosFechamentoRelatorio.faturamento}</td></tr>
                     <tr><td style="padding: 8px 12px; border: 1px solid #cbd5e0; background-color: #f7fafc; font-weight: bold;">Quantidade de Pedidos Atendidos:</td><td style="padding: 8px 12px; border: 1px solid #cbd5e0;">${dadosFechamentoRelatorio.pedidos}</td></tr>
                     <tr><td style="padding: 8px 12px; border: 1px solid #cbd5e0; background-color: #f7fafc; font-weight: bold;">Valor do Ticket Médio Geral:</td><td style="padding: 8px 12px; border: 1px solid #cbd5e0; font-weight: bold;">${dadosFechamentoRelatorio.ticket}</td></tr>
                 </table>
 
-                <div style="font-size: 13px; font-weight: bold; background-color: #edf2f7; padding: 8px; margin-top: 15px; margin-bottom: 10px; border-left: 4px solid #cc1d1d; text-transform: uppercase; color: #2d3748;">Faturamento por Meios de Recebimento</div>
+                <div style="font-size: 14px; font-weight: bold; background-color: #edf2f7; padding: 10px; margin-top: 20px; margin-bottom: 12px; border-left: 4px solid #cc1d1d; text-transform: uppercase; color: #2d3748;">Faturamento por Meios de Recebimento</div>
                 <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13px; table-layout: fixed;">
                     <thead><tr style="background-color: #f7fafc; font-weight: bold;"><th style="padding: 8px 12px; border: 1px solid #cbd5e0; text-align: left;">Forma de Pagamento</th><th style="padding: 8px 12px; border: 1px solid #cbd5e0; text-align: left;">Total Recebido</th></tr></thead>
                     <tbody>
@@ -897,7 +916,7 @@
                     </tbody>
                 </table>
 
-                <div style="font-size: 13px; font-weight: bold; background-color: #edf2f7; padding: 8px; margin-top: 15px; margin-bottom: 10px; border-left: 4px solid #cc1d1d; text-transform: uppercase; color: #2d3748;">Detalhamento de Faturamento por Produto</div>
+                <div style="font-size: 14px; font-weight: bold; background-color: #edf2f7; padding: 10px; margin-top: 20px; margin-bottom: 12px; border-left: 4px solid #cc1d1d; text-transform: uppercase; color: #2d3748;">Detalhamento de Faturamento por Produto</div>
                 <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13px; table-layout: fixed;">
                     <thead><tr style="background-color: #f7fafc; font-weight: bold;"><th style="padding: 8px 12px; border: 1px solid #cbd5e0; text-align: left;">Prato / Categoria</th><th style="padding: 8px 12px; border: 1px solid #cbd5e0; text-align: left;">Total Faturado</th></tr></thead>
                     <tbody>
@@ -911,7 +930,7 @@
                     </tbody>
                 </table>
                 
-                <div style="font-size: 13px; font-weight: bold; background-color: #edf2f7; padding: 8px; margin-top: 15px; margin-bottom: 10px; border-left: 4px solid #cc1d1d; text-transform: uppercase; color: #2d3748;">Relação Analítica de Pedidos</div>
+                <div style="font-size: 14px; font-weight: bold; background-color: #edf2f7; padding: 10px; margin-top: 20px; margin-bottom: 12px; border-left: 4px solid #cc1d1d; text-transform: uppercase; color: #2d3748;">Relação Analítica de Pedidos</div>
                 <table style="width: 100%; border-collapse: collapse; font-size: 11px; table-layout: fixed;">
                     <thead>
                         <tr style="background-color: #f7fafc; font-weight: bold;">

@@ -199,6 +199,11 @@
         }
         .btn-print:hover { background-color: #218838; }
 
+        .btn-reprint {
+            background-color: #007bff; color: white; padding: 6px 10px; font-size: 12px; border-radius: 6px;
+        }
+        .btn-reprint:hover { background-color: #0056b3; }
+
         .btn-fechamento { background-color: #4a5568; color: white; }
         .btn-fechamento:hover { background-color: #2d3748; }
 
@@ -240,25 +245,29 @@
         .card-metrica h4 { margin: 0; color: #718096; font-size: 12px; text-transform: uppercase; }
         .card-metrica p { margin: 8px 0 0 0; font-size: 22px; font-weight: bold; color: var(--cor-principal); }
 
+        /* ==========================================================================
+           --- ESTILIZAÇÃO ULTRA COMPACTA PARA IMPRESSÃO DE 58MM ---
+           ========================================================================== */
         #ticket-print { display: none; }
         @media print {
-            @page { size: 80mm auto; margin: 0mm; }
+            @page { size: 58mm auto; margin: 0mm; }
             .no-print { display: none !important; }
-            body { background: #fff; padding: 0; margin: 0; display: block; width: 80mm; }
+            body { background: #fff; padding: 0; margin: 0; display: block; width: 58mm; }
             #ticket-print {
                 display: block !important;
                 font-family: 'Courier New', Courier, monospace;
-                width: 72mm; max-width: 72mm; padding: 5mm 4mm; margin: 0; font-size: 13px; color: #000; line-height: 1.4;
+                width: 48mm; max-width: 48mm; padding: 3mm 1mm; margin: 0; font-size: 11px; color: #000; line-height: 1.3;
+                word-wrap: break-word;
             }
-            .ticket-header { text-align: center; margin-bottom: 10px; border-bottom: 1px dashed #000; padding-bottom: 8px; }
-            .ticket-header-title { font-size: 14px; font-weight: bold; }
-            .ticket-header-num { font-size: 20px; font-weight: bold; margin: 5px 0; }
-            .ticket-client-info { font-size: 12px; border-bottom: 1px dashed #000; padding-bottom: 6px; margin-bottom: 8px; }
-            .ticket-item { margin: 8px 0; border-bottom: 1px dotted #000; padding-bottom: 8px; page-break-inside: avoid; }
-            .ticket-item-main { font-weight: bold; display: flex; justify-content: space-between; }
-            .ticket-item-obs { font-size: 12px; padding-left: 4ch; margin-top: 3px; white-space: pre-wrap; word-wrap: break-word; }
-            .ticket-total-container { border-top: 1px dashed #000; margin-top: 12px; padding-top: 8px; font-size: 16px; font-weight: bold; display: flex; justify-content: space-between; }
-            .ticket-footer { margin-top: 15px; padding-top: 8px; text-align: center; font-size: 11px; border-top: 1px dashed #000; padding-bottom: 20mm; }
+            .ticket-header { text-align: center; margin-bottom: 8px; border-bottom: 1px dashed #000; padding-bottom: 4px; }
+            .ticket-header-title { font-size: 12px; font-weight: bold; }
+            .ticket-header-num { font-size: 16px; font-weight: bold; margin: 3px 0; }
+            .ticket-client-info { font-size: 10.5px; border-bottom: 1px dashed #000; padding-bottom: 4px; margin-bottom: 6px; }
+            .ticket-item { margin: 5px 0; border-bottom: 1px dotted #000; padding-bottom: 4px; page-break-inside: avoid; }
+            .ticket-item-main { font-weight: bold; display: flex; justify-content: space-between; gap: 2px; }
+            .ticket-item-obs { font-size: 10px; padding-left: 2ch; margin-top: 2px; white-space: pre-wrap; }
+            .ticket-total-container { border-top: 1px dashed #000; margin-top: 8px; padding-top: 4px; font-size: 13px; font-weight: bold; display: flex; justify-content: space-between; }
+            .ticket-footer { margin-top: 10px; padding-top: 4px; text-align: center; font-size: 9.5px; border-top: 1px dashed #000; padding-bottom: 15mm; }
         }
     </style>
 </head>
@@ -269,7 +278,7 @@
             <h2 style="color: var(--cor-principal); margin: 0 0 10px 0; text-transform: uppercase; font-size: 20px;">Acesso Restrito</h2>
             <p style="font-size: 13px; color: var(--cor-texto-secundario); margin: 0 0 25px 0;">Identifique-se para acessar o PDV Tempero de Família</p>
             
-            <form id="form-login-id" onsubmit="validarAcessoSeguro(event)">
+            <form id="form-login-id" onsubmit="validarAcessoSecure(event)">
                 <div class="form-group" style="text-align: left;">
                     <label>Operador / Usuário:</label>
                     <input type="text" id="login-usuario" required placeholder="Digite o usuário">
@@ -405,12 +414,13 @@
                     <table class="tabela-comercial">
                         <thead>
                             <tr>
-                                <th style="width: 10%;">Nº</th>
-                                <th style="width: 12%;">Hora</th>
-                                <th style="width: 23%;">Cliente</th>
-                                <th style="width: 35%;">Itens</th>
+                                <th style="width: 8%;">Nº</th>
+                                <th style="width: 10%;">Hora</th>
+                                <th style="width: 22%;">Cliente</th>
+                                <th style="width: 33%;">Itens</th>
                                 <th style="width: 10%;">Pagamento</th>
-                                <th style="width: 10%;">Total</th>
+                                <th style="width: 8%;">Total</th>
+                                <th style="width: 9%; text-align: center;">Ações</th>
                             </tr>
                         </thead>
                         <tbody id="corpo-historico"></tbody>
@@ -424,12 +434,12 @@
         <div class="ticket-header">
             <div class="ticket-header-title">** TEMPERO DE FAMÍLIA **</div>
             <div class="ticket-header-num" id="print-numero-pedido">PEDIDO #00</div>
-            <div id="print-data" style="font-size: 11px;"></div>
+            <div id="print-data"></div>
         </div>
         <div id="print-dados-cliente" class="ticket-client-info"></div>
         <div id="print-itens-lista"></div>
         <div class="ticket-total-container">
-            <span>TOTAL DO PEDIDO:</span>
+            <span>TOTAL:</span>
             <span id="print-total">R$ 0.00</span>
         </div>
         <div class="ticket-footer">Obrigado pela preferência!</div>
@@ -487,12 +497,12 @@
             selectTipo.innerHTML = '';
             
             if (!categoriaSel || !cardapioEstruturado[categoriaSel]) {
-                selectTipo.innerHTML = '<option value="">-- Selecione primeiro o prato --</option>';
+                selectTipo.innerHTML = '<option value="">-- Selecione o prato --</option>';
                 return;
             }
             
             cardapioEstruturado[categoriaSel].forEach(opcao => {
-                selectTipo.innerHTML += `<option value="${opcao}">${opcao}</option>`;
+                selectTipo.innerHTML += `<option value="${opcao}">${opcao}</option>';`;
             });
             inserirPrecoSugerido();
         };
@@ -509,7 +519,7 @@
             }
         };
 
-        window.validarAcessoSeguro = function(event) {
+        window.validarAcessoSecure = function(event) {
             event.preventDefault();
             const usuarioInput = document.getElementById('login-usuario').value.trim();
             const senhaInput = document.getElementById('login-senha').value.trim();
@@ -541,6 +551,8 @@
                     const milisegundosDoc = dados.timestamp ? dados.timestamp.toMillis() : 0;
 
                     if (milisegundosDoc > horarioCorteTurno) {
+                        // Injeta o ID único do Firestore no objeto para conseguirmos localizá-lo na reimpressão
+                        dados.firebaseId = doc.id;
                         historicoGeralPedidos.push(dados);
                         
                         if (dados.numero > maiorNumeroTurnoAtual) {
@@ -549,8 +561,8 @@
 
                         let resumoItens = dados.itens.map(i => {
                             let itemQtd = i.qtd || 1;
-                            let itemPrato = i.prato || "Marmita Antiga";
-                            let itemTipo = i.tipo || "Tradicional";
+                            let itemPrato = i.prato || "Marmita";
+                            let itemTipo = i.tipo || "G";
                             return `<span style="color:var(--cor-principal); font-weight:600;">(${itemQtd}x) [${itemPrato}]</span> ${itemTipo}`;
                         }).join('<br>');
                         
@@ -562,6 +574,7 @@
                                 <td>${resumoItens}</td>
                                 <td><span style="font-size:12px; font-weight:600; padding:4px 8px; background:#e2e8f0; border-radius:4px;">${dados.pagamento || 'Dinheiro'}</span></td>
                                 <td><strong>R$ ${parseFloat(dados.total || 0).toFixed(2)}</strong></td>
+                                <td style="text-align:center;"><button class="btn-reprint" onclick="reimprimirTicketPorId('${doc.id}')">🖨️ Rep</button></td>
                             </tr>
                         `;
                     }
@@ -573,6 +586,58 @@
                 console.error("Erro Firebase: ", erro);
             }
         }
+
+        window.carregarHistoricoDoFirebase = carregarHistoricoDoFirebase;
+
+        // --- SISTEMA INTELLIGENT DE REIMPRESSÃO DIRETA ---
+        window.reimprimirTicketPorId = function(firebaseId) {
+            const pedidoMestre = historicoGeralPedidos.find(p => p.firebaseId === firebaseId);
+            if (!pedidoMestre) {
+                alert("Pedido não localizado no turno atual.");
+                return;
+            }
+
+            // Alimenta a div do Cupom Oculto com os dados históricos mapeados
+            document.getElementById('print-numero-pedido').innerText = 'PEDIDO #' + String(pedidoMestre.numero).padStart(2, '0');
+            document.getElementById('print-data').innerText = pedidoMestre.data;
+
+            const containerClientePrint = document.getElementById('print-dados-cliente');
+            containerClientePrint.innerHTML = '';
+            
+            // Tratamento contra logs antigos ou strings de HTML salvas
+            if (pedidoMestre.clienteA4 && pedidoMestre.clienteA4 !== 'Consumidor Final') {
+                containerClientePrint.innerHTML = pedidoMestre.clienteHtml;
+                containerClientePrint.style.display = 'block';
+            } else {
+                containerClientePrint.style.display = 'none';
+            }
+
+            const containerItensPrint = document.getElementById('print-itens-lista');
+            containerItensPrint.innerHTML = '';
+
+            pedidoMestre.itens.forEach((item, index) => {
+                let itemQtd = item.qtd || 1;
+                let itemPrato = item.prato || "Marmita";
+                let itemTipo = item.tipo || "Opção";
+                let itemValor = parseFloat(item.valor || 0);
+
+                containerItensPrint.innerHTML += `
+                    <div class="ticket-item">
+                        <div class="ticket-item-main">
+                            <span>${itemQtd}x ${itemPrato} (${itemTipo})</span>
+                            <span>R$ ${itemValor.toFixed(2)}</span>
+                        </div>
+                        <div class="ticket-item-obs">${item.descricao || ''}</div>
+                    </div>
+                `;
+            });
+
+            document.getElementById('print-total').innerText = 'R$ ' + parseFloat(pedidoMestre.total || 0).toFixed(2);
+
+            // Dispara a janela nativa do Windows calibrada para 58mm
+            document.body.className = "modo-impressao-ticket";
+            window.print();
+        };
 
         window.adicionarItem = function(event) {
             event.preventDefault();
@@ -602,7 +667,7 @@
             document.getElementById('valor').value = '';
             document.getElementById('quantidade').value = '1';
             document.getElementById('categoria-prato').value = '';
-            document.getElementById('tipo').innerHTML = '<option value="">-- Selecione primeiro o prato --</option>';
+            document.getElementById('tipo').innerHTML = '<option value="">-- Selecione o prato --</option>';
             document.getElementById('categoria-prato').focus();
         };
 
@@ -689,7 +754,7 @@
                 containerItensPrint.innerHTML += `
                     <div class="ticket-item">
                         <div class="ticket-item-main">
-                            <span>${item.qtd}x - ${item.prato} (${item.tipo})</span>
+                            <span>${item.qtd}x ${item.prato} (${item.tipo})</span>
                             <span>R$ ${item.valor.toFixed(2)}</span>
                         </div>
                         <div class="ticket-item-obs">Obs: ${item.descricao}</div>
@@ -716,7 +781,7 @@
                 await addDoc(collection(db, "pedidos"), documentoPedido);
                 await carregarHistoricoDoFirebase();
             } catch (erro) {
-                console.warn("Salvamento em buffer local.", erro);
+                console.warn("Buffer offline acionado.", erro);
                 historicoGeralPedidos.push(documentoPedido);
                 await carregarHistoricoDoFirebase();
             }
@@ -791,7 +856,6 @@
             document.getElementById('dashboard-vendas-tela').scrollIntoView({ behavior: 'smooth' });
         };
 
-        // --- EXPORTAÇÃO BLINDADA CONTRA TRAVAMENTOS E QUEBRAS DE PÁGINA ---
         window.exportarFechamentoPDF = function() {
             if (!dadosFechamentoRelatorio) return;
 
@@ -861,7 +925,6 @@
                     <tbody>`;
 
             historicoGeralPedidos.forEach(p => {
-                // Injetado o 'page-break-inside: avoid' para proibir o corte de linhas no meio ao pular de folha
                 conteudoHTML += `
                     <tr style="page-break-inside: avoid !important;">
                         <td style="padding: 8px 6px; border: 1px solid #cbd5e0; vertical-align: top; white-space: normal; word-break: break-word;">

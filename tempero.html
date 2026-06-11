@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tempero de Família - PDV Comercial</title>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <style>
+        /* ==========================================================================
+           --- DESIGN DO PAINEL OPERACIONAL (TELA DE USO) ---
+           ========================================================================== */
+        :root {
+            --cor-principal: #cc1d1d; 
+            --cor-principal-hover: #a31414;
+            --cor-fundo: #f0f2f5;
+            --cor-card: #ffffff;
+            --cor-texto: #1a202c;
+            --cor-texto-secundario: #4a5568;
+            --border-radius: 12px;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: var(--cor-fundo);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--cor-texto);
+        }
+
+        .brand-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            background: var(--cor-card);
+            padding: 15px 30px;
+            border-radius: var(--border-radius);
+            width: 100%;
+            max-width: 1150px;
+            box-shadow: var(--shadow);
+            box-sizing: border-box;
+            border-left: 6px solid var(--cor-principal);
+            margin-bottom: 20px;
+        }
+
+        .brand-logo {
+            width: 65px;
+            height: 65px;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 2px solid var(--cor-principal);
+        }
+
+        .brand-header h1 {
+            margin: 0;
+            font-size: 24px;
+            color: var(--cor-principal);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            width: 100%;
+            max-width: 1150px;
+            box-sizing: border-box;
+        }
+
+        @media(min-width: 950px) {
+            .main-grid { grid-template-columns: 1.4fr 1fr; }
+            .full-width-grid { grid-column: span 2; }
+        }
+
+        .card {
+            background-color: var(--cor-card);
+            padding: 25px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            box-sizing: border-box;
+        }
+
+        h3 {
+            margin: 0 0 20px 0;
+            color: var(--cor-texto);
+            font-size: 18px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .secao-titulo {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #a0aec0;
+            margin: 15px 0 10px 0;
+            font-weight: bold;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        @media(min-width: 480px) {
+            .form-row.dois-campos { grid-template-columns: 1fr 1fr; }
+        }
+
+        .form-group { margin-bottom: 12px; }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: var(--cor-texto-secundario);
+            font-size: 13px;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 15px;
+            background-color: #f8fafc;
+            color: var(--cor-texto);
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--cor-principal);
+            background-color: #fff;
+            box-shadow: 0 0 0 3px rgba(204, 29, 29, 0.1);
+        }
+
+        textarea { resize: vertical; height: 60px; }
+
+        .btn {
+            border: none;
+            padding: 12px 20px;
+            font-size: 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-add { 
+            background-color: var(--cor-principal); 
+            color: white; width: 100%; margin-top: 10px;
+        }
+        .btn-add:hover { background-color: var(--cor-principal-hover); }
+
+        .btn-print { 
+            background-color: #28a745; color: white; font-size: 16px; width: 100%;
+        }
+        .btn-print:hover { background-color: #218838; }
+
+        .btn-fechamento { background-color: #4a5568; color: white; }
+        .btn-fechamento:hover { background-color: #2d3748; }
+
+        .btn-pdf { background-color: #007bff; color: white; display: none; }
+        .btn-pdf:hover { background-color: #0056b3; }
+
+        .btn-reset { background-color: #e53e3e; color: white; display: none; }
+        .btn-reset:hover { background-color: #9b2c2c; }
+
+        .carrinho-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            background: #f8fafc; border: 1px solid #e2e8f0;
+        }
+
+        .lista-itens { list-style: none; padding: 0; margin: 0; max-height: 260px; overflow-y: auto; }
+
+        .item-carrinho {
+            background: white; padding: 12px; margin-bottom: 8px;
+            border-radius: 8px; font-size: 14px; display: flex;
+            justify-content: space-between; align-items: center; border: 1px solid #edf2f7;
+        }
+
+        .total-tela {
+            font-size: 22px; font-weight: bold; text-align: right;
+            margin-top: 15px; padding-top: 15px; border-top: 2px dashed #cbd5e0;
+        }
+        .total-tela span { color: var(--cor-principal); }
+
+        .tabela-wrapper { width: 100%; overflow-x: auto; }

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tempero de Família - PDV Comercial</title>
+    <title>Tempero de Família - PDV Comercial & Cloud</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
@@ -202,3 +202,479 @@
         .total-tela span { color: var(--cor-principal); }
 
         .tabela-wrapper { width: 100%; overflow-x: auto; }
+        .tabela-comercial { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
+        .tabela-comercial th, .tabela-comercial td { padding: 12px; text-align: left; border-bottom: 1px solid #edf2f7; vertical-align: top; }
+        .tabela-comercial th { background-color: #f7fafc; color: #4a5568; font-weight: 700; }
+
+        .dash-container-tela { display: none; grid-template-columns: 1fr; gap: 15px; margin-top: 15px; padding: 15px; background: #fafafa; border: 1px solid #cbd5e0; border-radius: 8px; }
+        @media(min-width: 600px) { .dash-container-tela { grid-template-columns: repeat(3, 1fr); } .dash-full { grid-column: span 3; } }
+        .card-metrica { background: #fff; border: 1px solid #e2e8f0; padding: 15px; border-radius: 8px; text-align: center; }
+        .card-metrica h4 { margin: 0; color: #718096; font-size: 12px; text-transform: uppercase; }
+        .card-metrica p { margin: 8px 0 0 0; font-size: 22px; font-weight: bold; color: var(--cor-principal); }
+
+        /* Styles da Fita de Impressão de Cupom Termico 80mm */
+        #ticket-print { display: none; }
+        @media print {
+            @page { size: 80mm auto; margin: 0mm; }
+            .no-print { display: none !important; }
+            body { background: #fff; padding: 0; margin: 0; display: block; width: 80mm; }
+            #ticket-print {
+                display: block !important;
+                font-family: 'Courier New', Courier, monospace;
+                width: 72mm; max-width: 72mm; padding: 5mm 4mm; margin: 0; font-size: 13px; color: #000; line-height: 1.4;
+            }
+            .ticket-header { text-align: center; margin-bottom: 10px; border-bottom: 1px dashed #000; padding-bottom: 8px; }
+            .ticket-header-title { font-size: 14px; font-weight: bold; }
+            .ticket-header-num { font-size: 20px; font-weight: bold; margin: 5px 0; }
+            .ticket-client-info { font-size: 12px; border-bottom: 1px dashed #000; padding-bottom: 6px; margin-bottom: 8px; }
+            .ticket-item { margin: 8px 0; border-bottom: 1px dotted #000; padding-bottom: 8px; page-break-inside: avoid; }
+            .ticket-item-main { font-weight: bold; display: flex; justify-content: space-between; }
+            .ticket-item-obs { font-size: 12px; padding-left: 4ch; margin-top: 3px; white-space: pre-wrap; word-wrap: break-word; }
+            .ticket-total-container { border-top: 1px dashed #000; margin-top: 12px; padding-top: 8px; font-size: 16px; font-weight: bold; display: flex; justify-content: space-between; }
+            .ticket-footer { margin-top: 15px; padding-top: 8px; text-align: center; font-size: 11px; border-top: 1px dashed #000; padding-bottom: 20mm; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="brand-header no-print">
+        <img src="logo.png" alt="Logo" class="brand-logo" onerror="this.style.display='none'">
+        <h1>Tempero de Família</h1>
+    </div>
+
+    <div class="main-grid no-print">
+        <div class="card">
+            <h3>📝 Lançar Novo Pedido</h3>
+            <form id="form-item" onsubmit="adicionarItem(event)">
+                <div class="secao-titulo">1. Identificação do Cliente (Opcional)</div>
+                <div class="form-row dois-campos">
+                    <div class="form-group">
+                        <label>Nome do Cliente:</label>
+                        <input type="text" id="cliente-nome" placeholder="Nome">
+                    </div>
+                    <div class="form-group">
+                        <label>Celular / WhatsApp:</label>
+                        <input type="tel" id="cliente-celular" placeholder="(00) 00000-0000">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Endereço de Entrega:</label>
+                    <input type="text" id="cliente-endereco" placeholder="Rua, número, bairro...">
+                </div>
+
+                <div class="secao-titulo">2. Itens da Venda</div>
+                <div class="form-row dois-campos">
+                    <div class="form-group">
+                        <label>Item / Produto:</label>
+                        <select id="tipo" required>
+                            <option value="Tamanho P">Tamanho P</option>
+                            <option value="Tamanho M">Tamanho M</option>
+                            <option value="Tamanho G">Tamanho G</option>
+                            <option value="PRATO">PRATO</option>
+                            <option value="REFRIGERANTE LATA">REFRIGERANTE LATA</option>
+                            <option value="REFRIGERANTE 2L">REFRIGERANTE 2L</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Preço (R$):</label>
+                        <input type="number" id="valor" step="0.01" min="0" placeholder="0,00" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Observações do Item:</label>
+                    <textarea id="descricao" placeholder="Ex: Sem cebola, Coca normal..." required></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-add">＋ Incluir Item</button>
+            </form>
+        </div>
+
+        <div class="card carrinho-container">
+            <div>
+                <h3>🛒 Pedido Atual</h3>
+                <ul id="lista-itens" class="lista-itens"></ul>
+            </div>
+            <div>
+                <div class="total-tela">Total: <span>R$ <span id="total-valor">0.00</span></span></div>
+                <button type="button" class="btn btn-print" style="margin-top: 15px;" onclick="finalizarEImprimirTicket()">🖨️ Imprimir Cupom Balcão</button>
+            </div>
+        </div>
+
+        <div class="card full-width-grid">
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;">
+                <h3 style="margin:0;">🔒 Fechamento de Caixa Diário</h3>
+                <div style="display: flex; gap: 10px;">
+                    <button type="button" class="btn btn-fechamento" onclick="calcularFechamentoDiario()">🔒 Realizar Fechamento</button>
+                    <button type="button" id="btn-pdf-id" class="btn btn-pdf" onclick="exportarFechamentoPDF()">📥 Exportar Relatório (PDF)</button>
+                    <button type="button" id="btn-reset-id" class="btn btn-reset" onclick="reiniciarTurnoComSenha()">⚠️ Reiniciar Turno (Zerar Caixa)</button>
+                </div>
+            </div>
+            
+            <div id="dashboard-vendas-tela" class="dash-container-tela">
+                <div class="card-metrica">
+                    <h4>Faturamento Bruto</h4>
+                    <p id="t-dash-faturamento">R$ 0.00</p>
+                </div>
+                <div class="card-metrica">
+                    <h4>Total de Pedidos</h4>
+                    <p id="t-dash-qtd-pedidos">0</p>
+                </div>
+                <div class="card-metrica">
+                    <h4>Ticket Médio</h4>
+                    <p id="t-dash-ticket-medio">R$ 0.00</p>
+                </div>
+                <div class="dash-full" style="text-align:center; padding: 10px; font-weight: bold; color: #2b6cb0;">
+                    ✨ Fechamento processado com sucesso! Clique em 'Exportar Relatório (PDF)' para fazer o download.
+                </div>
+            </div>
+        </div>
+
+        <div class="card full-width-grid">
+            <h3>📋 Transações Ativas do Turno (Conectado ao Firebase)</h3>
+            <div class="tabela-wrapper">
+                <table class="tabela-comercial">
+                    <thead>
+                        <tr>
+                            <th style="width: 10%;">Nº</th>
+                            <th style="width: 15%;">Hora</th>
+                            <th style="width: 25%;">Cliente</th>
+                            <th style="width: 38%;">Itens</th>
+                            <th style="width: 12%;">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody id="corpo-historico"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="ticket-print">
+        <div class="ticket-header">
+            <div class="ticket-header-title">** TEMPERO DE FAMÍLIA **</div>
+            <div class="ticket-header-num" id="print-numero-pedido">PEDIDO #00</div>
+            <div id="print-data" style="font-size: 11px;"></div>
+        </div>
+        <div id="print-dados-cliente" class="ticket-client-info"></div>
+        <div id="print-itens-lista"></div>
+        <div class="ticket-total-container">
+            <span>TOTAL DO PEDIDO:</span>
+            <span id="print-total">R$ 0.00</span>
+        </div>
+        <div class="ticket-footer">Obrigado pela preferência!</div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, query, orderBy, Timestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+        // Chaves oficiais do seu projeto "tempero-3857c" vinculadas com sucesso
+        const firebaseConfig = {
+            apiKey: "AIzaSyD1miyZUImKwCCNwbgppUjtni860Urt-z4",
+            authDomain: "tempero-3857c.firebaseapp.com",
+            projectId: "tempero-3857c",
+            storageBucket: "tempero-3857c.firebasestorage.app",
+            messagingSenderId: "696644233661",
+            appId: "1:696644233661:web:00d99dac7d8d79eecdcad4",
+            measurementId: "G-7KV67X1DD0"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        let pedidoAtual = [];
+        let historicoGeralPedidos = []; 
+        let contadorPedidos = 1;
+        let dadosFechamentoRelatorio = null;
+
+        // Puxa e sincroniza os dados direto do Cloud do Firebase
+        async function carregarHistoricoDoFirebase() {
+            try {
+                const q = query(collection(db, "pedidos"), orderBy("numero", "desc"));
+                const querySnapshot = await getDocs(q);
+                
+                historicoGeralPedidos = [];
+                const corpoHistorico = document.getElementById('corpo-historico');
+                corpoHistorico.innerHTML = '';
+
+                querySnapshot.forEach((doc) => {
+                    const dados = doc.data();
+                    historicoGeralPedidos.push(dados);
+                    
+                    if (dados.numero >= contadorPedidos) {
+                        contadorPedidos = dados.numero + 1;
+                    }
+
+                    let resumoItens = dados.itens.map(i => `<span style="color:var(--cor-principal); font-weight:600;">[${i.tipo}]</span> ${i.descricao}`).join('<br>');
+                    
+                    corpoHistorico.innerHTML += `
+                        <tr>
+                            <td><strong style="color:var(--cor-principal)">#${String(dados.numero).padStart(2, '0')}</strong></td>
+                            <td>${dados.hora}</td>
+                            <td>${dados.clienteHtml}</td>
+                            <td>${resumoItens}</td>
+                            <td><strong>R$ ${dados.total.toFixed(2)}</strong></td>
+                        </tr>
+                    `;
+                });
+                
+                historicoGeralPedidos.reverse();
+            } catch (erro) {
+                console.error("Erro Firebase: ", erro);
+            }
+        }
+
+        carregarHistoricoDoFirebase();
+
+        window.adicionarItem = function(event) {
+            event.preventDefault();
+            const tipo = document.getElementById('tipo').value;
+            const descricao = document.getElementById('descricao').value;
+            const valor = parseFloat(document.getElementById('valor').value);
+
+            pedidoAtual.push({ id: Date.now(), tipo: tipo, descricao: descricao, valor: valor });
+            atualizarInterface();
+
+            document.getElementById('descricao').value = '';
+            document.getElementById('valor').value = '';
+            document.getElementById('tipo').focus();
+        };
+
+        window.removerItem = function(id) {
+            pedidoAtual = pedidoAtual.filter(item => item.id !== id);
+            atualizarInterface();
+        };
+
+        function atualizarInterface() {
+            const lista = document.getElementById('lista-itens');
+            lista.innerHTML = '';
+            let total = 0;
+
+            pedidoAtual.forEach(item => {
+                total += item.valor;
+                lista.innerHTML += `
+                    <li class="item-carrinho">
+                        <div>
+                            <strong>[${item.tipo}]</strong> ${item.descricao}<br>
+                            <small style="color: var(--cor-texto-secundario)">R$ ${item.valor.toFixed(2)}</small>
+                        </div>
+                        <button class="btn-del" onclick="removerItem(${item.id})">X</button>
+                    </li>
+                `;
+            });
+            document.getElementById('total-valor').innerText = total.toFixed(2);
+        }
+
+        window.finalizarEImprimirTicket = async function() {
+            if (pedidoAtual.length === 0) {
+                alert("Nenhum item inserido no pedido!");
+                return;
+            }
+
+            const nomeCliente = document.getElementById('cliente-nome').value.trim();
+            const celularCliente = document.getElementById('cliente-celular').value.trim();
+            const enderecoCliente = document.getElementById('cliente-endereco').value.trim();
+
+            const agora = new Date();
+            const dataFormatada = agora.toLocaleDateString('pt-BR') + ' ' + agora.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
+            const horaSimples = agora.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
+            
+            document.getElementById('print-numero-pedido').innerText = 'PEDIDO #' + String(contadorPedidos).padStart(2, '0');
+            document.getElementById('print-data').innerText = dataFormatada;
+
+            const containerClientePrint = document.getElementById('print-dados-cliente');
+            containerClientePrint.innerHTML = '';
+            let stringClienteHistorico = 'Balcão';
+            let detalheClienteRelatorio = 'Consumidor Final';
+
+            if (nomeCliente || celularCliente || enderecoCliente) {
+                stringClienteHistorico = '';
+                detalheClienteRelatorio = '';
+                if (nomeCliente) {
+                    containerClientePrint.innerHTML += `<strong>CLIENTE:</strong> ${nomeCliente}<br>`;
+                    stringClienteHistorico += `<strong>${nomeCliente}</strong><br>`;
+                    detalheClienteRelatorio += `<strong>${nomeCliente}</strong> `;
+                }
+                if (celularCliente) {
+                    containerClientePrint.innerHTML += `<strong>CELULAR:</strong> ${celularCliente}<br>`;
+                    stringClienteHistorico += `Tel: ${celularCliente}<br>`;
+                    detalheClienteRelatorio += `<br>Tel: ${celularCliente}`;
+                }
+                if (enderecoCliente) {
+                    containerClientePrint.innerHTML += `<strong>ENDEREÇO:</strong> ${enderecoCliente}<br>`;
+                    stringClienteHistorico += `<small>${enderecoCliente}</small>`;
+                    detalheClienteRelatorio += `<br><small>End: ${enderecoCliente}</small>`;
+                }
+                containerClientePrint.style.display = 'block';
+            } else {
+                containerClientePrint.style.display = 'none';
+            }
+
+            const containerItensPrint = document.getElementById('print-itens-lista');
+            containerItensPrint.innerHTML = '';
+            let totalPedido = 0;
+            let itensListaSimples = [];
+
+            pedidoAtual.forEach((item, index) => {
+                totalPedido += item.valor;
+                itensListaSimples.push(`[${item.tipo}] ${item.descricao}`);
+
+                containerItensPrint.innerHTML += `
+                    <div class="ticket-item">
+                        <div class="ticket-item-main">
+                            <span>${index + 1}. ${item.tipo}</span>
+                            <span>R$ ${item.valor.toFixed(2)}</span>
+                        </div>
+                        <div class="ticket-item-obs">${item.descricao}</div>
+                    </div>
+                `;
+            });
+
+            document.getElementById('print-total').innerText = 'R$ ' + totalPedido.toFixed(2);
+
+            const documentoPedido = {
+                numero: contadorPedidos,
+                data: dataFormatada,
+                hora: horaSimples,
+                clienteHtml: stringClienteHistorico,
+                clienteA4: detalheClienteRelatorio,
+                itens: [...pedidoAtual],
+                itensTxt: itensListaSimples.join('<br>'),
+                total: totalPedido,
+                timestamp: Timestamp.now()
+            };
+
+            try {
+                // Insere de forma persistente na nuvem do Firebase Firestore
+                await addDoc(collection(db, "pedidos"), documentoPedido);
+                
+                await carregarHistoricoDoFirebase();
+                document.body.className = "modo-impressao-ticket";
+                window.print();
+
+                contadorPedidos++;
+                pedidoAtual = [];
+                document.getElementById('cliente-nome').value = '';
+                document.getElementById('cliente-celular').value = '';
+                document.getElementById('cliente-endereco').value = '';
+                atualizarInterface();
+            } catch (erro) {
+                alert("Erro de conexão ao salvar no Firebase!");
+                console.error(erro);
+            }
+        };
+
+        window.calcularFechamentoDiario = function() {
+            if (historicoGeralPedidos.length === 0) {
+                alert("Não existem dados faturados hoje para realizar o fechamento.");
+                return;
+            }
+
+            let faturamentoTotal = 0;
+            let totalItens = 0;
+            let porCategoria = { "Tamanho P": 0, "Tamanho M": 0, "Tamanho G": 0, "PRATO": 0, "REFRIGERANTE LATA": 0, "REFRIGERANTE 2L": 0 };
+
+            historicoGeralPedidos.forEach(p => {
+                faturamentoTotal += p.total;
+                p.itens.forEach(i => {
+                    totalItens++;
+                    if (porCategoria[i.tipo] !== undefined) porCategoria[i.tipo] += i.valor;
+                });
+            });
+
+            let ticketMedio = faturamentoTotal / historicoGeralPedidos.length;
+            const agora = new Date();
+            const dataHoraString = `Emissão: ${agora.toLocaleDateString('pt-BR')} às ${agora.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})}`;
+
+            document.getElementById('t-dash-faturamento').innerText = 'R$ ' + faturamentoTotal.toFixed(2);
+            document.getElementById('t-dash-qtd-pedidos').innerText = historicoGeralPedidos.length + ` (${totalItens} un)`;
+            document.getElementById('t-dash-ticket-medio').innerText = 'R$ ' + ticketMedio.toFixed(2);
+            document.getElementById('dashboard-vendas-tela').style.display = 'grid';
+
+            dadosFechamentoRelatorio = {
+                dataHora: dataHoraString,
+                faturamento: 'R$ ' + faturamentoTotal.toFixed(2),
+                pedidos: historicoGeralPedidos.length + ` pedidos (${totalItens} itens vendidos)`,
+                ticket: 'R$ ' + ticketMedio.toFixed(2),
+                porCategoria: porCategoria
+            };
+
+            document.getElementById('btn-pdf-id').style.display = 'flex';
+            document.getElementById('btn-reset-id').style.display = 'flex';
+            document.getElementById('dashboard-vendas-tela').scrollIntoView({ behavior: 'smooth' });
+        };
+
+        window.exportarFechamentoPDF = function() {
+            if (!dadosFechamentoRelatorio) return;
+
+            const divPDF = document.createElement('div');
+            divPDF.style.width = '800px'; divPDF.style.padding = '30px';
+            divPDF.style.fontFamily = 'Arial, sans-serif'; divPDF.style.color = '#1a202c';
+            divPDF.style.backgroundColor = '#ffffff'; divPDF.style.boxSizing = 'border-box';
+
+            let conteudoHTML = `
+                <div style="border-bottom: 3px solid #cc1d1d; padding-bottom: 12px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: flex-end;">
+                    <div>
+                        <h2 style="margin: 0; color: #cc1d1d; font-size: 26px; text-transform: uppercase;">Tempero de Família</h2>
+                        <div style="font-size: 14px; font-weight: bold; color: #4a5568; margin-top: 5px;">Resumo Consolidado de Vendas Diárias</div>
+                    </div>
+                    <div style="font-size: 12px; color: #718096; text-align: right; font-weight: 600;">${dadosFechamentoRelatorio.dataHora}</div>
+                </div>
+
+                <div style="font-size: 14px; font-weight: bold; background-color: #edf2f7; padding: 10px; margin-top: 20px; margin-bottom: 12px; border-left: 4px solid #cc1d1d; text-transform: uppercase; color: #2d3748;">Resumo Financeiro Geral</div>
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 25px;">
+                    <tr><td style="padding: 10px 14px; border: 1px solid #cbd5e0; background-color: #f7fafc; font-weight: bold; width: 45%;">Faturamento Bruto Acumulado:</td><td style="padding: 10px 14px; border: 1px solid #cbd5e0; font-weight: bold; color: #cc1d1d; font-size: 16px;">${dadosFechamentoRelatorio.faturamento}</td></tr>
+                    <tr><td style="padding: 10px 14px; border: 1px solid #cbd5e0; background-color: #f7fafc; font-weight: bold;">Quantidade de Pedidos Atendidos:</td><td style="padding: 10px 14px; border: 1px solid #cbd5e0;">${dadosFechamentoRelatorio.pedidos}</td></tr>
+                    <tr><td style="padding: 10px 14px; border: 1px solid #cbd5e0; background-color: #f7fafc; font-weight: bold;">Valor do Ticket Médio Geral:</td><td style="padding: 10px 14px; border: 1px solid #cbd5e0; font-weight: bold;">${dadosFechamentoRelatorio.ticket}</td></tr>
+                </table>
+
+                <div style="font-size: 14px; font-weight: bold; background-color: #edf2f7; padding: 10px; margin-top: 20px; margin-bottom: 12px; border-left: 4px solid #cc1d1d; text-transform: uppercase; color: #2d3748;">Faturamento por Linha de Produto</div>
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 25px;">
+                    <thead><tr style="background-color: #f7fafc; font-weight: bold;"><th style="padding: 10px 14px; border: 1px solid #cbd5e0; text-align: left;">Categoria de Produto</th><th style="padding: 10px 14px; border: 1px solid #cbd5e0; text-align: left;">Total Faturado</th></tr></thead>
+                    <tbody>
+            `;
+
+            for (const [categoria, valor] of Object.entries(dadosFechamentoRelatorio.porCategoria)) {
+                conteudoHTML += `<tr><td style="padding: 10px 14px; border: 1px solid #cbd5e0; font-weight: bold;">${categoria}</td><td style="padding: 10px 14px; border: 1px solid #cbd5e0; font-weight: 600;">R$ ${valor.toFixed(2)}</td></tr>`;
+            }
+
+            conteudoHTML += `</tbody></table><div style="font-size: 14px; font-weight: bold; background-color: #edf2f7; padding: 10px; margin-top: 20px; margin-bottom: 12px; border-left: 4px solid #cc1d1d; text-transform: uppercase; color: #2d3748;">Relação Analítica de Pedidos</div><table style="width: 100%; border-collapse: collapse; font-size: 12px;"><thead><tr style="background-color: #f7fafc; font-weight: bold;"><th style="padding: 8px 10px; border: 1px solid #cbd5e0; text-align: left; width: 12%;">Nº</th><th style="padding: 8px 10px; border: 1px solid #cbd5e0; text-align: left; width: 35%;">Cliente / Contato / Endereço</th><th style="padding: 8px 10px; border: 1px solid #cbd5e0; text-align: left; width: 40%;">Produtos Lançados</th><th style="padding: 8px 10px; border: 1px solid #cbd5e0; text-align: right; width: 13%;">Total</th></tr></thead><tbody>`;
+
+            historicoGeralPedidos.forEach(p => {
+                conteudoHTML += `<tr style="page-break-inside: avoid;"><td style="padding: 8px 10px; border: 1px solid #cbd5e0; vertical-align: top;"><strong>#${String(p.numero).padStart(2, '0')}</strong><br><small style="color:#718096">${p.hora}</small></td><td style="padding: 8px 10px; border: 1px solid #cbd5e0; vertical-align: top;">${p.clienteA4}</td><td style="padding: 8px 10px; border: 1px solid #cbd5e0; vertical-align: top;">${p.itensTxt}</td><td style="padding: 8px 10px; border: 1px solid #cbd5e0; vertical-align: top; text-align: right; font-weight: bold;">R$ ${p.total.toFixed(2)}</td></tr>`;
+            });
+
+            conteudoHTML += `</tbody></table>`;
+            divPDF.innerHTML = conteudoHTML;
+
+            const configuracoes = {
+                margin: 15,
+                filename: `Fechamento_Caixa_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, logging: false, width: 800 },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            html2pdf().set(configuracoes).from(divPDF).save();
+        };
+
+        window.reiniciarTurnoComSenha = function() {
+            const senhaDigitada = prompt("Para zerar o painel operacional local para o próximo turno, digite a senha:");
+            if (senhaDigitada === "1234") {
+                historicoGeralPedidos = [];
+                contadorPedidos = 1;
+                dadosFechamentoRelatorio = null;
+                
+                document.getElementById('corpo-historico').innerHTML = ''; 
+                document.getElementById('dashboard-vendas-tela').style.display = 'none';
+                document.getElementById('btn-pdf-id').style.display = 'none';
+                document.getElementById('btn-reset-id').style.display = 'none';
+                
+                alert("Turno Operacional reiniciado!\nO contador local voltou para o Pedido #01.");
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else if (senhaDigitada !== null) {
+                alert("Senha inválida!");
+            }
+        };
+    </script>
+</body>
+</html>

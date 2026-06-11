@@ -759,7 +759,7 @@
                 }
 
                 p.itens.forEach(i => {
-                    let itemQtd = parseInt(i.qtd || 1);
+                    let itemQtd = parseInt(i.qtd || 1); // Corrigido de NaN para inteiro seguro
                     totalItens += itemQtd;
                     
                     if (faturamentoPorPrato[i.prato] !== undefined) {
@@ -773,7 +773,7 @@
             const dataHoraString = `Emissão: ${agora.toLocaleDateString('pt-BR')} às ${agora.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})}`;
 
             document.getElementById('t-dash-faturamento').innerText = 'R$ ' + faturamentoTotal.toFixed(2);
-            document.getElementById('t-dash-qtd-pedidos').innerText = historicoGeralPedidos.length + ` (${totalItens} un)`;
+            document.getElementById('t-dash-qtd-pedidos').innerText = historicoGeralPedidos.length + ` (${totalItens} un) `;
             document.getElementById('t-dash-ticket-medio').innerText = 'R$ ' + ticketMedio.toFixed(2);
             document.getElementById('dashboard-vendas-tela').style.display = 'grid';
 
@@ -791,14 +791,14 @@
             document.getElementById('dashboard-vendas-tela').scrollIntoView({ behavior: 'smooth' });
         };
 
-        // --- EXPORTAÇÃO CORRIGIDA E 100% ENQUADRADA NO PAPEL A4 ---
+        // --- ENGENHARIA DE EXPORTAÇÃO COMPORTAMENTAL RE-CALIBRADA ---
         window.exportarFechamentoPDF = function() {
             if (!dadosFechamentoRelatorio) return;
 
+            // Criamos uma div container oculta com largura fixa restrita ao A4
             const divPDF = document.createElement('div');
-            // Alterado de 800px para 100% responsivo para casar com as margens físicas do A4
-            divPDF.style.width = '100%'; 
-            divPDF.style.padding = '10px';
+            divPDF.style.width = '790px'; 
+            divPDF.style.padding = '25px';
             divPDF.style.fontFamily = 'Arial, sans-serif'; 
             divPDF.style.color = '#1a202c';
             divPDF.style.backgroundColor = '#ffffff'; 
@@ -814,14 +814,14 @@
                 </div>
 
                 <div style="font-size: 13px; font-weight: bold; background-color: #edf2f7; padding: 8px; margin-top: 15px; margin-bottom: 10px; border-left: 4px solid #cc1d1d; text-transform: uppercase; color: #2d3748;">Resumo Financeiro Geral</div>
-                <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13px;">
-                    <tr><td style="padding: 8px 12px; border: 1px solid #cbd5e0; background-color: #f7fafc; font-weight: bold; width: 45%;">Faturamento Bruto Acumulado:</td><td style="padding: 8px 12px; border: 1px solid #cbd5e0; font-weight: bold; color: #cc1d1d; font-size: 15px;">${dadosFechamentoRelatorio.faturamento}</td></tr>
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13px; table-layout: fixed;">
+                    <tr><td style="padding: 8px 12px; border: 1px solid #cbd5e0; background-color: #f7fafc; font-weight: bold; width: 40%;">Faturamento Bruto Acumulado:</td><td style="padding: 8px 12px; border: 1px solid #cbd5e0; font-weight: bold; color: #cc1d1d; font-size: 15px;">${dadosFechamentoRelatorio.faturamento}</td></tr>
                     <tr><td style="padding: 8px 12px; border: 1px solid #cbd5e0; background-color: #f7fafc; font-weight: bold;">Quantidade de Pedidos Atendidos:</td><td style="padding: 8px 12px; border: 1px solid #cbd5e0;">${dadosFechamentoRelatorio.pedidos}</td></tr>
                     <tr><td style="padding: 8px 12px; border: 1px solid #cbd5e0; background-color: #f7fafc; font-weight: bold;">Valor do Ticket Médio Geral:</td><td style="padding: 8px 12px; border: 1px solid #cbd5e0; font-weight: bold;">${dadosFechamentoRelatorio.ticket}</td></tr>
                 </table>
 
                 <div style="font-size: 13px; font-weight: bold; background-color: #edf2f7; padding: 8px; margin-top: 15px; margin-bottom: 10px; border-left: 4px solid #cc1d1d; text-transform: uppercase; color: #2d3748;">Faturamento por Meios de Recebimento</div>
-                <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13px;">
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13px; table-layout: fixed;">
                     <thead><tr style="background-color: #f7fafc; font-weight: bold;"><th style="padding: 8px 12px; border: 1px solid #cbd5e0; text-align: left;">Forma de Pagamento</th><th style="padding: 8px 12px; border: 1px solid #cbd5e0; text-align: left;">Total Recebido</th></tr></thead>
                     <tbody>
             `;
@@ -835,7 +835,7 @@
                 </table>
 
                 <div style="font-size: 13px; font-weight: bold; background-color: #edf2f7; padding: 8px; margin-top: 15px; margin-bottom: 10px; border-left: 4px solid #cc1d1d; text-transform: uppercase; color: #2d3748;">Detalhamento de Faturamento por Produto</div>
-                <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13px;">
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13px; table-layout: fixed;">
                     <thead><tr style="background-color: #f7fafc; font-weight: bold;"><th style="padding: 8px 12px; border: 1px solid #cbd5e0; text-align: left;">Prato / Categoria</th><th style="padding: 8px 12px; border: 1px solid #cbd5e0; text-align: left;">Total Faturado</th></tr></thead>
                     <tbody>
             `;
@@ -844,20 +844,20 @@
                 conteudoHTML += `<tr><td style="padding: 8px 12px; border: 1px solid #cbd5e0; font-weight: bold;">${categoria}</td><td style="padding: 8px 12px; border: 1px solid #cbd5e0; font-size: 12px; font-weight: 600; color: #4a5568;">R$ ${valor.toFixed(2)}</td></tr>`;
             }
 
-            // Tabela Analítica totalmente enquadrada com quebra de linha forçada (word-break) para não vazar a margem
+            // A Tabela Analítica foi redesenhada com larguras rígidas (%) e propriedades drásticas de quebra de linha por caractere
             conteudoHTML += `
                     </tbody>
                 </table>
                 
-                <div style="font-size: 13px; font-weight: bold; background-color: #edf2f7; padding: 8px; margin-top: 15px; margin-bottom: 10px; border-left: 4px solid #cc1d1d; text-transform: uppercase; color: #2d3748; page-break-before: auto;">Relação Analítica de Pedidos</div>
-                <table style="width: 100%; border-collapse: collapse; font-size: 11px; table-layout: fixed; word-wrap: break-word;">
+                <div style="font-size: 13px; font-weight: bold; background-color: #edf2f7; padding: 8px; margin-top: 15px; margin-bottom: 10px; border-left: 4px solid #cc1d1d; text-transform: uppercase; color: #2d3748;">Relação Analítica de Pedidos</div>
+                <table style="width: 100%; border-collapse: collapse; font-size: 11px; table-layout: fixed;">
                     <thead>
                         <tr style="background-color: #f7fafc; font-weight: bold;">
-                            <th style="padding: 6px 8px; border: 1px solid #cbd5e0; text-align: left; width: 10%;">Nº</th>
-                            <th style="padding: 6px 8px; border: 1px solid #cbd5e0; text-align: left; width: 25%;">Cliente / Contato</th>
-                            <th style="padding: 6px 8px; border: 1px solid #cbd5e0; text-align: left; width: 43%;">Produtos Lançados</th>
-                            <th style="padding: 6px 8px; border: 1px solid #cbd5e0; text-align: center; width: 12%;">Forma</th>
-                            <th style="padding: 6px 8px; border: 1px solid #cbd5e0; text-align: right; width: 10%;">Total</th>
+                            <th style="padding: 8px 6px; border: 1px solid #cbd5e0; text-align: left; width: 12%;">Nº / Hora</th>
+                            <th style="padding: 8px 6px; border: 1px solid #cbd5e0; text-align: left; width: 28%;">Cliente / Contato</th>
+                            <th style="padding: 8px 6px; border: 1px solid #cbd5e0; text-align: left; width: 40%;">Produtos Lançados</th>
+                            <th style="padding: 8px 6px; border: 1px solid #cbd5e0; text-align: center; width: 10%;">Forma</th>
+                            <th style="padding: 8px 6px; border: 1px solid #cbd5e0; text-align: right; width: 10%;">Total</th>
                         </tr>
                     </thead>
                     <tbody>`;
@@ -865,26 +865,38 @@
             historicoGeralPedidos.forEach(p => {
                 conteudoHTML += `
                     <tr style="page-break-inside: avoid;">
-                        <td style="padding: 6px 8px; border: 1px solid #cbd5e0; vertical-align: top;"><strong>#${String(p.numero).padStart(2, '0')}</strong><br><small style="color:#718096">${p.hora || '12:00'}</small></td>
-                        <td style="padding: 6px 8px; border: 1px solid #cbd5e0; vertical-align: top; font-size: 10.5px;">${p.clienteA4 || 'Consumidor'}</td>
-                        <td style="padding: 6px 8px; border: 1px solid #cbd5e0; vertical-align: top; font-size: 10.5px; line-height: 1.3;">${p.itensTxt}</td>
-                        <td style="padding: 6px 8px; border: 1px solid #cbd5e0; vertical-align: top; text-align: center;">${p.pagamento || 'Dinheiro'}</td>
-                        <td style="padding: 6px 8px; border: 1px solid #cbd5e0; vertical-align: top; text-align: right; font-weight: bold;">R$ ${parseFloat(p.total || 0).toFixed(2)}</td>
+                        <td style="padding: 8px 6px; border: 1px solid #cbd5e0; vertical-align: top; white-space: normal; word-break: break-word;">
+                            <strong>#${String(p.numero).padStart(2, '0')}</strong><br><span style="color:#718096">${p.hora || '12:00'}</span>
+                        </td>
+                        <td style="padding: 8px 6px; border: 1px solid #cbd5e0; vertical-align: top; font-size: 10.5px; white-space: normal; word-break: break-all; max-width: 0;">
+                            ${p.clienteA4 || 'Consumidor'}
+                        </td>
+                        <td style="padding: 8px 6px; border: 1px solid #cbd5e0; vertical-align: top; font-size: 10.5px; line-height: 1.4; white-space: normal; word-break: break-word;">
+                            ${p.itensTxt}
+                        </td>
+                        <td style="padding: 8px 6px; border: 1px solid #cbd5e0; vertical-align: top; text-align: center; white-space: normal; word-break: break-word;">
+                            ${p.pagamento || 'Dinheiro'}
+                        </td>
+                        <td style="padding: 8px 6px; border: 1px solid #cbd5e0; vertical-align: top; text-align: right; font-weight: bold; white-space: normal; word-break: break-word;">
+                            R$ ${parseFloat(p.total || 0).toFixed(2)}
+                        </td>
                     </tr>`;
             });
 
             conteudoHTML += `</tbody></table>`;
             divPDF.innerHTML = conteudoHTML;
 
-            // Configuração refinada do html2pdf eliminando o estouro de largura
+            // Opções refinadas injetadas diretamente na viewport matemática do jsPDF
             const configuracoes = {
-                margin: [12, 10, 12, 10], // Margens físicas da folha (cima, esquerda, baixo, direita)
+                margin: [15, 12, 15, 12], 
                 filename: `Fechamento_Caixa_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.pdf`,
-                image: { type: 'jpeg', quality: 0.98 },
+                image: { type: 'jpeg', quality: 1.0 },
                 html2canvas: { 
-                    scale: 2.5, // Aumenta a nitidez das letras impressas
+                    scale: 2, 
                     logging: false, 
-                    useCORS: true 
+                    useCORS: true,
+                    letterRendering: true,
+                    width: 790 // Trava a captura do canvas na largura exata do nosso container
                 },
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };

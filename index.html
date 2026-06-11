@@ -353,7 +353,7 @@
                     </div>
                     <div class="form-group">
                         <label>Observações do Item:</label>
-                        <textarea id="descricao" placeholder="Ex: Sem cebola, Coca normal, observações gerais do prato..."></textarea>
+                        <textarea id="descricao" placeholder="Ex: Sem cebola, Coca normal, detalhe do prato do dia..."></textarea>
                     </div>
 
                     <button type="submit" class="btn btn-add">＋ Incluir Item</button>
@@ -458,6 +458,9 @@
         let contadorPedidos = 1;
         let dadosFechamentoRelatorio = null;
 
+        // Recupera o timestamp de corte da memória do navegador para o isolamento correto do dia
+        let horarioCorteTurno = localStorage.getItem('horarioCorteTurno') ? parseInt(localStorage.getItem('horarioCorteTurno')) : 0;
+
         const tabelaPrecosSugeridos = {
             "Parmegiana de Frango": { "Marmita (P)": 18.00, "Marmita (M)": 22.00, "Marmita (G)": 26.00, "Prato Feito (PF)": 20.00 },
             "Frango à Milanesa":    { "Marmita (P)": 16.00, "Marmita (M)": 20.00, "Marmita (G)": 24.00, "Prato Feito (PF)": 18.00 },
@@ -532,33 +535,43 @@
                 historicoGeralPedidos = [];
                 const corpoHistorico = document.getElementById('corpo-historico');
                 corpoHistorico.innerHTML = '';
+                
+                let maiorNumeroTurnoAtual = 0;
 
                 querySnapshot.forEach((doc) => {
                     const dados = doc.data();
-                    historicoGeralPedidos.push(dados);
-                    
-                    if (dados.numero >= contadorPedidos) {
-                        contadorPedidos = dados.numero + 1;
-                    }
+                    const milisegundosDoc = dados.timestamp ? dados.timestamp.toMillis() : 0;
 
-                    let resumoItens = dados.itens.map(i => `<span style="color:var(--cor-principal); font-weight:600;">(${i.qtd}x) [${i.prato}]</span> ${i.tipo}`).join('<br>');
-                    
-                    corpoHistorico.innerHTML += `
-                        <tr>
-                            <td><strong style="color:var(--cor-principal)">#${String(dados.numero).padStart(2, '0')}</strong></td>
-                            <td>${dados.hora}</td>
-                            <td>${dados.clienteHtml}</td>
-                            <td>${resumoItens}</td>
-                            <td><span style="font-size:12px; font-weight:600; padding:4px 8px; background:#e2e8f0; border-radius:4px;">${dados.pagamento || 'Dinheiro'}</span></td>
-                            <td><strong>R$ ${dados.total.toFixed(2)}</strong></td>
-                        </tr>
-                    `;
+                    // Filtro inteligente: Só traz para a tela os registros criados APÓS a última virada de dia
+                    if (milisegundosDoc > horarioCorteTurno) {
+                        historicoGeralPedidos.push(dados);
+                        
+                        if (dados.numero > maiorNumeroTurnoAtual) {
+                            maiorNumeroTurnoAtual = dados.numero;
+                        }
+
+                        let resumoItens = dados.itens.map(i => `<span style="color:var(--cor-principal); font-weight:600;">(${i.qtd}x) [${i.prato}]</span> ${i.tipo}`).join('<br>');
+                        
+                        corpoHistorico.innerHTML += `
+                            <tr>
+                                <td><strong style="color:var(--cor-principal)">#${String(dados.numero).padStart(2, '0')}</strong></td>
+                                <td>${dados.hora}</td>
+                                <td>${dados.clienteHtml}</td>
+                                <td>${resumoItens}</td>
+                                <td><span style="font-size:12px; font-weight:600; padding:4px 8px; background:#e2e8f0; border-radius:4px;">${dados.pagamento || 'Dinheiro'}</span></td>
+                                <td><strong>R$ ${dados.total.toFixed(2)}</strong></td>
+                            </tr>
+                        `;
+                    }
                 });
                 
-                // Mapeia a cronologia para a engine do dashboard fechar o dia na ordem correta
+                // Define o próximo número sequencial da mesa/pedido sem acumular os antigos
+                contadorPedidos = maiorNumeroTurnoAtual + 1;
+                
+                // Reverte o array interno para que a engenharia de fechamento diário processe na ordem correta
                 historicoGeralPedidos.reverse();
             } catch (erro) {
-                console.error("Aviso: Sincronização offline ou Firestore indisponível.", erro);
+                console.error("Erro ao sincronizar histórico: ", erro);
             }
         }
 
@@ -704,7 +717,7 @@
                 await addDoc(collection(db, "pedidos"), documentoPedido);
                 await carregarHistoricoDoFirebase();
             } catch (erro) {
-                console.warn("Computando de forma local em contingência.", erro);
+                console.warn("Computando de forma local temporária.", erro);
                 historicoGeralPedidos.push(documentoPedido);
                 await carregarHistoricoDoFirebase();
             }
@@ -712,7 +725,6 @@
             document.body.className = "modo-impressao-ticket";
             window.print();
 
-            contadorPedidos++;
             pedidoAtual = [];
             document.getElementById('cliente-nome').value = '';
             document.getElementById('cliente-celular').value = '';
@@ -722,7 +734,7 @@
 
         window.calcularFechamentoDiario = function() {
             if (historicoGeralPedidos.length === 0) {
-                alert("Não existem dados faturados hoje para realizar o fechamento.");
+                alert("Não existem dados faturados no turno atual para fechar.");
                 return;
             }
 
@@ -746,7 +758,8 @@
                 }
 
                 p.itens.forEach(i => {
-                    totalItens += i.qtd;
+                    // Resolução do bug do NaN: lê de forma matemática o valor inteiro de 'qtd'
+                    totalItens += parseInt(i.qtd || 1);
                     if (faturamentoPorPrato[i.prato] !== undefined) {
                         faturamentoPorPrato[i.prato] += i.valor;
                     }
@@ -844,9 +857,15 @@
             html2pdf().set(configuracoes).from(divPDF).save();
         };
 
+        // VIRADA DE TURNO MASTER: Agora grava o ponto de corte no navegador para isolar os dias de forma definitiva
         window.reiniciarTurnoComSenha = function() {
             const senhaDigitada = prompt("Para zerar o painel operacional local para o próximo turno, digite a senha:");
             if (senhaDigitada === "1234") {
+                
+                // Salva o momento exato do WIPE. Pedidos antes desse horário sumirão da tela atual.
+                horarioCorteTurno = Date.now();
+                localStorage.setItem('horarioCorteTurno', horarioCorteTurno);
+
                 historicoGeralPedidos = [];
                 contadorPedidos = 1;
                 dadosFechamentoRelatorio = null;
@@ -856,8 +875,11 @@
                 document.getElementById('btn-pdf-id').style.display = 'none';
                 document.getElementById('btn-reset-id').style.display = 'none';
                 
-                alert("Caixa zerado com sucesso!\nO contador retornou para o Pedido #01.");
+                alert("Caixa do dia encerrado com sucesso!\nO contador reiniciou no Pedido #01 para o novo turno.");
                 window.scrollTo({ top: 0, behavior: 'smooth' });
+                
+                // Recarrega o filtro para garantir tela limpa
+                carregarHistoricoDoFirebase();
             } else if (senhaDigitada !== null) {
                 alert("Senha incorreta! Operação cancelada.");
             }

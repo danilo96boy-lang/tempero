@@ -247,7 +247,7 @@
         .card-metrica p { margin: 8px 0 0 0; font-size: 22px; font-weight: bold; color: var(--cor-principal); }
 
         /* ==========================================================================
-           --- LAYOUT PROFISSIONAL ULTRA COMPACTADO PARA BOBINA DE 58MM ---
+           --- LAYOUT PROFISSIONAL BOBINA DE 58MM COM DUPLO AVANÇO DE PÁGINA ---
            ========================================================================== */
         #ticket-print { display: none; }
         @media print {
@@ -260,7 +260,7 @@
                 font-family: 'Courier New', Courier, monospace;
                 width: 48mm;
                 max-width: 48mm;
-                padding: 4mm 1mm;
+                padding: 2mm 1mm;
                 margin: 0;
                 font-size: 11px;
                 color: #000;
@@ -268,23 +268,23 @@
                 word-wrap: break-word;
             }
             
-            .ticket-header { text-align: center; margin-bottom: 5px; }
+            .ticket-header { text-align: center; margin-bottom: 3px; }
             .ticket-header-title { font-size: 13px; font-weight: bold; letter-spacing: 0.5px; }
-            .ticket-header-num { font-size: 18px; font-weight: bold; margin: 4px 0; }
-            .ticket-divider { text-align: center; margin: 4px 0; font-weight: bold; }
+            .ticket-header-num { font-size: 18px; font-weight: bold; margin: 2px 0; }
+            .ticket-divider { text-align: center; margin: 2px 0; font-weight: bold; }
             
-            .ticket-client-info { font-size: 10.5px; margin-bottom: 5px; line-height: 1.3; }
+            .ticket-client-info { font-size: 10.5px; margin-bottom: 3px; line-height: 1.2; }
             
-            .ticket-item { margin: 4px 0; page-break-inside: avoid; }
+            .ticket-item { margin: 3px 0; page-break-inside: avoid; }
             .ticket-item-main { display: flex; justify-content: space-between; font-weight: bold; gap: 4px; }
             .ticket-item-name { text-align: left; width: 70%; }
             .ticket-item-price { text-align: right; width: 30%; white-space: nowrap; }
             .ticket-item-obs { font-size: 10px; padding-left: 1.5ch; margin-top: 1px; color: #333; font-style: italic; }
             
-            .ticket-total-container { font-size: 14px; font-weight: bold; display: flex; justify-content: space-between; margin-top: 6px; }
+            .ticket-total-container { font-size: 14px; font-weight: bold; display: flex; justify-content: space-between; margin-top: 4px; }
             
-            /* Margem de segurança de 15mm para a faca cortar sem mutilar o rodapé */
-            .ticket-footer { margin-top: 8px; text-align: center; font-size: 10px; padding-bottom: 15mm; }
+            /* ADJUST PRINCIPAL: Forçado avanço final de 50mm (5cm) para corte limpo na faca */
+            .ticket-footer { margin-top: 6px; text-align: center; font-size: 10px; padding-bottom: 50mm !important; }
         }
     </style>
 </head>
@@ -523,7 +523,7 @@
             }
             
             cardapioEstruturado[categoriaSel].forEach(opcao => {
-                selectTipo.innerHTML += `<option value="${opcao}">${opcao}</option>`;
+                selectTipo.innerHTML += `<option value="${opcao}">${opcao}</option>';`;
             });
             inserirPrecoSugerido();
         };
@@ -609,7 +609,6 @@
 
         window.carregarHistoricoDoFirebase = carregarHistoricoDoFirebase;
 
-        // --- SISTEMA INTELLIGENT DE REIMPRESSÃO DIRETA ---
         window.reimprimirTicketPorId = function(firebaseId) {
             const pedidoMestre = historicoGeralPedidos.find(p => p.firebaseId === firebaseId);
             if (!pedidoMestre) {
@@ -656,8 +655,6 @@
             window.print();
         };
 
-        window.reimprimirTicketPorId = window.reimprimirTicketPorId;
-
         window.adicionarItem = function(event) {
             event.preventDefault();
             const prato = document.getElementById('categoria-prato').value;
@@ -696,13 +693,13 @@
         };
 
         function atualizarInterface() {
-            const lista = document.getElementById('lista-itens');
-            lista.innerHTML = '';
+            const autoLista = document.getElementById('lista-itens');
+            autoLista.innerHTML = '';
             let total = 0;
 
             pedidoAtual.forEach(item => {
                 total += item.valor;
-                lista.innerHTML += `
+                autoLista.innerHTML += `
                     <li class="item-carrinho">
                         <div>
                             <strong>${item.qtd}x - ${item.prato}</strong> (${item.tipo})<br>

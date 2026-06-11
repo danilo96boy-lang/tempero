@@ -323,6 +323,7 @@
                                 <option value="Marmitex">🍛 Marmitex Simples</option>
                                 <option value="Prato Feito">🍽️ Prato Feito Tradicional</option>
                                 <option value="Bebidas">🥤 Bebidas</option>
+                                <option value="Outros Pratos">✨ Outros Pratos / Especial</option>
                             </select>
                         </div>
                         <div class="form-group">
@@ -352,7 +353,7 @@
                     </div>
                     <div class="form-group">
                         <label>Observações do Item:</label>
-                        <textarea id="descricao" placeholder="Ex: Sem cebola, Coca normal, caprichar na batata..."></textarea>
+                        <textarea id="descricao" placeholder="Ex: Sem cebola, Coca normal, detalhe do prato do dia..."></textarea>
                     </div>
 
                     <button type="submit" class="btn btn-add">＋ Incluir Item</button>
@@ -457,7 +458,6 @@
         let contadorPedidos = 1;
         let dadosFechamentoRelatorio = null;
 
-        // TABELA DE PREÇOS PADRÃO (Altere os valores aqui quando precisar reajustar)
         const tabelaPrecosSugeridos = {
             "Parmegiana de Frango": { "Marmita (P)": 18.00, "Marmita (M)": 22.00, "Marmita (G)": 26.00, "Prato Feito (PF)": 20.00 },
             "Frango à Milanesa":    { "Marmita (P)": 16.00, "Marmita (M)": 20.00, "Marmita (G)": 24.00, "Prato Feito (PF)": 18.00 },
@@ -465,7 +465,8 @@
             "Feijoada":               { "Marmita (P)": 20.00, "Marmita (M)": 25.00, "Marmita (G)": 30.00, "Prato Feito (PF)": 22.00 },
             "Marmitex":               { "Marmitex P": 15.00, "Marmitex M": 18.00, "Marmitex G": 22.00 },
             "Prato Feito":            { "Prato Feito Único": 16.00 },
-            "Bebidas":                { "Refrigerante Lata": 6.00, "Refrigerante 2L": 12.00, "Agua Normal": 4.00, "Agua com Gas": 5.00, "Outros": 0.00 }
+            "Bebidas":                { "Refrigerante Lata": 6.00, "Refrigerante 2L": 12.00, "Agua Normal": 4.00, "Agua com Gas": 5.00, "Outros": 0.00 },
+            "Outros Pratos":          { "Marmita (P)": 0.00, "Marmita (M)": 0.00, "Marmita (G)": 0.00, "Prato Feito (PF)": 0.00 }
         };
 
         const cardapioEstruturado = {
@@ -475,7 +476,8 @@
             "Feijoada": ["Marmita (P)", "Marmita (M)", "Marmita (G)", "Prato Feito (PF)"],
             "Marmitex": ["Marmitex P", "Marmitex M", "Marmitex G"],
             "Prato Feito": ["Prato Feito Único"],
-            "Bebidas": ["Refrigerante Lata", "Refrigerante 2L", "Agua Normal", "Agua com Gas", "Outros"]
+            "Bebidas": ["Refrigerante Lata", "Refrigerante 2L", "Agua Normal", "Agua com Gas", "Outros"],
+            "Outros Pratos": ["Marmita (P)", "Marmita (M)", "Marmita (G)", "Prato Feito (PF)"]
         };
 
         window.atualizarOpcoesMenu = function() {
@@ -547,7 +549,7 @@
                             <td>${dados.hora}</td>
                             <td>${dados.clienteHtml}</td>
                             <td>${resumoItens}</td>
-                            <td><span style="font-size:12px; font-weight:600; padding:4px 8px; background:#e2e8f0; border-radius:4px;">${dados.pagamento || 'Não Inf.'}</span></td>
+                            <td><span style="font-size:12px; font-weight:600; padding:4px 8px; background:#e2e8f0; border-radius:4px;">${dados.pagamento || 'Dinheiro'}</span></td>
                             <td><strong>R$ ${dados.total.toFixed(2)}</strong></td>
                         </tr>
                     `;
@@ -665,7 +667,7 @@
             containerItensPrint.innerHTML = '';
             let totalPedido = 0;
             let itensListaSimples = [];
-            let formaPagamentoFinal = pedidoAtual[0].pagamento; // Captura a forma do primeiro item lançado
+            let formaPagamentoFinal = pedidoAtual[0].pagamento;
 
             pedidoAtual.forEach((item, index) => {
                 totalPedido += item.valor;
@@ -687,6 +689,7 @@
             const documentoPedido = {
                 numero: contadorPedidos,
                 data: dataFormatada,
+                hour: horaSimples,
                 hora: horaSimples,
                 clienteHtml: stringClienteHistorico,
                 clienteA4: detalheClienteRelatorio,
@@ -726,10 +729,9 @@
             let faturamentoTotal = 0;
             let totalItens = 0;
             
-            // Dicionários analíticos completos para o relatório
             let faturamentoPorPrato = {
                 "Parmegiana de Frango": 0, "Frango à Milanesa": 0, "Parmegiana de Berinjela": 0,
-                "Feijoada": 0, "Marmitex": 0, "Prato Feito": 0, "Bebidas": 0
+                "Feijoada": 0, "Marmitex": 0, "Prato Feito": 0, "Bebidas": 0, "Outros Pratos": 0
             };
 
             let faturamentoPorMetodoPagamento = { "Dinheiro": 0, "Pix": 0, "Cartão": 0 };
@@ -737,11 +739,10 @@
             historicoGeralPedidos.forEach(p => {
                 faturamentoTotal += p.total;
                 
-                // Consolida por forma de pagamento
                 if (faturamentoPorMetodoPagamento[p.pagamento] !== undefined) {
                     faturamentoPorMetodoPagamento[p.pagamento] += p.total;
                 } else {
-                    faturamentoPorMetodoPagamento["Dinheiro"] += p.total; // Fallback de contingência
+                    faturamentoPorMetodoPagamento["Dinheiro"] += p.total;
                 }
 
                 p.itens.forEach(i => {
@@ -786,7 +787,7 @@
             let conteudoHTML = `
                 <div style="border-bottom: 3px solid #cc1d1d; padding-bottom: 12px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: flex-end;">
                     <div>
-                        <h2 style="margin: 0; color: #cc1d1d; font-size: 26px; text-transform: uppercase;">Tempero de Família</h2>
+                        <h2 style="margin: 0; color: #cc1d1d; font-size: 26px; text-transform: uppercase; letter-spacing: 0.5px;">Tempero de Família</h2>
                         <div style="font-size: 14px; font-weight: bold; color: #4a5568; margin-top: 5px;">Resumo Consolidado de Vendas Diárias</div>
                     </div>
                     <div style="font-size: 12px; color: #718096; text-align: right; font-weight: 600;">${dadosFechamentoRelatorio.dataHora}</div>
@@ -823,7 +824,7 @@
                 conteudoHTML += `<tr><td style="padding: 10px 14px; border: 1px solid #cbd5e0; font-weight: bold;">${categoria}</td><td style="padding: 10px 14px; border: 1px solid #cbd5e0; font-size: 13px; font-weight: 600; color: #4a5568;">R$ ${valor.toFixed(2)}</td></tr>`;
             }
 
-            conteudoHTML += `</tbody></table><div style="font-size: 14px; font-weight: bold; background-color: #edf2f7; padding: 10px; margin-top: 20px; margin-bottom: 12px; border-left: 4px solid #cc1d1d; text-transform: uppercase; color: #2d3748; page-break-before: auto;">Relação Analítica de Pedidos</div><table style="width: 100%; border-collapse: collapse; font-size: 11px;"><thead><tr style="background-color: #f7fafc; font-weight: bold;"><th style="padding: 8px 10px; border: 1px solid #cbd5e0; text-align: left; width: 10%;">Nº</th><th style="padding: 8px 10px; border: 1px solid #cbd5e0; text-align: left; width: 30%;">Cliente / Contato</th><th style="padding: 8px 10px; border: 1px solid #cbd5e0; text-align: left; width: 40%;">Produtos Lançados</th><th style="padding: 8px 10px; border: 1px solid #cbd5e0; text-align: center; width: 10%;">Forma</th><th style="padding: 8px 10px; border: 1px solid #cbd5e0; text-align: right; width: 10%;">Total</th></tr></thead><tbody>`;
+            conteudoHTML += `</tbody></table><div style="font-size: 14px; font-weight: bold; background-color: #edf2f7; padding: 10px; margin-top: 20px; margin-bottom: 12px; border-left: 4px solid #cc1d1d; text-transform: uppercase; color: #2d3748; page-break-before: auto;">Relação Analítica de Pedidos</div><table style="width: 100%; border-collapse: collapse; font-size: 12px;"><thead><tr style="background-color: #f7fafc; font-weight: bold;"><th style="padding: 8px 10px; border: 1px solid #cbd5e0; text-align: left; width: 10%;">Nº</th><th style="padding: 8px 10px; border: 1px solid #cbd5e0; text-align: left; width: 30%;">Cliente / Contato</th><th style="padding: 8px 10px; border: 1px solid #cbd5e0; text-align: left; width: 40%;">Produtos Lançados</th><th style="padding: 8px 10px; border: 1px solid #cbd5e0; text-align: center; width: 10%;">Forma</th><th style="padding: 8px 10px; border: 1px solid #cbd5e0; text-align: right; width: 10%;">Total</th></tr></thead><tbody>`;
 
             historicoGeralPedidos.forEach(p => {
                 conteudoHTML += `<tr style="page-break-inside: avoid;"><td style="padding: 8px 10px; border: 1px solid #cbd5e0; vertical-align: top;"><strong>#${String(p.numero).padStart(2, '0')}</strong><br><small style="color:#718096">${p.hora}</small></td><td style="padding: 8px 10px; border: 1px solid #cbd5e0; vertical-align: top;">${p.clienteA4}</td><td style="padding: 8px 10px; border: 1px solid #cbd5e0; vertical-align: top;">${p.itensTxt}</td><td style="padding: 8px 10px; border: 1px solid #cbd5e0; vertical-align: top; text-align: center;">${p.pagamento || 'Dinheiro'}</td><td style="padding: 8px 10px; border: 1px solid #cbd5e0; vertical-align: top; text-align: right; font-weight: bold;">R$ ${p.total.toFixed(2)}</td></tr>`;

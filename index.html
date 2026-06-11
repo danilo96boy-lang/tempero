@@ -247,7 +247,7 @@
         .card-metrica p { margin: 8px 0 0 0; font-size: 22px; font-weight: bold; color: var(--cor-principal); }
 
         /* ==========================================================================
-           --- LAYOUT LINEAR BLINDADO EM DUPLA VIA PARA BOBINA DE 58MM ---
+           --- LAYOUT DA IMPRESSORA TÉRMICA (58MM) - MODIFICADO SEM DESPERDÍCIO ---
            ========================================================================== */
         #ticket-print { display: none; }
         @media print {
@@ -276,18 +276,20 @@
             
             .ticket-client-info { font-size: 10.5px; margin-bottom: 2px; line-height: 1.2; }
             
-            .ticket-item { margin: 4px 0; page-break-inside: avoid; }
-            .ticket-item-main { display: flex; justify-content: space-between; align-items: flex-start; font-weight: bold; gap: 4px; width: 100%; }
-            .ticket-item-name { text-align: left; width: 70%; word-wrap: break-word; font-size: 11px; }
-            .ticket-item-price { text-align: right; width: 30%; white-space: nowrap; font-size: 11px; }
-            .ticket-item-obs { font-size: 10px; padding-left: 1.5ch; margin-top: 1px; color: #333; font-style: italic; font-weight: normal; }
+            /* Correção Crítica do Layout das Descrições (Uso de 100% da Largura da Bobina) */
+            .ticket-item { margin: 6px 0; page-break-inside: avoid; border-bottom: 1px dotted #ccc; padding-bottom: 4px; }
+            .ticket-item-main { width: 100%; display: block; text-align: left; }
+            .ticket-item-name { display: block; font-weight: bold; font-size: 11px; line-height: 1.3; width: 100%; }
+            .ticket-item-price { display: block; text-align: right; font-weight: bold; font-size: 11px; margin-top: 1px; }
+            .ticket-item-obs { font-size: 10px; padding-left: 1ch; margin-top: 1px; color: #333; font-style: italic; display: block; }
             
             .ticket-total-container { font-size: 13px; font-weight: bold; display: flex; justify-content: space-between; margin-top: 4px; }
             
-            /* FORÇADO ESPAÇO DE 5CM E QUEBRA DE PÁGINA EM CADA VIA */
+            /* BLINDAGEM DA FACA DE CORTE: Espaçamento de 5cm forçado após cada via */
             .ticket-wrapper-via {
-                padding-bottom: 50mm !important; /* Margem de 5cm para a serrilha */
+                padding-bottom: 50mm !important; /* Injeta os 5cm em branco entre as impressões */
                 page-break-after: always !important;
+                display: block;
             }
         }
     </style>
@@ -597,7 +599,7 @@
 
         window.carregarHistoricoDoFirebase = carregarHistoricoDoFirebase;
 
-        // --- FUNÇÃO DE CONSTRUÇÃO DE LAYOUT DO TICKET (ÚNICA E LINEAR) ---
+        // --- ENGENHARIA DE CUPOM DA FILA (TEXTO TOTALMENTE CONTINUO EM LARGURA CHEIA) ---
         function gerarHtmlFitaVia(pedido, nomeVia) {
             let dadosCliente = '';
             if (pedido.clienteA4 && pedido.clienteA4 !== 'Consumidor Final') {
@@ -611,16 +613,18 @@
                 let itemTipo = item.tipo || "Opção";
                 let itemValor = parseFloat(item.valor || 0);
 
-                let tipoLimpo = itemTipo.replace("Marmita ", "");
-                let textoFinalPrato = `${itemPrato} (${tipoLimpo})`;
-                if(itemTipo === "Prato Feito Único" || itemTipo === "Prato Feito Tradicional" || itemPrato.includes("Bebidas")) {
-                    textoFinalPrato = `${itemPrato} ${itemTipo.replace("Único", "").replace("Tradicional", "")}`;
+                let tipoLimpo = itemTipo.replace("Marmita ", "").replace(" (P)", " P").replace(" (M)", " M").replace(" (G)", " G").replace(" (PF)", " PF");
+                
+                // Concatenação contínua sem colunas ocultas para aproveitar 100% o papel
+                let textoFinalPrato = `${itemQtd}x ${itemPrato}`;
+                if(itemTipo && !itemPrato.includes(itemTipo) && itemTipo !== "Prato Feito Único" && itemTipo !== "Prato Feito Tradicional") {
+                    textoFinalPrato += ` ${tipoLimpo}`;
                 }
 
                 linhasProdutosHtml += `
                     <div class="ticket-item">
                         <div class="ticket-item-main">
-                            <span class="ticket-item-name">${itemQtd}x ${textoFinalPrato}</span>
+                            <span class="ticket-item-name">${textoFinalPrato}</span>
                             <span class="ticket-item-price">R$ ${itemValor.toFixed(2)}</span>
                         </div>
                         <div class="ticket-item-obs">${item.descricao && item.descricao !== 'Sem obs' ? 'Obs: ' + item.descricao : ''}</div>
@@ -650,7 +654,6 @@
             `;
         }
 
-        // --- REIMPRESSÃO EM DUPLA VIA AUTOMÁTICA ---
         window.reimprimirTicketPorId = function(firebaseId) {
             const pedidoMestre = historicoGeralPedidos.find(p => p.firebaseId === firebaseId);
             if (!pedidoMestre) {
@@ -659,8 +662,6 @@
             }
 
             const containerFita = document.getElementById('ticket-print');
-            
-            // Injeta as duas vias completas seguidas com a quebra de 5cm no final de cada uma
             containerFita.innerHTML = gerarHtmlFitaVia(pedidoMestre, "COZINHA") + gerarHtmlFitaVia(pedidoMestre, "CLIENTE");
 
             document.body.className = "modo-impressao-ticket";
@@ -724,7 +725,6 @@
             document.getElementById('total-valor').innerText = total.toFixed(2);
         }
 
-        // --- CONCLUIR PEDIDO E LANÇAR DUPLA VIA ---
         window.finalizarEImprimirTicket = async function() {
             if (pedidoAtual.length === 0) {
                 alert("Nenhum item inserido no pedido!");
@@ -784,7 +784,6 @@
             try {
                 await addDoc(collection(db, "pedidos"), documentoPedido);
                 
-                // Monta as duas vias na fita de impressão
                 const containerFita = document.getElementById('ticket-print');
                 containerFita.innerHTML = gerarHtmlFitaVia(documentoPedido, "COZINHA") + gerarHtmlFitaVia(documentoPedido, "CLIENTE");
 

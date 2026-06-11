@@ -346,9 +346,7 @@
                 </table>
             </div>
         </div>
-    </div>
-
-    <div id="ticket-print">
+    </div> <div id="ticket-print">
         <div class="ticket-header">
             <div class="ticket-header-title">** TEMPERO DE FAMÍLIA **</div>
             <div class="ticket-header-num" id="print-numero-pedido">PEDIDO #00</div>
@@ -367,7 +365,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getFirestore, collection, addDoc, getDocs, query, orderBy, Timestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-        // Chaves oficiais do seu projeto "tempero-3857c" vinculadas com sucesso
         const firebaseConfig = {
             apiKey: "AIzaSyD1miyZUImKwCCNwbgppUjtni860Urt-z4",
             authDomain: "tempero-3857c.firebaseapp.com",
@@ -386,7 +383,6 @@
         let contadorPedidos = 1;
         let dadosFechamentoRelatorio = null;
 
-        // Puxa e sincroniza os dados direto do Cloud do Firebase
         async function carregarHistoricoDoFirebase() {
             try {
                 const q = query(collection(db, "pedidos"), orderBy("numero", "desc"));
@@ -544,7 +540,6 @@
             };
 
             try {
-                // Insere de forma persistente na nuvem do Firebase Firestore
                 await addDoc(collection(db, "pedidos"), documentoPedido);
                 
                 await carregarHistoricoDoFirebase();
@@ -604,7 +599,10 @@
         };
 
         window.exportarFechamentoPDF = function() {
-            if (!dadosFechamentoRelatorio) return;
+            if (!dadosFechamentoRelatorio) {
+                alert("Gere o fechamento antes de exportar!");
+                return;
+            }
 
             const divPDF = document.createElement('div');
             divPDF.style.width = '800px'; divPDF.style.padding = '30px';
@@ -614,7 +612,7 @@
             let conteudoHTML = `
                 <div style="border-bottom: 3px solid #cc1d1d; padding-bottom: 12px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: flex-end;">
                     <div>
-                        <h2 style="margin: 0; color: #cc1d1d; font-size: 26px; text-transform: uppercase;">Tempero de Família</h2>
+                        <h2 style="margin: 0; color: #cc1d1d; font-size: 26px; text-transform: uppercase; letter-spacing: 0.5px;">Tempero de Família</h2>
                         <div style="font-size: 14px; font-weight: bold; color: #4a5568; margin-top: 5px;">Resumo Consolidado de Vendas Diárias</div>
                     </div>
                     <div style="font-size: 12px; color: #718096; text-align: right; font-weight: 600;">${dadosFechamentoRelatorio.dataHora}</div>
@@ -622,32 +620,32 @@
 
                 <div style="font-size: 14px; font-weight: bold; background-color: #edf2f7; padding: 10px; margin-top: 20px; margin-bottom: 12px; border-left: 4px solid #cc1d1d; text-transform: uppercase; color: #2d3748;">Resumo Financeiro Geral</div>
                 <table style="width: 100%; border-collapse: collapse; margin-bottom: 25px;">
-                    <tr><td style="padding: 10px 14px; border: 1px solid #cbd5e0; background-color: #f7fafc; font-weight: bold; width: 45%;">Faturamento Bruto Acumulado:</td><td style="padding: 10px 14px; border: 1px solid #cbd5e0; font-weight: bold; color: #cc1d1d; font-size: 16px;">${dadosFechamentoRelatorio.faturamento}</td></tr>
-                    <tr><td style="padding: 10px 14px; border: 1px solid #cbd5e0; background-color: #f7fafc; font-weight: bold;">Quantidade de Pedidos Atendidos:</td><td style="padding: 10px 14px; border: 1px solid #cbd5e0;">${dadosFechamentoRelatorio.pedidos}</td></tr>
-                    <tr><td style="padding: 10px 14px; border: 1px solid #cbd5e0; background-color: #f7fafc; font-weight: bold;">Valor do Ticket Médio Geral:</td><td style="padding: 10px 14px; border: 1px solid #cbd5e0; font-weight: bold;">${dadosFechamentoRelatorio.ticket}</td></tr>
+                    <tr><td style="padding: 10px 14px; border: 1px solid #cbd5e0; background-color: #f7fafc; font-weight: bold; width: 45%; font-size: 13px;">Faturamento Bruto Acumulado:</td><td style="padding: 10px 14px; border: 1px solid #cbd5e0; font-weight: bold; color: #cc1d1d; font-size: 16px;">${dadosFechamentoRelatorio.faturamento}</td></tr>
+                    <tr><td style="padding: 10px 14px; border: 1px solid #cbd5e0; background-color: #f7fafc; font-weight: bold; font-size: 13px;">Quantidade de Pedidos Atendidos:</td><td style="padding: 10px 14px; border: 1px solid #cbd5e0; font-size: 13px;">${dadosFechamentoRelatorio.pedidos}</td></tr>
+                    <tr><td style="padding: 10px 14px; border: 1px solid #cbd5e0; background-color: #f7fafc; font-weight: bold; font-size: 13px;">Valor do Ticket Médio Geral:</td><td style="padding: 10px 14px; border: 1px solid #cbd5e0; font-weight: bold; font-size: 13px;">${dadosFechamentoRelatorio.ticket}</td></tr>
                 </table>
 
                 <div style="font-size: 14px; font-weight: bold; background-color: #edf2f7; padding: 10px; margin-top: 20px; margin-bottom: 12px; border-left: 4px solid #cc1d1d; text-transform: uppercase; color: #2d3748;">Faturamento por Linha de Produto</div>
                 <table style="width: 100%; border-collapse: collapse; margin-bottom: 25px;">
-                    <thead><tr style="background-color: #f7fafc; font-weight: bold;"><th style="padding: 10px 14px; border: 1px solid #cbd5e0; text-align: left;">Categoria de Produto</th><th style="padding: 10px 14px; border: 1px solid #cbd5e0; text-align: left;">Total Faturado</th></tr></thead>
+                    <thead><tr style="background-color: #f7fafc; font-weight: bold;"><th style="padding: 10px 14px; border: 1px solid #cbd5e0; text-align: left; font-size: 13px;">Categoria de Produto</th><th style="padding: 10px 14px; border: 1px solid #cbd5e0; text-align: left; font-size: 13px;">Total Faturado</th></tr></thead>
                     <tbody>
             `;
 
             for (const [categoria, valor] of Object.entries(dadosFechamentoRelatorio.porCategoria)) {
-                conteudoHTML += `<tr><td style="padding: 10px 14px; border: 1px solid #cbd5e0; font-weight: bold;">${categoria}</td><td style="padding: 10px 14px; border: 1px solid #cbd5e0; font-weight: 600;">R$ ${valor.toFixed(2)}</td></tr>`;
+                conteudoHTML += `<tr><td style="padding: 10px 14px; border: 1px solid #cbd5e0; font-weight: bold; font-size: 13px;">${categoria}</td><td style="padding: 10px 14px; border: 1px solid #cbd5e0; font-size: 13px; font-weight: 600; color: #4a5568;">R$ ${valor.toFixed(2)}</td></tr>`;
             }
 
-            conteudoHTML += `</tbody></table><div style="font-size: 14px; font-weight: bold; background-color: #edf2f7; padding: 10px; margin-top: 20px; margin-bottom: 12px; border-left: 4px solid #cc1d1d; text-transform: uppercase; color: #2d3748;">Relação Analítica de Pedidos</div><table style="width: 100%; border-collapse: collapse; font-size: 12px;"><thead><tr style="background-color: #f7fafc; font-weight: bold;"><th style="padding: 8px 10px; border: 1px solid #cbd5e0; text-align: left; width: 12%;">Nº</th><th style="padding: 8px 10px; border: 1px solid #cbd5e0; text-align: left; width: 35%;">Cliente / Contato / Endereço</th><th style="padding: 8px 10px; border: 1px solid #cbd5e0; text-align: left; width: 40%;">Produtos Lançados</th><th style="padding: 8px 10px; border: 1px solid #cbd5e0; text-align: right; width: 13%;">Total</th></tr></thead><tbody>`;
+            conteudoHTML += `</tbody></table><div style="font-size: 14px; font-weight: bold; background-color: #edf2f7; padding: 10px; margin-top: 20px; margin-bottom: 12px; border-left: 4px solid #cc1d1d; text-transform: uppercase; color: #2d3748; page-break-before: auto;">Relação Analítica de Pedidos</div><table style="width: 100%; border-collapse: collapse; font-size: 12px;"><thead><tr style="background-color: #f7fafc; font-weight: bold;"><th style="padding: 8px 10px; border: 1px solid #cbd5e0; text-align: left; width: 12%;">Nº</th><th style="padding: 8px 10px; border: 1px solid #cbd5e0; text-align: left; width: 35%;">Cliente / Contato / Endereço</th><th style="padding: 8px 10px; border: 1px solid #cbd5e0; text-align: left; width: 40%;">Produtos Lançados</th><th style="padding: 8px 10px; border: 1px solid #cbd5e0; text-align: right; width: 13%;">Total</th></tr></thead><tbody>`;
 
             historicoGeralPedidos.forEach(p => {
-                conteudoHTML += `<tr style="page-break-inside: avoid;"><td style="padding: 8px 10px; border: 1px solid #cbd5e0; vertical-align: top;"><strong>#${String(p.numero).padStart(2, '0')}</strong><br><small style="color:#718096">${p.hora}</small></td><td style="padding: 8px 10px; border: 1px solid #cbd5e0; vertical-align: top;">${p.clienteA4}</td><td style="padding: 8px 10px; border: 1px solid #cbd5e0; vertical-align: top;">${p.itensTxt}</td><td style="padding: 8px 10px; border: 1px solid #cbd5e0; vertical-align: top; text-align: right; font-weight: bold;">R$ ${p.total.toFixed(2)}</td></tr>`;
+                conteudoHTML += `<tr style="page-break-inside: avoid;"><td style="padding: 8px 10px; border: 1px solid #cbd5e0; vertical-align: top;"><strong>#${String(p.numero).padStart(2, '0')}</strong><br><small style="color:#718096">${p.hora}</small></td><td style="padding: 8px 10px; border: 1px solid #cbd5e0; vertical-align: top;">${p.clienteA4}</td><td style="padding: 8px 10px; border: 1px solid #cbd5e0; vertical-align: top;">${p.itensTxt}</td><td style="padding: 8px 10px; border: 1px solid #cbd5e0; vertical-align: top; text-align: right; font-weight: bold; color: #2d3748;">R$ ${p.total.toFixed(2)}</td></tr>`;
             });
 
             conteudoHTML += `</tbody></table>`;
             divPDF.innerHTML = conteudoHTML;
 
             const configuracoes = {
-                margin: 15,
+                margin: [15, 12, 15, 12],
                 filename: `Fechamento_Caixa_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.pdf`,
                 image: { type: 'jpeg', quality: 0.98 },
                 html2canvas: { scale: 2, logging: false, width: 800 },
@@ -669,10 +667,10 @@
                 document.getElementById('btn-pdf-id').style.display = 'none';
                 document.getElementById('btn-reset-id').style.display = 'none';
                 
-                alert("Turno Operacional reiniciado!\nO contador local voltou para o Pedido #01.");
+                alert("Caixa zerado com sucesso!\nO contador retornou para o Pedido #01 e o painel está limpa.");
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             } else if (senhaDigitada !== null) {
-                alert("Senha inválida!");
+                alert("Senha incorreta! Operação cancelada.");
             }
         };
     </script>

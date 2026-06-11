@@ -759,7 +759,7 @@
                 }
 
                 p.itens.forEach(i => {
-                    let itemQtd = parseInt(i.qtd || 1); // Corrigido de NaN para inteiro seguro
+                    let itemQtd = parseInt(i.qtd || 1); 
                     totalItens += itemQtd;
                     
                     if (faturamentoPorPrato[i.prato] !== undefined) {
@@ -773,7 +773,7 @@
             const dataHoraString = `Emissão: ${agora.toLocaleDateString('pt-BR')} às ${agora.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})}`;
 
             document.getElementById('t-dash-faturamento').innerText = 'R$ ' + faturamentoTotal.toFixed(2);
-            document.getElementById('t-dash-qtd-pedidos').innerText = historicoGeralPedidos.length + ` (${totalItens} un) `;
+            document.getElementById('t-dash-qtd-pedidos').innerText = historicoGeralPedidos.length + ` (${totalItens} un)`;
             document.getElementById('t-dash-ticket-medio').innerText = 'R$ ' + ticketMedio.toFixed(2);
             document.getElementById('dashboard-vendas-tela').style.display = 'grid';
 
@@ -791,11 +791,10 @@
             document.getElementById('dashboard-vendas-tela').scrollIntoView({ behavior: 'smooth' });
         };
 
-        // --- ENGENHARIA DE EXPORTAÇÃO COMPORTAMENTAL RE-CALIBRADA ---
+        // --- EXPORTAÇÃO BLINDADA CONTRA TRAVAMENTOS E QUEBRAS DE PÁGINA ---
         window.exportarFechamentoPDF = function() {
             if (!dadosFechamentoRelatorio) return;
 
-            // Criamos uma div container oculta com largura fixa restrita ao A4
             const divPDF = document.createElement('div');
             divPDF.style.width = '790px'; 
             divPDF.style.padding = '25px';
@@ -844,7 +843,6 @@
                 conteudoHTML += `<tr><td style="padding: 8px 12px; border: 1px solid #cbd5e0; font-weight: bold;">${categoria}</td><td style="padding: 8px 12px; border: 1px solid #cbd5e0; font-size: 12px; font-weight: 600; color: #4a5568;">R$ ${valor.toFixed(2)}</td></tr>`;
             }
 
-            // A Tabela Analítica foi redesenhada com larguras rígidas (%) e propriedades drásticas de quebra de linha por caractere
             conteudoHTML += `
                     </tbody>
                 </table>
@@ -863,13 +861,14 @@
                     <tbody>`;
 
             historicoGeralPedidos.forEach(p => {
+                // Injetado o 'page-break-inside: avoid' para proibir o corte de linhas no meio ao pular de folha
                 conteudoHTML += `
-                    <tr style="page-break-inside: avoid;">
+                    <tr style="page-break-inside: avoid !important;">
                         <td style="padding: 8px 6px; border: 1px solid #cbd5e0; vertical-align: top; white-space: normal; word-break: break-word;">
                             <strong>#${String(p.numero).padStart(2, '0')}</strong><br><span style="color:#718096">${p.hora || '12:00'}</span>
                         </td>
                         <td style="padding: 8px 6px; border: 1px solid #cbd5e0; vertical-align: top; font-size: 10.5px; white-space: normal; word-break: break-all; max-width: 0;">
-                            ${p.clienteA4 || 'Consumidor'}
+                            ${p.clienteA4 || 'Consumidor Final'}
                         </td>
                         <td style="padding: 8px 6px; border: 1px solid #cbd5e0; vertical-align: top; font-size: 10.5px; line-height: 1.4; white-space: normal; word-break: break-word;">
                             ${p.itensTxt}
@@ -886,7 +885,6 @@
             conteudoHTML += `</tbody></table>`;
             divPDF.innerHTML = conteudoHTML;
 
-            // Opções refinadas injetadas diretamente na viewport matemática do jsPDF
             const configuracoes = {
                 margin: [15, 12, 15, 12], 
                 filename: `Fechamento_Caixa_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.pdf`,
@@ -896,7 +894,7 @@
                     logging: false, 
                     useCORS: true,
                     letterRendering: true,
-                    width: 790 // Trava a captura do canvas na largura exata do nosso container
+                    width: 790 
                 },
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };

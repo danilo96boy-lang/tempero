@@ -247,7 +247,7 @@
         .card-metrica p { margin: 8px 0 0 0; font-size: 22px; font-weight: bold; color: var(--cor-principal); }
 
         /* ==========================================================================
-           --- LAYOUT PROFISSIONAL BOBINA DE 58MM COM DUPLO AVANÇO DE PÁGINA ---
+           --- LAYOUT LINEAR PERFEITO E ENXUTO PARA BOBINA DE 58MM ---
            ========================================================================== */
         #ticket-print { display: none; }
         @media print {
@@ -260,7 +260,7 @@
                 font-family: 'Courier New', Courier, monospace;
                 width: 48mm;
                 max-width: 48mm;
-                padding: 2mm 1mm;
+                padding: 2mm 0.5mm;
                 margin: 0;
                 font-size: 11px;
                 color: #000;
@@ -271,19 +271,20 @@
             .ticket-header { text-align: center; margin-bottom: 3px; }
             .ticket-header-title { font-size: 13px; font-weight: bold; letter-spacing: 0.5px; }
             .ticket-header-num { font-size: 18px; font-weight: bold; margin: 2px 0; }
-            .ticket-divider { text-align: center; margin: 2px 0; font-weight: bold; }
+            .ticket-divider { text-align: center; margin: 2px 0; font-weight: bold; font-size: 11px; }
             
             .ticket-client-info { font-size: 10.5px; margin-bottom: 3px; line-height: 1.2; }
             
-            .ticket-item { margin: 3px 0; page-break-inside: avoid; }
-            .ticket-item-main { display: flex; justify-content: space-between; font-weight: bold; gap: 4px; }
-            .ticket-item-name { text-align: left; width: 70%; }
-            .ticket-item-price { text-align: right; width: 30%; white-space: nowrap; }
-            .ticket-item-obs { font-size: 10px; padding-left: 1.5ch; margin-top: 1px; color: #333; font-style: italic; }
+            /* Estrutura Linear Sem Quebras Desordenadas */
+            .ticket-item { margin: 5px 0; page-break-inside: avoid; }
+            .ticket-item-main { display: flex; justify-content: space-between; align-items: flex-start; font-weight: bold; gap: 4px; width: 100%; }
+            .ticket-item-name { text-align: left; width: 72%; word-wrap: break-word; }
+            .ticket-item-price { text-align: right; width: 28%; white-space: nowrap; }
+            .ticket-item-obs { font-size: 10px; padding-left: 1.5ch; margin-top: 1px; color: #333; font-style: italic; font-weight: normal; }
             
             .ticket-total-container { font-size: 14px; font-weight: bold; display: flex; justify-content: space-between; margin-top: 4px; }
             
-            /* ADJUST PRINCIPAL: Forçado avanço final de 50mm (5cm) para corte limpo na faca */
+            /* Mantido o avanço final de 50mm (5cm) para garantir o corte limpo na serrilha */
             .ticket-footer { margin-top: 6px; text-align: center; font-size: 10px; padding-bottom: 50mm !important; }
         }
     </style>
@@ -451,7 +452,7 @@
         <div class="ticket-header">
             <div class="ticket-header-title">TEMPERO DE FAMÍLIA</div>
             <div class="ticket-header-num" id="print-numero-pedido">PEDIDO #00</div>
-            <div id="print-data" style="font-size: 10px;"></div>
+            <div id="print-data"></div>
         </div>
         <div class="ticket-divider">--------------------------------</div>
         <div id="print-dados-cliente" class="ticket-client-info"></div>
@@ -523,7 +524,7 @@
             }
             
             cardapioEstruturado[categoriaSel].forEach(opcao => {
-                selectTipo.innerHTML += `<option value="${opcao}">${opcao}</option>';`;
+                selectTipo.innerHTML += `<option value="${opcao}">${opcao}</option>`;
             });
             inserirPrecoSugerido();
         };
@@ -638,10 +639,16 @@
                 let itemTipo = item.tipo || "Opção";
                 let itemValor = parseFloat(item.valor || 0);
 
+                // Tratamento enxuto simplificado para evitar as quebras de linha indesejadas
+                let nomeExibicao = `${itemQtd}x ${itemPrato}`;
+                if(itemTipo && !itemPrato.includes(itemTipo) && itemTipo !== "Prato Feito Único" && itemTipo !== "Prato Feito Tradicional" && itemTipo !== "Prato Feito Único") {
+                    nomeExibicao += ` ${itemTipo.replace("Marmita", "")}`;
+                }
+
                 containerItensPrint.innerHTML += `
                     <div class="ticket-item">
                         <div class="ticket-item-main">
-                            <span class="ticket-item-name">${itemQtd}x ${itemPrato} (${itemTipo})</span>
+                            <span class="ticket-item-name">${nomeExibicao}</span>
                             <span class="ticket-item-price">R$ ${itemValor.toFixed(2)}</span>
                         </div>
                         <div class="ticket-item-obs">${item.descricao && item.descricao !== 'Sem obs' ? 'Obs: ' + item.descricao : ''}</div>
@@ -767,10 +774,15 @@
                 totalPedido += item.valor;
                 itensListaSimples.push(`(${item.qtd}x) [${item.prato}] ${item.tipo} - ${item.descricao}`);
 
+                let nomeExibicao = `${item.qtd}x ${item.prato}`;
+                if(item.tipo && !item.prato.includes(item.tipo) && item.tipo !== "Prato Feito Único" && item.tipo !== "Prato Feito Tradicional") {
+                    nomeExibicao += ` ${item.tipo.replace("Marmita", "")}`;
+                }
+
                 containerItensPrint.innerHTML += `
                     <div class="ticket-item">
                         <div class="ticket-item-main">
-                            <span class="ticket-item-name">${item.qtd}x ${item.prato} (${item.tipo})</span>
+                            <span class="ticket-item-name">${nomeExibicao}</span>
                             <span class="ticket-item-price">R$ ${item.valor.toFixed(2)}</span>
                         </div>
                         <div class="ticket-item-obs">${item.descricao && item.descricao !== 'Sem obs' ? 'Obs: ' + item.descricao : ''}</div>

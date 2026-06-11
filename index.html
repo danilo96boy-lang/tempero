@@ -247,7 +247,7 @@
         .card-metrica p { margin: 8px 0 0 0; font-size: 22px; font-weight: bold; color: var(--cor-principal); }
 
         /* ==========================================================================
-           --- LAYOUT LINEAR BLINDADO EM LOTE PARA BOBINA DE 58MM ---
+           --- LAYOUT LINEAR BLINDADO EM DUPLA VIA PARA BOBINA DE 58MM ---
            ========================================================================== */
         #ticket-print { display: none; }
         @media print {
@@ -269,13 +269,13 @@
             }
             
             .ticket-header { text-align: center; margin-bottom: 2px; }
+            .ticket-via-tag { font-size: 12px; font-weight: bold; border: 1px solid #000; display: inline-block; padding: 2px 4px; margin-bottom: 4px; text-transform: uppercase; }
             .ticket-header-title { font-size: 13px; font-weight: bold; letter-spacing: 0.5px; }
             .ticket-header-num { font-size: 18px; font-weight: bold; margin: 2px 0; }
             .ticket-divider { text-align: center; margin: 2px 0; font-weight: bold; font-size: 11px; }
             
             .ticket-client-info { font-size: 10.5px; margin-bottom: 2px; line-height: 1.2; }
             
-            /* Estrutura Rígida de Alinhamento Horizontal */
             .ticket-item { margin: 4px 0; page-break-inside: avoid; }
             .ticket-item-main { display: flex; justify-content: space-between; align-items: flex-start; font-weight: bold; gap: 4px; width: 100%; }
             .ticket-item-name { text-align: left; width: 70%; word-wrap: break-word; font-size: 11px; }
@@ -284,13 +284,10 @@
             
             .ticket-total-container { font-size: 13px; font-weight: bold; display: flex; justify-content: space-between; margin-top: 4px; }
             
-            /* BLINDAGEM DE FILA DE IMPRESSÃO: Injeta uma quebra de página de 5cm reais no fim de cada cupom */
-            .ticket-footer { 
-                margin-top: 4px; 
-                text-align: center; 
-                font-size: 10px; 
-                padding-bottom: 50mm !important; /* Cria o espaçamento físico de 5cm para o corte */
-                page-break-after: always;
+            /* FORÇADO ESPAÇO DE 5CM E QUEBRA DE PÁGINA EM CADA VIA */
+            .ticket-wrapper-via {
+                padding-bottom: 50mm !important; /* Margem de 5cm para a serrilha */
+                page-break-after: always !important;
             }
         }
     </style>
@@ -454,24 +451,7 @@
         </div>
     </div>
 
-    <div id="ticket-print">
-        <div class="ticket-header">
-            <div class="ticket-header-title">TEMPERO DE FAMÍLIA</div>
-            <div class="ticket-header-num" id="print-numero-pedido">PEDIDO #00</div>
-            <div id="print-data" style="font-size: 10px;"></div>
-        </div>
-        <div class="ticket-divider">--------------------------------</div>
-        <div id="print-dados-cliente" class="ticket-client-info"></div>
-        <div class="ticket-divider">--------------------------------</div>
-        <div id="print-itens-lista"></div>
-        <div class="ticket-divider">--------------------------------</div>
-        <div class="ticket-total-container">
-            <span>TOTAL:</span>
-            <span id="print-total">R$ 0.00</span>
-        </div>
-        <div class="ticket-divider">================================</div>
-        <div class="ticket-footer">Obrigado pela preferência!</div>
-    </div>
+    <div id="ticket-print"></div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
@@ -590,7 +570,6 @@
                             let itemQtd = i.qtd || 1;
                             let itemPrato = i.prato || "Marmita";
                             let itemTipo = i.tipo || "G";
-                            
                             let tipoLimpo = itemTipo.replace("Marmita ", "");
                             return `<span style="color:var(--cor-principal); font-weight:600;">(${itemQtd}x) [${itemPrato}]</span> ${tipoLimpo}`;
                         }).join('<br>');
@@ -618,31 +597,15 @@
 
         window.carregarHistoricoDoFirebase = carregarHistoricoDoFirebase;
 
-        // --- SISTEMA INTELLIGENT DE REIMPRESSÃO DIRETA COM LAYOUT LINEAR ---
-        window.reimprimirTicketPorId = function(firebaseId) {
-            const pedidoMestre = historicoGeralPedidos.find(p => p.firebaseId === firebaseId);
-            if (!pedidoMestre) {
-                alert("Pedido não localizado no turno atual.");
-                return;
+        // --- FUNÇÃO DE CONSTRUÇÃO DE LAYOUT DO TICKET (ÚNICA E LINEAR) ---
+        function gerarHtmlFitaVia(pedido, nomeVia) {
+            let dadosCliente = '';
+            if (pedido.clienteA4 && pedido.clienteA4 !== 'Consumidor Final') {
+                dadosCliente = pedido.clienteHtml;
             }
 
-            document.getElementById('print-numero-pedido').innerText = 'PEDIDO #' + String(pedidoMestre.numero).padStart(2, '0');
-            document.getElementById('print-data').innerText = pedidoMestre.data;
-
-            const containerClientePrint = document.getElementById('print-dados-cliente');
-            containerClientePrint.innerHTML = '';
-            
-            if (pedidoMestre.clienteA4 && pedidoMestre.clienteA4 !== 'Consumidor Final') {
-                containerClientePrint.innerHTML = pedidoMestre.clienteHtml;
-                containerClientePrint.style.display = 'block';
-            } else {
-                containerClientePrint.style.display = 'none';
-            }
-
-            const containerItensPrint = document.getElementById('print-itens-lista');
-            containerItensPrint.innerHTML = '';
-
-            pedidoMestre.itens.forEach((item) => {
+            let linhasProdutosHtml = '';
+            pedido.itens.forEach((item) => {
                 let itemQtd = item.qtd || 1;
                 let itemPrato = item.prato || "Marmita";
                 let itemTipo = item.tipo || "Opção";
@@ -654,7 +617,7 @@
                     textoFinalPrato = `${itemPrato} ${itemTipo.replace("Único", "").replace("Tradicional", "")}`;
                 }
 
-                containerItensPrint.innerHTML += `
+                linhasProdutosHtml += `
                     <div class="ticket-item">
                         <div class="ticket-item-main">
                             <span class="ticket-item-name">${itemQtd}x ${textoFinalPrato}</span>
@@ -665,7 +628,40 @@
                 `;
             });
 
-            document.getElementById('print-total').innerText = 'R$ ' + parseFloat(pedidoMestre.total || 0).toFixed(2);
+            return `
+                <div class="ticket-wrapper-via">
+                    <div class="ticket-header">
+                        <div class="ticket-via-tag">--- VIA: ${nomeVia} ---</div><br>
+                        <span class="ticket-header-title">TEMPERO DE FAMÍLIA</span>
+                        <div class="ticket-header-num">PEDIDO #${String(pedido.numero).padStart(2, '0')}</div>
+                        <div style="font-size: 10px;">${pedido.data}</div>
+                    </div>
+                    <div class="ticket-divider">--------------------------------</div>
+                    ${dadosCliente ? `<div class="ticket-client-info">${dadosCliente}</div><div class="ticket-divider">--------------------------------</div>` : ''}
+                    <div>${linhasProdutosHtml}</div>
+                    <div class="ticket-divider">--------------------------------</div>
+                    <div class="ticket-total-container">
+                        <span>TOTAL:</span>
+                        <span>R$ ${parseFloat(pedido.total || 0).toFixed(2)}</span>
+                    </div>
+                    <div class="ticket-divider">================================</div>
+                    <div class="ticket-footer">Obrigado pela preferência!</div>
+                </div>
+            `;
+        }
+
+        // --- REIMPRESSÃO EM DUPLA VIA AUTOMÁTICA ---
+        window.reimprimirTicketPorId = function(firebaseId) {
+            const pedidoMestre = historicoGeralPedidos.find(p => p.firebaseId === firebaseId);
+            if (!pedidoMestre) {
+                alert("Pedido não localizado.");
+                return;
+            }
+
+            const containerFita = document.getElementById('ticket-print');
+            
+            // Injeta as duas vias completas seguidas com a quebra de 5cm no final de cada uma
+            containerFita.innerHTML = gerarHtmlFitaVia(pedidoMestre, "COZINHA") + gerarHtmlFitaVia(pedidoMestre, "CLIENTE");
 
             document.body.className = "modo-impressao-ticket";
             window.print();
@@ -728,6 +724,7 @@
             document.getElementById('total-valor').innerText = total.toFixed(2);
         }
 
+        // --- CONCLUIR PEDIDO E LANÇAR DUPLA VIA ---
         window.finalizarEImprimirTicket = async function() {
             if (pedidoAtual.length === 0) {
                 alert("Nenhum item inserido no pedido!");
@@ -741,12 +738,7 @@
             const agora = new Date();
             const dataFormatada = agora.toLocaleDateString('pt-BR') + ' ' + agora.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
             const horaSimples = agora.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
-            
-            document.getElementById('print-numero-pedido').innerText = 'PEDIDO #' + String(contadorPedidos).padStart(2, '0');
-            document.getElementById('print-data').innerText = dataFormatada;
 
-            const containerClientePrint = document.getElementById('print-dados-cliente');
-            containerClientePrint.innerHTML = '';
             let stringClienteHistorico = 'Balcão';
             let detalheClienteRelatorio = 'Consumidor Final';
 
@@ -754,27 +746,19 @@
                 stringClienteHistorico = '';
                 detalheClienteRelatorio = '';
                 if (nomeCliente) {
-                    containerClientePrint.innerHTML += `<strong>CLIENTE:</strong> ${nomeCliente}<br>`;
                     stringClienteHistorico += `<strong>${nomeCliente}</strong><br>`;
                     detalheClienteRelatorio += `<strong>${nomeCliente}</strong> `;
                 }
                 if (celularCliente) {
-                    containerClientePrint.innerHTML += `<strong>TEL:</strong> ${celularCliente}<br>`;
                     stringClienteHistorico += `Tel: ${celularCliente}<br>`;
                     detalheClienteRelatorio += `<br>Tel: ${celularCliente}`;
                 }
                 if (enderecoCliente) {
-                    containerClientePrint.innerHTML += `<strong>END:</strong> ${enderecoCliente}<br>`;
                     stringClienteHistorico += `<small>${enderecoCliente}</small>`;
                     detalheClienteRelatorio += `<br><small>End: ${enderecoCliente}</small>`;
                 }
-                containerClientePrint.style.display = 'block';
-            } else {
-                containerClientePrint.style.display = 'none';
             }
 
-            const containerItensPrint = document.getElementById('print-itens-lista');
-            containerItensPrint.innerHTML = '';
             let totalPedido = 0;
             let itensListaSimples = [];
             let formaPagamentoFinal = pedidoAtual[0].pagamento;
@@ -782,25 +766,7 @@
             pedidoAtual.forEach((item) => {
                 totalPedido += item.valor;
                 itensListaSimples.push(`(${item.qtd}x) [${item.prato}] ${item.tipo} - ${item.descricao}`);
-
-                let tipoLimpo = item.tipo.replace("Marmita ", "");
-                let textoFinalPrato = `${item.prato} (${tipoLimpo})`;
-                if(item.tipo === "Prato Feito Único" || item.tipo === "Prato Feito Tradicional" || item.prato.includes("Bebidas")) {
-                    textoFinalPrato = `${item.prato} ${item.tipo.replace("Único", "").replace("Tradicional", "")}`;
-                }
-
-                containerItensPrint.innerHTML += `
-                    <div class="ticket-item">
-                        <div class="ticket-item-main">
-                            <span class="ticket-item-name">${item.qtd}x ${textoFinalPrato}</span>
-                            <span class="ticket-item-price">R$ ${item.valor.toFixed(2)}</span>
-                        </div>
-                        <div class="ticket-item-obs">${item.descricao && item.descricao !== 'Sem obs' ? 'Obs: ' + item.descricao : ''}</div>
-                    </div>
-                `;
             });
-
-            document.getElementById('print-total').innerText = 'R$ ' + totalPedido.toFixed(2);
 
             const documentoPedido = {
                 numero: contadorPedidos,
@@ -817,21 +783,25 @@
 
             try {
                 await addDoc(collection(db, "pedidos"), documentoPedido);
+                
+                // Monta as duas vias na fita de impressão
+                const containerFita = document.getElementById('ticket-print');
+                containerFita.innerHTML = gerarHtmlFitaVia(documentoPedido, "COZINHA") + gerarHtmlFitaVia(documentoPedido, "CLIENTE");
+
                 await carregarHistoricoDoFirebase();
+                
+                document.body.className = "modo-impressao-ticket";
+                window.print();
+
+                pedidoAtual = [];
+                document.getElementById('cliente-nome').value = '';
+                document.getElementById('cliente-celular').value = '';
+                document.getElementById('cliente-endereco').value = '';
+                atualizarInterface();
             } catch (erro) {
-                console.warn("Buffer offline acionado.", erro);
-                historicoGeralPedidos.push(documentoPedido);
-                await carregarHistoricoDoFirebase();
+                alert("Erro ao conectar com o Firebase!");
+                console.error(erro);
             }
-
-            document.body.className = "modo-impressao-ticket";
-            window.print();
-
-            pedidoAtual = [];
-            document.getElementById('cliente-nome').value = '';
-            document.getElementById('cliente-celular').value = '';
-            document.getElementById('cliente-endereco').value = '';
-            atualizarInterface();
         };
 
         window.calcularFechamentoDiario = function() {

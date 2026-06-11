@@ -346,7 +346,9 @@
                 </table>
             </div>
         </div>
-    </div> <div id="ticket-print">
+    </div>
+
+    <div id="ticket-print">
         <div class="ticket-header">
             <div class="ticket-header-title">** TEMPERO DE FAMÍLIA **</div>
             <div class="ticket-header-num" id="print-numero-pedido">PEDIDO #00</div>
@@ -415,7 +417,7 @@
                 
                 historicoGeralPedidos.reverse();
             } catch (erro) {
-                console.error("Erro Firebase: ", erro);
+                console.error("Aviso: Firestore ainda não inicializado no console ou operando offline.", erro);
             }
         }
 
@@ -460,6 +462,7 @@
             document.getElementById('total-valor').innerText = total.toFixed(2);
         }
 
+        // FUNÇÃO PROTEGIDA: Imprime o cupom de qualquer forma, mesmo se o Firebase estiver desativado
         window.finalizarEImprimirTicket = async function() {
             if (pedidoAtual.length === 0) {
                 alert("Nenhum item inserido no pedido!");
@@ -539,23 +542,30 @@
                 timestamp: Timestamp.now()
             };
 
+            // BLINDAGEM DO BOTÃO: Roda a impressão mesmo se a API do Firebase der erro de permissão
             try {
                 await addDoc(collection(db, "pedidos"), documentoPedido);
-                
                 await carregarHistoricoDoFirebase();
-                document.body.className = "modo-impressao-ticket";
-                window.print();
-
-                contadorPedidos++;
-                pedidoAtual = [];
-                document.getElementById('cliente-nome').value = '';
-                document.getElementById('cliente-celular').value = '';
-                document.getElementById('cliente-endereco').value = '';
-                atualizarInterface();
             } catch (erro) {
-                alert("Erro de conexão ao salvar no Firebase!");
-                console.error(erro);
+                console.warn("Aviso: Pedido não computado na nuvem. Ative a API Cloud Firestore no Console.", erro);
+                
+                // Se der erro no Firebase, adiciona localmente na tabela para você não perder o fluxo do dia
+                historicoGeralPedidos.push(documentoPedido);
+                const corpoHistorico = document.getElementById('corpo-historico');
+                let resumoItensLocal = documentoPedido.itens.map(i => `<span style="color:var(--cor-principal); font-weight:600;">[${i.tipo}]</span> ${i.descricao}`).join('<br>');
+                corpoHistorico.innerHTML = `<tr><td><strong>#${String(documentoPedido.numero).padStart(2, '0')}</strong></td><td>${documentoPedido.hora}</td><td>${documentoPedido.clienteHtml}</td><td>${resumoItensLocal}</td><td><strong>R$ ${documentoPedido.total.toFixed(2)}</strong></td></tr>` + corpoHistorico.innerHTML;
             }
+
+            // Executa a impressão física de qualquer forma
+            document.body.className = "modo-impressao-ticket";
+            window.print();
+
+            contadorPedidos++;
+            pedidoAtual = [];
+            document.getElementById('cliente-nome').value = '';
+            document.getElementById('cliente-celular').value = '';
+            document.getElementById('cliente-endereco').value = '';
+            atualizarInterface();
         };
 
         window.calcularFechamentoDiario = function() {
@@ -667,7 +677,7 @@
                 document.getElementById('btn-pdf-id').style.display = 'none';
                 document.getElementById('btn-reset-id').style.display = 'none';
                 
-                alert("Caixa zerado com sucesso!\nO contador retornou para o Pedido #01 e o painel está limpa.");
+                alert("Caixa zerado com sucesso!\nO contador retornou para o Pedido #01 e o painel está limpo.");
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             } else if (senhaDigitada !== null) {
                 alert("Senha incorreta! Operação cancelada.");

@@ -240,7 +240,6 @@
         .card-metrica h4 { margin: 0; color: #718096; font-size: 12px; text-transform: uppercase; }
         .card-metrica p { margin: 8px 0 0 0; font-size: 22px; font-weight: bold; color: var(--cor-principal); }
 
-        /* Styles da Fita de Impressão de Cupom Termico 80mm */
         #ticket-print { display: none; }
         @media print {
             @page { size: 80mm auto; margin: 0mm; }
@@ -353,7 +352,7 @@
                     </div>
                     <div class="form-group">
                         <label>Observações do Item:</label>
-                        <textarea id="descricao" placeholder="Ex: Sem cebola, Coca normal, detalhe do prato do dia..."></textarea>
+                        <textarea id="descricao" placeholder="Ex: Sem cebola, Coca normal..."></textarea>
                     </div>
 
                     <button type="submit" class="btn btn-add">＋ Incluir Item</button>
@@ -458,7 +457,7 @@
         let contadorPedidos = 1;
         let dadosFechamentoRelatorio = null;
 
-        // Recupera o timestamp de corte da memória do navegador para o isolamento correto do dia
+        // Recupera o corte do turno persistido no navegador
         let horarioCorteTurno = localStorage.getItem('horarioCorteTurno') ? parseInt(localStorage.getItem('horarioCorteTurno')) : 0;
 
         const tabelaPrecosSugeridos = {
@@ -542,7 +541,7 @@
                     const dados = doc.data();
                     const milisegundosDoc = dados.timestamp ? dados.timestamp.toMillis() : 0;
 
-                    // Filtro inteligente: Só traz para a tela os registros criados APÓS a última virada de dia
+                    // FILTRAGEM RIGIDA: Ignora os dados antigos quebrados que estão na nuvem
                     if (milisegundosDoc > horarioCorteTurno) {
                         historicoGeralPedidos.push(dados);
                         
@@ -550,28 +549,31 @@
                             maiorNumeroTurnoAtual = dados.numero;
                         }
 
-                        let resumoItens = dados.itens.map(i => `<span style="color:var(--cor-principal); font-weight:600;">(${i.qtd}x) [${i.prato}]</span> ${i.tipo}`).join('<br>');
+                        // Proteção contra registros de layout antigo (se não tiver .prato, exibe o tipo antigo)
+                        let resumoItens = dados.itens.map(i => {
+                            let itemQtd = i.qtd || 1;
+                            let itemPrato = i.prato || "Marmita Antiga";
+                            let itemTipo = i.tipo || "Tradicional";
+                            return `<span style="color:var(--cor-principal); font-weight:600;">(${itemQtd}x) [${itemPrato}]</span> ${itemTipo}`;
+                        }).join('<br>');
                         
                         corpoHistorico.innerHTML += `
                             <tr>
                                 <td><strong style="color:var(--cor-principal)">#${String(dados.numero).padStart(2, '0')}</strong></td>
-                                <td>${dados.hora}</td>
-                                <td>${dados.clienteHtml}</td>
+                                <td>${dados.hora || '12:00'}</td>
+                                <td>${dados.clienteHtml || 'Consumidor'}</td>
                                 <td>${resumoItens}</td>
                                 <td><span style="font-size:12px; font-weight:600; padding:4px 8px; background:#e2e8f0; border-radius:4px;">${dados.pagamento || 'Dinheiro'}</span></td>
-                                <td><strong>R$ ${dados.total.toFixed(2)}</strong></td>
+                                <td><strong>R$ ${parseFloat(dados.total || 0).toFixed(2)}</strong></td>
                             </tr>
                         `;
                     }
                 });
                 
-                // Define o próximo número sequencial da mesa/pedido sem acumular os antigos
                 contadorPedidos = maiorNumeroTurnoAtual + 1;
-                
-                // Reverte o array interno para que a engenharia de fechamento diário processe na ordem correta
                 historicoGeralPedidos.reverse();
             } catch (erro) {
-                console.error("Erro ao sincronizar histórico: ", erro);
+                console.error("Erro Firebase: ", erro);
             }
         }
 
@@ -717,7 +719,7 @@
                 await addDoc(collection(db, "pedidos"), documentoPedido);
                 await carregarHistoricoDoFirebase();
             } catch (erro) {
-                console.warn("Computando de forma local temporária.", erro);
+                console.warn("Salvamento em buffer local.", erro);
                 historicoGeralPedidos.push(documentoPedido);
                 await carregarHistoricoDoFirebase();
             }
@@ -732,9 +734,10 @@
             atualizarInterface();
         };
 
+        // --- ENGENHARIA DE MATEMÁTICA E CONSOLIDAÇÃO DO CAIXA (SEM NaN) ---
         window.calcularFechamentoDiario = function() {
             if (historicoGeralPedidos.length === 0) {
-                alert("Não existem dados faturados no turno atual para fechar.");
+                alert("Não existem dados faturados no turno atual.");
                 return;
             }
 
@@ -749,19 +752,23 @@
             let faturamentoPorMetodoPagamento = { "Dinheiro": 0, "Pix": 0, "Cartão": 0 };
 
             historicoGeralPedidos.forEach(p => {
-                faturamentoTotal += p.total;
+                let totalPedidoMatematico = parseFloat(p.total || 0);
+                faturamentoTotal += totalPedidoMatematico;
                 
-                if (faturamentoPorMetodoPagamento[p.pagamento] !== undefined) {
-                    faturamentoPorMetodoPagamento[p.pagamento] += p.total;
+                let metPag = p.pagamento || "Dinheiro";
+                if (faturamentoPorMetodoPagamento[metPag] !== undefined) {
+                    faturamentoPorMetodoPagamento[metPag] += totalPedidoMatematico;
                 } else {
-                    faturamentoPorMetodoPagamento["Dinheiro"] += p.total;
+                    faturamentoPorMetodoPagamento["Dinheiro"] += totalPedidoMatematico;
                 }
 
                 p.itens.forEach(i => {
-                    // Resolução do bug do NaN: lê de forma matemática o valor inteiro de 'qtd'
-                    totalItens += parseInt(i.qtd || 1);
+                    // Proteção antierro: se a quantidade vier nula, assume 1 de forma segura
+                    let itemQtd = parseInt(i.qtd || 1);
+                    totalItens += itemQtd;
+                    
                     if (faturamentoPorPrato[i.prato] !== undefined) {
-                        faturamentoPorPrato[i.prato] += i.valor;
+                        faturamentoPorPrato[i.prato] += parseFloat(i.valor || 0);
                     }
                 });
             });
@@ -840,7 +847,7 @@
             conteudoHTML += `</tbody></table><div style="font-size: 14px; font-weight: bold; background-color: #edf2f7; padding: 10px; margin-top: 20px; margin-bottom: 12px; border-left: 4px solid #cc1d1d; text-transform: uppercase; color: #2d3748; page-break-before: auto;">Relação Analítica de Pedidos</div><table style="width: 100%; border-collapse: collapse; font-size: 12px;"><thead><tr style="background-color: #f7fafc; font-weight: bold;"><th style="padding: 8px 10px; border: 1px solid #cbd5e0; text-align: left; width: 10%;">Nº</th><th style="padding: 8px 10px; border: 1px solid #cbd5e0; text-align: left; width: 30%;">Cliente / Contato</th><th style="padding: 8px 10px; border: 1px solid #cbd5e0; text-align: left; width: 40%;">Produtos Lançados</th><th style="padding: 8px 10px; border: 1px solid #cbd5e0; text-align: center; width: 10%;">Forma</th><th style="padding: 8px 10px; border: 1px solid #cbd5e0; text-align: right; width: 10%;">Total</th></tr></thead><tbody>`;
 
             historicoGeralPedidos.forEach(p => {
-                conteudoHTML += `<tr style="page-break-inside: avoid;"><td style="padding: 8px 10px; border: 1px solid #cbd5e0; vertical-align: top;"><strong>#${String(p.numero).padStart(2, '0')}</strong><br><small style="color:#718096">${p.hora}</small></td><td style="padding: 8px 10px; border: 1px solid #cbd5e0; vertical-align: top;">${p.clienteA4}</td><td style="padding: 8px 10px; border: 1px solid #cbd5e0; vertical-align: top;">${p.itensTxt}</td><td style="padding: 8px 10px; border: 1px solid #cbd5e0; vertical-align: top; text-align: center;">${p.pagamento || 'Dinheiro'}</td><td style="padding: 8px 10px; border: 1px solid #cbd5e0; vertical-align: top; text-align: right; font-weight: bold;">R$ ${p.total.toFixed(2)}</td></tr>`;
+                conteudoHTML += `<tr style="page-break-inside: avoid;"><td style="padding: 8px 10px; border: 1px solid #cbd5e0; vertical-align: top;"><strong>#${String(p.numero).padStart(2, '0')}</strong><br><small style="color:#718096">${p.hora || '12:00'}</small></td><td style="padding: 8px 10px; border: 1px solid #cbd5e0; vertical-align: top;">${p.clienteA4 || 'Consumidor'}</td><td style="padding: 8px 10px; border: 1px solid #cbd5e0; vertical-align: top;">${p.itensTxt}</td><td style="padding: 8px 10px; border: 1px solid #cbd5e0; vertical-align: top; text-align: center;">${p.pagamento || 'Dinheiro'}</td><td style="padding: 8px 10px; border: 1px solid #cbd5e0; vertical-align: top; text-align: right; font-weight: bold;">R$ ${parseFloat(p.total || 0).toFixed(2)}</td></tr>`;
             });
 
             conteudoHTML += `</tbody></table>`;
@@ -857,12 +864,12 @@
             html2pdf().set(configuracoes).from(divPDF).save();
         };
 
-        // VIRADA DE TURNO MASTER: Agora grava o ponto de corte no navegador para isolar os dias de forma definitiva
+        // --- SISTEMA DE VIRADA DE TURNO DEFINITIVO (BLOQUEIA RETORNO DE LOGS ANTIGOS) ---
         window.reiniciarTurnoComSenha = function() {
-            const senhaDigitada = prompt("Para zerar o painel operacional local para o próximo turno, digite a senha:");
+            const senhaDigitada = prompt("Para zerar o caixa e iniciar o próximo turno, digite a senha master:");
             if (senhaDigitada === "1234") {
                 
-                // Salva o momento exato do WIPE. Pedidos antes desse horário sumirão da tela atual.
+                // Grava o ponto de corte matemático no navegador. Vendas anteriores a esse instante somem do turno atual.
                 horarioCorteTurno = Date.now();
                 localStorage.setItem('horarioCorteTurno', horarioCorteTurno);
 
@@ -875,13 +882,13 @@
                 document.getElementById('btn-pdf-id').style.display = 'none';
                 document.getElementById('btn-reset-id').style.display = 'none';
                 
-                alert("Caixa do dia encerrado com sucesso!\nO contador reiniciou no Pedido #01 para o novo turno.");
+                alert("Turno encerrado!\nO caixa operacional local foi zerado e iniciou no Pedido #01.");
                 window.scrollTo({ top: 0, behavior: 'smooth' });
                 
-                // Recarrega o filtro para garantir tela limpa
+                // Força a atualização imediata da tela aplicando a nova regra de tempo
                 carregarHistoricoDoFirebase();
             } else if (senhaDigitada !== null) {
-                alert("Senha incorreta! Operação cancelada.");
+                alert("Senha incorreta!");
             }
         };
     </script>

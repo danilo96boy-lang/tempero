@@ -3,35 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tempero de Família - PDV Comercial & Cloud</title>
+    <title>Tempero de Família - PDV Comercial Premium</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
         /* ==========================================================================
-           --- DESIGN DO PAINEL OPERACIONAL (TELA DE USO) ---
+           --- SISTEMA DE DESIGN MODERNO (TELA DE USO) ---
            ========================================================================== */
         :root {
-            --cor-principal: #cc1d1d; 
-            --cor-principal-hover: #a31414;
-            --cor-fundo: #f0f2f5;
+            --cor-principal: #d32f2f; 
+            --cor-principal-hover: #b71c1c;
+            --cor-fundo: #f4f6f8;
             --cor-card: #ffffff;
-            --cor-texto: #1a202c;
-            --cor-texto-secundario: #4a5568;
-            --border-radius: 12px;
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --cor-texto: #2d3748;
+            --cor-texto-secundario: #718096;
+            --cor-borda: #e2e8f0;
+            --border-radius-lg: 14px;
+            --border-radius-md: 8px;
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.02);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.05);
+            --transition: all 0.25s ease;
         }
 
         body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: var(--cor-fundo);
             margin: 0;
-            padding: 20px;
+            padding: 24px;
             display: flex;
             flex-direction: column;
             align-items: center;
             color: var(--cor-texto);
+            -webkit-font-smoothing: antialiased;
         }
 
         #tela-login {
@@ -48,39 +53,39 @@
         .card-login {
             background: var(--cor-card);
             padding: 40px;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow-md);
             width: 100%;
-            max-width: 380px;
+            max-width: 400px;
             box-sizing: border-box;
             text-align: center;
-            border-top: 5px solid var(--cor-principal);
+            border-top: 6px solid var(--cor-principal);
         }
 
         #conteudo-sistema {
             display: none;
             width: 100%;
-            max-width: 1150px;
+            max-width: 1200px;
         }
 
         .brand-header {
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 15px;
+            justify-content: flex-start;
+            gap: 16px;
             background: var(--cor-card);
-            padding: 15px 30px;
-            border-radius: var(--border-radius);
+            padding: 20px 32px;
+            border-radius: var(--border-radius-lg);
             width: 100%;
-            box-shadow: var(--shadow);
+            box-shadow: var(--shadow-sm);
             box-sizing: border-box;
-            border-left: 6px solid var(--cor-principal);
-            margin-bottom: 20px;
+            border-bottom: 3px solid var(--cor-borda);
+            margin-bottom: 24px;
         }
 
         .brand-logo {
-            width: 65px;
-            height: 65px;
+            width: 50px;
+            height: 50px;
             object-fit: cover;
             border-radius: 50%;
             border: 2px solid var(--cor-principal);
@@ -88,60 +93,65 @@
 
         .brand-header h1 {
             margin: 0;
-            font-size: 24px;
-            color: var(--cor-principal);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--cor-texto);
+            letter-spacing: -0.5px;
         }
 
         .main-grid {
             display: grid;
             grid-template-columns: 1fr;
-            gap: 20px;
+            gap: 24px;
             width: 100%;
             box-sizing: border-box;
         }
 
         @media(min-width: 950px) {
-            .main-grid { grid-template-columns: 1.4fr 1fr; }
+            .main-grid { grid-template-columns: 1.35fr 1fr; }
             .full-width-grid { grid-column: span 2; }
         }
 
         .card {
             background-color: var(--cor-card);
-            padding: 25px;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
+            padding: 30px;
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--cor-borda);
             box-sizing: border-box;
         }
 
         .card.card-fechamento-compacto {
-            padding: 15px 25px;
+            padding: 18px 30px;
         }
 
         h3 {
-            margin: 0 0 20px 0;
+            margin: 0 0 24px 0;
             color: var(--cor-texto);
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
             display: flex;
             align-items: center;
             gap: 8px;
+            border-bottom: 1px solid var(--cor-borda);
+            padding-bottom: 12px;
         }
 
         .secao-titulo {
-            font-size: 12px;
+            font-size: 11px;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: #a0aec0;
-            margin: 15px 0 10px 0;
-            font-weight: bold;
+            letter-spacing: 0.8px;
+            color: var(--cor-principal);
+            margin: 20px 0 12px 0;
+            font-weight: 700;
         }
 
         .form-row {
             display: grid;
             grid-template-columns: 1fr;
-            gap: 15px;
+            gap: 16px;
         }
 
         @media(min-width: 480px) {
@@ -149,44 +159,45 @@
             .form-row.tres-campos { grid-template-columns: 1fr 1fr 1fr; }
         }
 
-        .form-group { margin-bottom: 12px; }
+        .form-group { margin-bottom: 14px; }
 
         label {
             display: block;
             margin-bottom: 6px;
             font-weight: 600;
-            color: var(--cor-texto-secundario);
-            font-size: 13px;
+            color: var(--cor-texto);
+            font-size: 12px;
         }
 
         input, select, textarea {
             width: 100%;
-            padding: 10px 14px;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
+            padding: 11px 14px;
+            border: 1px solid #cbd5e1;
+            border-radius: var(--border-radius-md);
             box-sizing: border-box;
-            font-size: 15px;
-            background-color: #f8fafc;
+            font-size: 14px;
+            font-family: inherit;
+            background-color: #fff;
             color: var(--cor-texto);
+            transition: var(--transition);
         }
 
         input:focus, select:focus, textarea:focus {
             outline: none;
             border-color: var(--cor-principal);
-            background-color: #fff;
-            box-shadow: 0 0 0 3px rgba(204, 29, 29, 0.1);
+            box-shadow: 0 0 0 3px rgba(211, 47, 47, 0.12);
         }
 
         textarea { resize: vertical; height: 60px; }
 
         .btn {
             border: none;
-            padding: 12px 20px;
-            font-size: 15px;
-            border-radius: 8px;
+            padding: 12px 24px;
+            font-size: 14px;
+            border-radius: var(--border-radius-md);
             cursor: pointer;
-            font-weight: bold;
-            transition: all 0.2s;
+            font-weight: 700;
+            transition: var(--transition);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -195,79 +206,90 @@
 
         .btn-add { 
             background-color: var(--cor-principal); 
-            color: white; width: 100%; margin-top: 10px;
+            color: white; width: 100%; margin-top: 12px;
         }
         .btn-add:hover { background-color: var(--cor-principal-hover); }
 
         .btn-print { 
-            background-color: #28a745; color: white; font-size: 16px; width: 100%;
+            background-color: #2e7d32; color: white; font-size: 15px; width: 100%;
+            box-shadow: 0 2px 4px rgba(46,125,50,0.2);
         }
-        .btn-print:hover { background-color: #218838; }
+        .btn-print:hover { background-color: #1b5e20; }
 
         .btn-reprint {
-            background-color: #007bff; color: white; padding: 6px 10px; font-size: 12px; border-radius: 6px;
-            font-weight: bold; cursor: pointer; border: none;
+            background-color: #0288d1; color: white; padding: 6px 12px; font-size: 11px; border-radius: 6px;
+            font-weight: bold; border: none; cursor: pointer;
         }
-        .btn-reprint:hover { background-color: #0056b3; }
+        .btn-reprint:hover { background-color: #01579b; }
 
-        .btn-fechamento { background-color: #4a5568; color: white; }
-        .btn-fechamento:hover { background-color: #2d3748; }
+        .btn-fechamento { background-color: #475569; color: white; }
+        .btn-fechamento:hover { background-color: #334155; }
 
-        .btn-pdf { background-color: #007bff; color: white; display: none; }
-        .btn-pdf:hover { background-color: #0056b3; }
+        .btn-pdf { background-color: #0288d1; color: white; display: none; }
+        .btn-pdf:hover { background-color: #01579b; }
 
-        .btn-reset { background-color: #e53e3e; color: white; display: none; }
-        .btn-reset:hover { background-color: #9b2c2c; }
+        .btn-reset { background-color: #ef4444; color: white; display: none; }
+        .btn-reset:hover { background-color: #dc2626; }
 
         .carrinho-container {
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            background: #f8fafc; border: 1px solid #e2e8f0;
+            background: #f8fafc;
         }
 
-        .lista-itens { list-style: none; padding: 0; margin: 0; max-height: 260px; overflow-y: auto; }
+        .lista-itens { list-style: none; padding: 0; margin: 0; max-height: 280px; overflow-y: auto; }
 
         .item-carrinho {
-            background: white; padding: 12px; margin-bottom: 8px;
-            border-radius: 8px; font-size: 14px; display: flex;
-            justify-content: space-between; align-items: center; border: 1px solid #edf2f7;
+            background: white; padding: 14px; margin-bottom: 10px;
+            border-radius: var(--border-radius-md); font-size: 13px; display: flex;
+            justify-content: space-between; align-items: center; border: 1px solid var(--cor-borda);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.01);
         }
 
+        .btn-del {
+            background: #fee2e2; color: #ef4444; border: none; border-radius: 50%;
+            width: 24px; height: 24px; font-weight: bold; cursor: pointer; display: flex;
+            align-items: center; justify-content: center; font-size: 11px; transition: var(--transition);
+        }
+        .btn-del:hover { background: #fca5a5; }
+
         .total-tela {
-            font-size: 22px; font-weight: bold; text-align: right;
-            margin-top: 15px; padding-top: 15px; border-top: 2px dashed #cbd5e0;
+            font-size: 24px; font-weight: 800; text-align: right;
+            margin-top: 16px; padding-top: 16px; border-top: 2px dashed var(--cor-borda);
+            letter-spacing: -0.5px;
         }
         .total-tela span { color: var(--cor-principal); }
 
         .tabela-wrapper { width: 100%; overflow-x: auto; }
-        .tabela-comercial { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
-        .tabela-comercial th, .tabela-comercial td { padding: 12px; text-align: left; border-bottom: 1px solid #edf2f7; vertical-align: top; }
-        .tabela-comercial th { background-color: #f7fafc; color: #4a5568; font-weight: 700; }
+        .tabela-comercial { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 13px; }
+        .tabela-comercial th, .tabela-comercial td { padding: 14px 16px; text-align: left; border-bottom: 1px solid var(--cor-borda); vertical-align: top; }
+        .tabela-comercial th { background-color: #f8fafc; color: #4a5568; font-weight: 700; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; }
+        .tabela-comercial tbody tr:hover { background-color: #fafbfc; }
 
-        /* Dashboard de Métricas */
+        /* Dashboard Operacional Refinado */
         .dash-container-tela { 
             display: none; 
             grid-template-columns: 1fr; 
-            gap: 15px; 
-            margin-top: 15px; 
-            padding: 15px; 
-            background: #fafafa; 
-            border: 1px solid #cbd5e0; 
-            border-radius: 8px; 
+            gap: 20px; 
+            margin-top: 20px; 
+            padding: 20px; 
+            background: #f8fafc; 
+            border: 1px solid var(--cor-borda); 
+            border-radius: var(--border-radius-lg); 
         }
         @media(min-width: 650px) { 
-            .dash-container-tela { grid-template-columns: 1.2fr 1fr; } 
+            .dash-container-tela { grid-template-columns: 1.1fr 1fr; } 
             .dash-full { grid-column: span 2; } 
         }
-        .bloco-metricas-caixa { display: flex; flex-direction: column; gap: 10px; }
-        .card-metrica { background: #fff; border: 1px solid #e2e8f0; padding: 12px 15px; border-radius: 8px; }
-        .card-metrica h4 { margin: 0; color: #718096; font-size: 12px; text-transform: uppercase; }
-        .card-metrica p { margin: 5px 0 0 0; font-size: 20px; font-weight: bold; color: var(--cor-principal); }
-        .bloco-grafico-caixa { background: #fff; border: 1px solid #e2e8f0; padding: 15px; border-radius: 8px; display: flex; justify-content: center; align-items: center; max-height: 260px; }
+        .bloco-metricas-caixa { display: flex; flex-direction: column; gap: 12px; }
+        .card-metrica { background: #fff; border: 1px solid var(--cor-borda); padding: 16px; border-radius: var(--border-radius-md); box-shadow: var(--shadow-sm); }
+        .card-metrica h4 { margin: 0; color: var(--cor-texto-secundario); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .card-metrica p { margin: 6px 0 0 0; font-size: 22px; font-weight: 800; color: var(--cor-texto); letter-spacing: -0.5px; }
+        .bloco-grafico-caixa { background: #fff; border: 1px solid var(--cor-borda); padding: 16px; border-radius: var(--border-radius-md); display: flex; justify-content: center; align-items: center; max-height: 260px; box-shadow: var(--shadow-sm); }
 
         /* ==========================================================================
-           --- AMBIENTE DE IMPRESSÃO COMPATÍVEL COM MINI TÉRMICA DE 58MM ---
+           --- CONFIGURAÇÃO ULTRA COMPACTA PARA BOBINA DE 58MM ---
            ========================================================================== */
         #ticket-print { display: none; }
         @media print {
@@ -278,45 +300,21 @@
             #ticket-print {
                 display: block !important;
                 font-family: 'Courier New', Courier, monospace;
-                width: 48mm;
-                max-width: 48mm;
-                padding: 1mm 0.5mm;
-                margin: 0;
-                font-size: 11px;
-                color: #000;
-                line-height: 1.25;
-                word-wrap: break-word;
+                width: 48mm; max-width: 48mm; padding: 1mm 0.5mm; margin: 0; font-size: 11px; color: #000; line-height: 1.25; word-wrap: break-word;
             }
-            
             .ticket-header { text-align: center; margin-bottom: 2px; }
             .ticket-via-tag { font-size: 12px; font-weight: bold; border: 1px solid #000; display: inline-block; padding: 2px 4px; margin-bottom: 3px; text-transform: uppercase; }
             .ticket-header-title { font-size: 13px; font-weight: bold; letter-spacing: 0.5px; }
-            
-            .ticket-header-num-destaque {
-                font-size: 26px !important;
-                font-weight: 950 !important;
-                margin: 4px 0 !important;
-                text-align: center !important;
-                display: block !important;
-                width: 100% !important;
-                letter-spacing: -0.5px;
-            }
-            
+            .ticket-header-num-destaque { font-size: 26px !important; font-weight: 950 !important; margin: 4px 0 !important; text-align: center !important; display: block !important; width: 100% !important; letter-spacing: -0.5px; }
             .ticket-divider { text-align: center; margin: 2px 0; font-weight: bold; font-size: 11px; }
             .ticket-client-info { font-size: 10.5px; margin-bottom: 2px; line-height: 1.2; }
-            
             .ticket-item { margin: 6px 0; page-break-inside: avoid; border-bottom: 1px dotted #ccc; padding-bottom: 4px; }
             .ticket-item-main { width: 100%; display: block; text-align: left; }
             .ticket-item-name { display: block; font-weight: bold; font-size: 11px; line-height: 1.3; width: 100%; }
             .ticket-item-price { display: block; text-align: right; font-weight: bold; font-size: 11px; margin-top: 1px; }
             .ticket-item-obs { font-size: 10px; padding-left: 1ch; margin-top: 1px; color: #333; font-style: italic; display: block; }
-            
             .ticket-total-container { font-size: 13px; font-weight: bold; display: flex; justify-content: space-between; margin-top: 4px; }
-            
-            .ticket-wrapper-via {
-                page-break-after: always !important;
-                display: block;
-            }
+            .ticket-wrapper-via { page-break-after: always !important; display: block; }
         }
     </style>
 </head>
@@ -324,19 +322,19 @@
 
     <div id="tela-login" class="no-print">
         <div class="card-login">
-            <h2 style="color: var(--cor-principal); margin: 0 0 10px 0; text-transform: uppercase; font-size: 20px;">Acesso Restrito</h2>
-            <p style="font-size: 13px; color: var(--cor-texto-secundario); margin: 0 0 25px 0;">Identifique-se para acessar o PDV Tempero de Família</p>
+            <h2 style="color: var(--cor-principal); margin: 0 0 6px 0; text-transform: uppercase; font-size: 18px; font-weight: 800; letter-spacing: 0.5px;">Acesso Restrito</h2>
+            <p style="font-size: 13px; color: var(--cor-texto-secundario); margin: 0 0 28px 0;">Painel PDV comercial Cloud</p>
             
             <form id="form-login-id" onsubmit="validarAcessoSecure(event)">
                 <div class="form-group" style="text-align: left;">
                     <label>Operador / Usuário:</label>
                     <input type="text" id="login-usuario" required placeholder="Digite o usuário">
                 </div>
-                <div class="form-group" style="text-align: left; margin-bottom: 25px;">
+                <div class="form-group" style="text-align: left; margin-bottom: 28px;">
                     <label>Senha de Acesso:</label>
-                    <input type="password" id="login-senha" required placeholder="••••••">
+                    <input type="password" id="login-senha" required placeholder="•••••">
                 </div>
-                <button type="submit" class="btn btn-add" style="margin: 0;">🔓 Entrar no Sistema</button>
+                <button type="submit" class="btn btn-add" style="margin: 0; box-shadow: 0 4px 12px rgba(211,47,47,0.25);">🔓 Confirmar Identidade</button>
             </form>
         </div>
     </div>
@@ -349,16 +347,16 @@
 
         <div class="main-grid no-print">
             <div class="card">
-                <h3>📝 Lançar Novo Pedido</h3>
+                <h3>📝 Registrar Venda</h3>
                 <form id="form-item" onsubmit="adicionarItem(event)">
-                    <div class="secao-titulo">1. Identificação do Cliente (Opcional)</div>
+                    <div class="secao-titulo">1. Dados do Cliente</div>
                     <div class="form-row dois-campos">
                         <div class="form-group">
                             <label>Celular / WhatsApp:</label>
                             <input type="tel" id="cliente-celular" oninput="buscarClientePorTelefone(this.value)" placeholder="(00) 00000-0000">
                         </div>
                         <div class="form-group">
-                            <label>Nome do Cliente:</label>
+                            <label>Nome Completo:</label>
                             <input type="text" id="cliente-nome" placeholder="Nome">
                         </div>
                     </div>
@@ -367,10 +365,10 @@
                         <input type="text" id="cliente-endereco" placeholder="Deixe em branco para BALCÃO...">
                     </div>
 
-                    <div class="secao-titulo">2. Itens da Venda</div>
+                    <div class="secao-titulo">2. Seleção de Itens</div>
                     <div class="form-row dois-campos">
                         <div class="form-group">
-                            <label>Prato / Categoria:</label>
+                            <label>Produto / Categoria:</label>
                             <select id="categoria-prato" onchange="atualizarOpcoesMenu()" required>
                                 <option value="">-- Selecione o Prato --</option>
                                 <option value="Parmegiana de Frango">🍗 Parmegiana de Frango</option>
@@ -384,9 +382,9 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <label>Tamanho / Opção:</label>
+                            <label>Tamanho / Especificação:</label>
                             <select id="tipo" onchange="inserirPrecoSugerido()" required>
-                                <option value="">-- Selecione primeiro o prato --</option>
+                                <option value="">-- Selecione o prato primeiro --</option>
                             </select>
                         </div>
                     </div>
@@ -409,70 +407,70 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label>Observações do Item:</label>
+                        <label>Observações:</label>
                         <textarea id="descricao" placeholder="Ex: Sem cebola, Coca normal..."></textarea>
                     </div>
 
-                    <button type="submit" class="btn btn-add">＋ Incluir Item</button>
+                    <button type="submit" class="btn btn-add">＋ Lançar no Carrinho</button>
                 </form>
             </div>
 
             <div class="card carrinho-container">
                 <div>
-                    <h3>🛒 Pedido Atual</h3>
+                    <h3>🛒 Checkout do Pedido</h3>
                     <ul id="lista-itens" class="lista-itens"></ul>
                 </div>
                 <div>
                     <div class="total-tela">Total: <span>R$ <span id="total-valor">0.00</span></span></div>
-                    <button type="button" class="btn btn-print" style="margin-top: 15px;" onclick="finalizarEImprimirTicket()">🖨️ Imprimir Cupom Balcão</button>
+                    <button type="button" class="btn btn-print" style="margin-top: 16px;" onclick="finalizarEImprimirTicket()">🖨️ Autenticar & Imprimir Dupla Via</button>
                 </div>
             </div>
 
             <div class="card full-width-grid card-fechamento-compacto">
                 <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;">
-                    <h3 style="margin:0;">🔒 Fechamento de Caixa Diário</h3>
+                    <h3 style="margin:0; border: none; padding: 0;">🔒 Fechamento Consolidado de Caixa</h3>
                     <div style="display: flex; gap: 10px;">
-                        <button type="button" class="btn btn-fechamento" onclick="calcularFechamentoDiario()">🔒 Realizar Fechamento</button>
-                        <button type="button" id="btn-pdf-id" class="btn btn-pdf" onclick="exportarFechamentoPDF()">📥 Exportar Relatório (PDF)</button>
-                        <button type="button" id="btn-reset-id" class="btn btn-reset" onclick="reiniciarTurnoComSenha()">⚠️ Reiniciar Turno (Zerar Caixa)</button>
+                        <button type="button" class="btn btn-fechamento" onclick="calcularFechamentoDiario()">🔒 Processar Turno</button>
+                        <button type="button" id="btn-pdf-id" class="btn btn-pdf" onclick="exportarFechamentoPDF()">📥 Gerar Relatório PDF (A4)</button>
+                        <button type="button" id="btn-reset-id" class="btn btn-reset" onclick="reiniciarTurnoComSenha()">⚠️ Resetar Caixa (Turno)</button>
                     </div>
                 </div>
                 
                 <div id="dashboard-vendas-tela" class="dash-container-tela">
                     <div class="bloco-metricas-caixa">
                         <div class="card-metrica">
-                            <h4>Faturamento Bruto</h4>
+                            <h4>Faturamento Bruto Acumulado</h4>
                             <p id="t-dash-faturamento">R$ 0.00</p>
                         </div>
                         <div class="card-metrica">
-                            <h4>Total de Pedidos</h4>
+                            <h4>Total de Pedidos Processados</h4>
                             <p id="t-dash-qtd-pedidos">0</p>
                         </div>
                         <div class="card-metrica">
-                            <h4>Ticket Médio</h4>
+                            <h4>Ticket Médio do Turno</h4>
                             <p id="t-dash-ticket-medio">R$ 0.00</p>
                         </div>
                     </div>
                     <div class="bloco-grafico-caixa">
                         <canvas id="graficoPizzaFechamento"></canvas>
                     </div>
-                    <div class="dash-full" style="text-align:center; padding: 5px; font-weight: bold; color: #2b6cb0; font-size: 13px;">
-                        ✨ Fechamento processado com sucesso! Clique em 'Exportar Relatório (PDF)' para baixar.
+                    <div class="dash-full" style="text-align:center; padding: 5px; font-weight: bold; color: #2563eb; font-size: 13px;">
+                        🎯 Relatório financeiro compilado com sucesso! Pronto para exportação.
                     </div>
                 </div>
             </div>
 
             <div class="card full-width-grid">
-                <h3>📋 Transações Ativas do Turno (Conectado ao Firebase)</h3>
+                <h3>📋 Logs Analíticos de Transações (Real-time Firebase)</h3>
                 <div class="tabela-wrapper">
                     <table class="tabela-comercial">
                         <thead>
                             <tr>
                                 <th style="width: 8%;">Nº</th>
                                 <th style="width: 10%;">Hora</th>
-                                <th style="width: 22%;">Cliente</th>
-                                <th style="width: 33%;">Itens</th>
-                                <th style="width: 10%;">Pagamento</th>
+                                <th style="width: 22%;">Cliente / Canal</th>
+                                <th style="width: 33%;">Produtos</th>
+                                <th style="width: 10%;">Método</th>
                                 <th style="width: 8%;">Total</th>
                                 <th style="width: 9%; text-align: center;">Ações</th>
                             </tr>
@@ -636,9 +634,9 @@
                             <tr>
                                 <td><strong style="color:var(--cor-principal)">#${String(dados.numero).padStart(2, '0')}</strong></td>
                                 <td>${dados.hora || '12:00'}</td>
-                                <td>${dados.clienteHtml || 'BALCÃO'}</td>
+                                <td>${dados.clienteHtml || '<span style="color:#94a3b8; font-weight:bold;">BALCÃO</span>'}</td>
                                 <td>${resumoItens}</td>
-                                <td><span style="font-size:12px; font-weight:600; padding:4px 8px; background:#e2e8f0; border-radius:4px;">${dados.pagamento || 'Dinheiro'}</span></td>
+                                <td><span style="font-size:11px; font-weight:700; padding:4px 8px; background:#f1f5f9; border-radius:6px; color:#475569;">${dados.pagamento || 'Dinheiro'}</span></td>
                                 <td><strong>R$ ${parseFloat(dados.total || 0).toFixed(2)}</strong></td>
                                 <td style="text-align:center;"><button class="btn-reprint" onclick="reimprimirTicketPorId('${doc.id}')">🖨️ Rep</button></td>
                             </tr>
@@ -669,7 +667,6 @@
                 let itemValor = parseFloat(item.valor || 0);
 
                 let tipoLimpo = itemTipo.replace("Marmita ", "").replace(" (P)", " P").replace(" (M)", " M").replace(" (G)", " G").replace(" (PF)", " PF");
-                
                 let textoFinalPrato = `${itemQtd}x ${itemPrato}`;
                 if(itemTipo && !itemPrato.includes(itemTipo) && itemTipo !== "Prato Feito Único" && itemTipo !== "Prato Feito Tradicional") {
                     textoFinalPrato += ` ${tipoLimpo}`;
@@ -817,7 +814,7 @@
                     stringClienteHistorico += `<small>${enderecoCliente}</small>`;
                     detalheClienteRelatorio += `<br><small>End: ${enderecoCliente}</small>`;
                 } else {
-                    stringClienteHistorico += `<strong>BALCÃO</strong>`;
+                    stringClienteHistorico += `<span style="color:#94a3b8; font-weight:bold;">BALCÃO</span>`;
                     detalheClienteRelatorio += `<br><small>End: BALCÃO</small>`;
                 }
 
@@ -825,7 +822,7 @@
                     boxingCadastroCliente(celularCliente, nomeCliente, enderecoCliente);
                 }
             } else {
-                stringClienteHistorico = '<strong>BALCÃO</strong>';
+                stringClienteHistorico = '<span style="color:#94a3b8; font-weight:bold;">BALCÃO</span>';
             }
 
             let totalPedido = 0;
@@ -953,14 +950,14 @@
                     labels: labelsFiltrados,
                     datasets: [{
                         data: valoresFiltrados,
-                        backgroundColor: ['#cc1d1d', '#ed8936', '#ecc94b', '#48bb78', '#38b2ac', '#3182ce', '#9f7aea', '#ed64a6']
+                        backgroundColor: ['#e11d48', '#f97316', '#fbbf24', '#10b981', '#14b8a6', '#3b82f6', '#8b5cf6', '#ec4899']
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { position: 'right', labels: { boxWidth: 10, font: { size: 10 } } }
+                        legend: { position: 'right', labels: { boxWidth: 10, font: { size: 10, family: 'Inter' } } }
                     }
                 }
             });
@@ -970,16 +967,15 @@
             document.getElementById('dashboard-vendas-tela').scrollIntoView({ behavior: 'smooth' });
         };
 
-        // --- EXPORTAÇÃO COMPLETA CORRIGIDA VIA ISOLAMENTO EM IFRAME (FIM DO PDF EM BRANCO) ---
+        // --- ENGENHARIA DE EXPORTAÇÃO PREMIUM EM IFRAME (IMPECÁVEL NO TOPO DO A4) ---
         window.exportarFechamentoPDF = function() {
             if (!dadosFechamentoRelatorio) return;
 
-            // Cria um iframe invisível para a renderização limpa e isolada no topo do A4
             const iframePDF = document.createElement('iframe');
             iframePDF.style.position = 'fixed';
             iframePDF.style.width = '800px';
             iframePDF.style.height = '600px';
-            iframePDF.style.top = '-10000px'; // Joga completamente para fora da tela de uso
+            iframePDF.style.top = '-10000px'; 
             document.body.appendChild(iframePDF);
 
             const iframeDoc = iframePDF.contentWindow.document;
@@ -987,21 +983,22 @@
 
             let tabelaPedidosHtml = '';
             historicoGeralPedidos.forEach(p => {
+                let canalLimpo = p.clienteA4 === 'Consumidor Final' ? '<span style="color:#94a3b8; font-weight:bold;">BALCÃO</span>' : p.clienteA4;
                 tabelaPedidosHtml += `
                     <tr style="page-break-inside: avoid !important;">
-                        <td style="padding: 8px 6px; border: 1px solid #cbd5e0; vertical-align: top;">
-                            <strong>#${String(p.numero).padStart(2, '0')}</strong><br><span style="color:#718096">${p.hora || '12:00'}</span>
+                        <td style="padding: 10px 8px; border-bottom: 1px solid #e2e8f0; vertical-align: top;">
+                            <strong>#${String(p.numero).padStart(2, '0')}</strong><br><span style="color:#64748b; font-size:10px;">${p.hora || '12:00'}</span>
                         </td>
-                        <td style="padding: 8px 6px; border: 1px solid #cbd5e0; vertical-align: top; font-size: 10.5px;">
-                            ${p.clienteA4 || 'BALCÃO'}
+                        <td style="padding: 10px 8px; border-bottom: 1px solid #e2e8f0; vertical-align: top; font-size: 11px; color:#334155;">
+                            ${canalLimpo}
                         </td>
-                        <td style="padding: 8px 6px; border: 1px solid #cbd5e0; vertical-align: top; font-size: 10.5px; line-height: 1.4;">
+                        <td style="padding: 10px 8px; border-bottom: 1px solid #e2e8f0; vertical-align: top; font-size: 11px; line-height: 1.4; color:#1e293b;">
                             ${p.itensTxt}
                         </td>
-                        <td style="padding: 8px 6px; border: 1px solid #cbd5e0; vertical-align: top; text-align: center;">
+                        <td style="padding: 10px 8px; border-bottom: 1px solid #e2e8f0; vertical-align: top; text-align: center; font-size: 11px; font-weight:600;">
                             ${p.pagamento || 'Dinheiro'}
                         </td>
-                        <td style="padding: 8px 6px; border: 1px solid #cbd5e0; vertical-align: top; text-align: right; font-weight: bold;">
+                        <td style="padding: 10px 8px; border-bottom: 1px solid #e2e8f0; vertical-align: top; text-align: right; font-weight: bold; color:#0f172a; font-size:12px;">
                             R$ ${parseFloat(p.total || 0).toFixed(2)}
                         </td>
                     </tr>`;
@@ -1009,55 +1006,70 @@
 
             let stringMeiosPagamentoHtml = '';
             for (const [metodo, valor] of Object.entries(dadosFechamentoRelatorio.porPagamento)) {
-                stringMeiosPagamentoHtml += `<tr><td style="padding: 8px 12px; border: 1px solid #cbd5e0; font-weight: bold;">💵 ${metodo}</td><td style="padding: 8px 12px; border: 1px solid #cbd5e0; font-weight: 600; color:#2d3748;">R$ ${valor.toFixed(2)}</td></tr>`;
+                stringMeiosPagamentoHtml += `<tr><td style="padding: 10px 12px; border-bottom: 1px solid #e2e8f0; font-weight: bold; color:#475569;">💵 ${metodo}</td><td style="padding: 10px 12px; border-bottom: 1px solid #e2e8f0; font-weight: 700; color:#d32f2f; text-align:right;">R$ ${valor.toFixed(2)}</td></tr>`;
             }
 
             let stringProdutosHtml = '';
             for (const [categoria, valor] of Object.entries(dadosFechamentoRelatorio.porCategoria)) {
-                stringProdutosHtml += `<tr><td style="padding: 8px 12px; border: 1px solid #cbd5e0; font-weight: bold;">${categoria}</td><td style="padding: 8px 12px; border: 1px solid #cbd5e0; font-size: 12px; font-weight: 600; color: #4a5568;">R$ ${valor.toFixed(2)}</td></tr>`;
+                stringProdutosHtml += `<tr><td style="padding: 10px 12px; border-bottom: 1px solid #e2e8f0; font-weight: 600; color:#475569;">${categoria}</td><td style="padding: 10px 12px; border-bottom: 1px solid #e2e8f0; font-weight: 600; color: #334155; text-align:right;">R$ ${valor.toFixed(2)}</td></tr>`;
             }
 
-            // Injeta a estrutura estruturada direto no documento do iframe
             iframeDoc.write(`
                 <html>
-                <body style="margin:0; padding: 25px; font-family: Arial, sans-serif; color: #1a202c; background-color: #ffffff;">
-                    <div style="width: 740px;">
-                        <div style="border-bottom: 3px solid #cc1d1d; padding-bottom: 12px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: flex-end;">
-                            <div>
-                                <h2 style="margin: 0; color: #cc1d1d; font-size: 26px; text-transform: uppercase; letter-spacing: 0.5px; font-family: sans-serif;">Tempero de Família</h2>
-                                <div style="font-size: 14px; font-weight: bold; color: #4a5568; margin-top: 5px;">Resumo Consolidado de Vendas Diárias</div>
-                            </div>
-                            <div style="font-size: 12px; color: #718096; text-align: right; font-weight: 600;">${dadosFechamentoRelatorio.dataHora}</div>
-                        </div>
-
-                        <div style="font-size: 14px; font-weight: bold; background-color: #edf2f7; padding: 10px; margin-top: 20px; margin-bottom: 12px; border-left: 4px solid #cc1d1d; text-transform: uppercase; color: #2d3748;">Resumo Financeiro Geral</div>
-                        <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13px;">
-                            <tr><td style="padding: 8px 12px; border: 1px solid #cbd5e0; background-color: #f7fafc; font-weight: bold; width: 40%;">Faturamento Bruto Acumulado:</td><td style="padding: 8px 12px; border: 1px solid #cbd5e0; font-weight: bold; color: #cc1d1d; font-size: 15px;">${dadosFechamentoRelatorio.faturamento}</td></tr>
-                            <tr><td style="padding: 8px 12px; border: 1px solid #cbd5e0; background-color: #f7fafc; font-weight: bold;">Quantidade de Pedidos Atendidos:</td><td style="padding: 8px 12px; border: 1px solid #cbd5e0;">${dadosFechamentoRelatorio.pedidos}</td></tr>
-                            <tr><td style="padding: 8px 12px; border: 1px solid #cbd5e0; background-color: #f7fafc; font-weight: bold;">Valor do Ticket Médio Geral:</td><td style="padding: 8px 12px; border: 1px solid #cbd5e0; font-weight: bold;">${dadosFechamentoRelatorio.ticket}</td></tr>
+                <head>
+                    <style>
+                        body { margin:0; padding: 20px; font-family: 'Segoe UI', Arial, sans-serif; color: #1e293b; background-color: #ffffff; }
+                        .report-wrapper { width: 740px; }
+                        .header-table { width:100%; border-collapse:collapse; border-bottom: 3px solid #d32f2f; padding-bottom: 14px; margin-bottom: 25px; }
+                        .section-title { font-size: 12px; font-weight: bold; background-color: #f1f5f9; padding: 10px; margin-top: 24px; margin-bottom: 12px; border-left: 4px solid #d32f2f; text-transform: uppercase; color: #1e293b; letter-spacing:0.5px; }
+                        .metrics-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13px; }
+                        .metrics-table td { padding: 10px 12px; border: 1px solid #e2e8f0; }
+                        .data-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+                        .data-table th { padding: 10px 8px; background-color: #f8fafc; color: #475569; font-weight: 700; text-transform: uppercase; font-size: 10px; letter-spacing: 0.5px; border-bottom: 2px solid #cbd5e1; }
+                    </style>
+                </head>
+                <body>
+                    <div class="report-wrapper">
+                        <table class="header-table">
+                            <tr>
+                                <td style="vertical-align:bottom;">
+                                    <h2 style="margin: 0; color: #d32f2f; font-size: 26px; text-transform: uppercase; letter-spacing: -0.5px; font-weight:800;">Tempero de Família</h2>
+                                    <div style="font-size: 13px; font-weight: 600; color: #64748b; margin-top: 4px;">Relatório Consolidado de Fechamento Diário</div>
+                                </td>
+                                <td style="text-align: right; vertical-align: bottom; font-size: 11px; color: #64748b; font-weight: 600;">
+                                    ${dadosFechamentoRelatorio.dataHora}
+                                </td>
+                            </tr>
                         </table>
 
-                        <div style="font-size: 14px; font-weight: bold; background-color: #edf2f7; padding: 10px; margin-top: 20px; margin-bottom: 12px; border-left: 4px solid #cc1d1d; text-transform: uppercase; color: #2d3748;">Faturamento por Meios de Recebimento</div>
-                        <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13px;">
-                            <thead><tr style="background-color: #f7fafc; font-weight: bold;"><th style="padding: 8px 12px; border: 1px solid #cbd5e0; text-align: left;">Forma de Pagamento</th><th style="padding: 8px 12px; border: 1px solid #cbd5e0; text-align: left;">Total Recebido</th></tr></thead>
+                        <div class="section-title">Resumo Financeiro do Turno</div>
+                        <table class="metrics-table">
+                            <tr><td style="background-color: #f8fafc; font-weight: bold; width: 45%;">Faturamento Bruto Total:</td><td style="font-weight: 800; color: #d32f2f; font-size: 15px;">${dadosFechamentoRelatorio.faturamento}</td></tr>
+                            <tr><td style="background-color: #f8fafc; font-weight: bold;">Volume de Pedidos Atendidos:</td><td style="font-weight: 600;">${dadosFechamentoRelatorio.pedidos}</td></tr>
+                            <tr><td style="background-color: #f8fafc; font-weight: bold;">Ticket Médio do Caixa:</td><td style="font-weight: 700; color:#334155;">${dadosFechamentoRelatorio.ticket}</td></tr>
+                        </table>
+
+                        <div class="section-title">Recebimento por Meios de Pagamento</div>
+                        <table class="data-table" style="margin-bottom: 20px;">
+                            <thead><tr><th style="text-align: left;">Meio de Captura</th><th style="text-align: right; width:30%;">Total Líquido</th></tr></thead>
                             <tbody>${stringMeiosPagamentoHtml}</tbody>
                         </table>
 
-                        <div style="font-size: 14px; font-weight: bold; background-color: #edf2f7; padding: 10px; margin-top: 20px; margin-bottom: 12px; border-left: 4px solid #cc1d1d; text-transform: uppercase; color: #2d3748;">Detalhamento de Faturamento por Produto</div>
-                        <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13px;">
-                            <thead><tr style="background-color: #f7fafc; font-weight: bold;"><th style="padding: 8px 12px; border: 1px solid #cbd5e0; text-align: left;">Prato / Categoria</th><th style="padding: 8px 12px; border: 1px solid #cbd5e0; text-align: left;">Total Faturado</th></tr></thead>
+                        <div class="section-title">Análise de Performance por Produto</div>
+                        <table class="data-table" style="margin-bottom: 25px;">
+                            <thead><tr><th style="text-align: left;">Item / Categoria</th><th style="text-align: right; width:30%;">Total Faturado</th></tr></thead>
                             <tbody>${stringProdutosHtml}</tbody>
                         </table>
                         
-                        <div style="font-size: 14px; font-weight: bold; background-color: #edf2f7; padding: 10px; margin-top: 20px; margin-bottom: 12px; border-left: 4px solid #cc1d1d; text-transform: uppercase; color: #2d3748;">Relação Analítica de Pedidos</div>
-                        <table style="width: 100%; border-collapse: collapse; font-size: 11px; table-layout: fixed;">
+                        <div class="section-title">Movimentação Analítica das Transações</div>
+                        <table class="data-table">
                             <thead>
-                                <tr style="background-color: #f7fafc; font-weight: bold;">
-                                    <th style="padding: 8px 6px; border: 1px solid #cbd5e0; text-align: left; width: 12%;">Nº / Hora</th>
-                                    <th style="padding: 8px 6px; border: 1px solid #cbd5e0; text-align: left; width: 26%;">Cliente / Contato</th>
-                                    <th style="padding: 8px 6px; border: 1px solid #cbd5e0; text-align: left; width: 42%;">Produtos Lançados</th>
-                                    <th style="padding: 8px 6px; border: 1px solid #cbd5e0; text-align: center; width: 10%;">Forma</th>
-                                    <th style="padding: 8px 6px; border: 1px solid #cbd5e0; text-align: right; width: 10%;">Total</th>
+                                <tr>
+                                    <th style="text-align: left; width: 12%;">Ref / Hora</th>
+                                    <th style="text-align: left; width: 26%;">Cliente / Canal</th>
+                                    <th style="text-align: left; width: 42%;">Produtos Lançados</th>
+                                    <th style="text-align: center; width: 10%;">Forma</th>
+                                    <th style="text-align: right; width: 10%;">Total</th>
                                 </tr>
                             </thead>
                             <tbody>${tabelaPedidosHtml}</tbody>
@@ -1070,14 +1082,13 @@
 
             const targetElement = iframeDoc.body;
             const configuracoes = {
-                margin: [15, 12, 15, 12], 
+                margin: [15, 14, 15, 14], 
                 filename: `Fechamento_Caixa_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.pdf`,
                 image: { type: 'jpeg', quality: 1.0 },
                 html2canvas: { scale: 2, logging: false, useCORS: true, letterRendering: true, width: 790 },
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
 
-            // Captura e destrói o iframe oculto logo em seguida
             html2pdf().set(configuracoes).from(targetElement).save().then(() => {
                 iframePDF.remove();
             });

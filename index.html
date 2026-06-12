@@ -245,7 +245,7 @@
         .tabela-comercial th, .tabela-comercial td { padding: 12px; text-align: left; border-bottom: 1px solid #edf2f7; vertical-align: top; }
         .tabela-comercial th { background-color: #f7fafc; color: #4a5568; font-weight: 700; }
 
-        /* Estilo do Dashboard Dinâmico com Layout de Gráfico */
+        /* Dashboard de Métricas */
         .dash-container-tela { 
             display: none; 
             grid-template-columns: 1fr; 
@@ -292,11 +292,10 @@
             .ticket-via-tag { font-size: 12px; font-weight: bold; border: 1px solid #000; display: inline-block; padding: 2px 4px; margin-bottom: 3px; text-transform: uppercase; }
             .ticket-header-title { font-size: 13px; font-weight: bold; letter-spacing: 0.5px; }
             
-            /* DESTAQUE MASTER TOTAL: PEDIDO EM NEGRITO ULTRA PESADO (950) E FONTE GRANDE (26px) */
             .ticket-header-num-destaque {
-                font-size: 26px !important;
+                font-size: 22px !important;
                 font-weight: 950 !important;
-                margin: 6px 0 !important;
+                margin: 4px 0 !important;
                 text-align: center !important;
                 display: block !important;
                 width: 100% !important;
@@ -559,16 +558,16 @@
         }
 
         window.atualizarOpcoesMenu = function() {
-            const categoriaSel = document.getElementById('categoria-prato').value;
+            const categorySel = document.getElementById('categoria-prato').value;
             const selectTipo = document.getElementById('tipo');
             selectTipo.innerHTML = '';
             
-            if (!categoriaSel || !cardapioEstruturado[categoriaSel]) {
+            if (!categorySel || !cardapioEstruturado[categorySel]) {
                 selectTipo.innerHTML = '<option value="">-- Selecione o prato --</option>';
                 return;
             }
             
-            cardapioEstruturado[categoriaSel].forEach(opcao => {
+            cardapioEstruturado[categorySel].forEach(opcao => {
                 selectTipo.innerHTML += `<option value="${opcao}">${opcao}</option>`;
             });
             inserirPrecoSugerido();
@@ -687,7 +686,6 @@
                 `;
             });
 
-            // 25 saltos de linha físicos para avançar 15cm na mini térmica
             let pulosDeLinhaFisicos = '<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>';
 
             return `
@@ -746,4 +744,370 @@
                 id: Date.now(), 
                 prato: prato, 
                 tipo: tipo, 
-                descricao
+                descricao: descricao || "Sem obs", 
+                precoUnitario: precoUnitario, 
+                qtd: qtd, 
+                valor: subtotalItem,
+                pagamento: pagamento
+            });
+            
+            atualizarInterface();
+
+            document.getElementById('descricao').value = '';
+            document.getElementById('valor').value = '';
+            document.getElementById('quantidade').value = '1';
+            document.getElementById('categoria-prato').value = '';
+            document.getElementById('tipo').innerHTML = '<option value="">-- Selecione o prato --</option>';
+            document.getElementById('categoria-prato').focus();
+        };
+
+        window.removerItem = function(id) {
+            pedidoAtual = pedidoAtual.filter(item => item.id !== id);
+            atualizarInterface();
+        };
+
+        function atualizarInterface() {
+            const autoLista = document.getElementById('lista-itens');
+            autoLista.innerHTML = '';
+            let total = 0;
+
+            pedidoAtual.forEach(item => {
+                total += item.valor;
+                autoLista.innerHTML += `
+                    <li class="item-carrinho">
+                        <div>
+                            <strong>${item.qtd}x - ${item.prato}</strong> (${item.tipo})<br>
+                            <small style="color: var(--cor-texto-secundario)">Valor: R$ ${item.valor.toFixed(2)} | Pag: ${item.pagamento}</small>
+                        </div>
+                        <button class="btn-del" onclick="removerItem(${item.id})">X</button>
+                    </li>
+                `;
+            });
+            document.getElementById('total-valor').innerText = total.toFixed(2);
+        }
+
+        window.finalizarEImprimirTicket = async function() {
+            if (pedidoAtual.length === 0) {
+                alert("Nenhum item inserido no pedido!");
+                return;
+            }
+
+            const nomeCliente = document.getElementById('cliente-nome').value.trim();
+            const celularCliente = document.getElementById('cliente-celular').value.trim();
+            const enderecoCliente = document.getElementById('cliente-endereco').value.trim();
+
+            const agora = new Date();
+            const dataFormatada = agora.toLocaleDateString('pt-BR') + ' ' + agora.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
+            const horaSimples = agora.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
+
+            let stringClienteHistorico = '';
+            let detalheClienteRelatorio = 'Consumidor Final';
+
+            if (nomeCliente || celularCliente || enderecoCliente) {
+                detalheClienteRelatorio = '';
+                if (nomeCliente) {
+                    stringClienteHistorico += `<strong>${nomeCliente}</strong><br>`;
+                    detalheClienteRelatorio += `<strong>${nomeCliente}</strong> `;
+                }
+                if (celularCliente) {
+                    stringClienteHistorico += `Tel: ${celularCliente}<br>`;
+                    detalheClienteRelatorio += `<br>Tel: ${celularCliente}`;
+                }
+                if (enderecoCliente) {
+                    stringClienteHistorico += `<small>${enderecoCliente}</small>`;
+                    detalheClienteRelatorio += `<br><small>End: ${enderecoCliente}</small>`;
+                } else {
+                    stringClienteHistorico += `<strong>BALCÃO</strong>`;
+                    detalheClienteRelatorio += `<br><small>End: BALCÃO</small>`;
+                }
+
+                if (celularCliente && nomeCliente) {
+                    salvarCadastroCliente(celularCliente, nomeCliente, enderecoCliente);
+                }
+            } else {
+                stringClienteHistorico = '<strong>BALCÃO</strong>';
+            }
+
+            let totalPedido = 0;
+            let itensListaSimples = [];
+            let formaPagamentoFinal = pedidoAtual[0].pagamento;
+
+            pedidoAtual.forEach((item) => {
+                totalPedido += item.valor;
+                itensListaSimples.push(`(${item.qtd}x) [${item.prato}] ${item.tipo} - ${item.descricao}`);
+            });
+
+            const documentoPedido = {
+                numero: contadorPedidos,
+                data: dataFormatada,
+                hora: horaSimples,
+                clienteHtml: stringClienteHistorico,
+                clienteA4: detalheClienteRelatorio,
+                itens: [...pedidoAtual],
+                itensTxt: itensListaSimples.join('<br>'),
+                pagamento: formaPagamentoFinal,
+                total: totalPedido,
+                timestamp: Timestamp.now()
+            };
+
+            try {
+                await addDoc(collection(db, "pedidos"), documentoPedido);
+                
+                const containerFita = document.getElementById('ticket-print');
+                containerFita.innerHTML = gerarHtmlFitaVia(documentoPedido, "COZINHA") + gerarHtmlFitaVia(documentoPedido, "CLIENTE");
+
+                await carregarHistoricoDoFirebase();
+                
+                document.body.className = "modo-impressao-ticket";
+                window.print();
+
+                pedidoAtual = [];
+                document.getElementById('cliente-nome').value = '';
+                document.getElementById('cliente-celular').value = '';
+                document.getElementById('cliente-endereco').value = '';
+                atualizarInterface();
+            } catch (erro) {
+                alert("Erro ao conectar com o Firebase!");
+                console.error(erro);
+            }
+        };
+
+        window.calcularFechamentoDiario = function() {
+            if (historicoGeralPedidos.length === 0) {
+                alert("Não existem dados faturados no turno atual.");
+                return;
+            }
+
+            let faturamentoTotal = 0;
+            let totalItens = 0;
+            
+            let faturamentoPorPrato = {
+                "Parmegiana de Frango": 0, "Frango à Milanesa": 0, "Parmegiana de Berinjela": 0,
+                "Feijoada": 0, "Marmitex": 0, "Prato Feito": 0, "Bebidas": 0, "Outros Pratos": 0
+            };
+
+            let faturamentoPorMetodoPagamento = { "Dinheiro": 0, "Pix": 0, "Cartão": 0 };
+
+            historicoGeralPedidos.forEach(p => {
+                let totalPedidoMatematico = parseFloat(p.total || 0);
+                faturamentoTotal += totalPedidoMatematico;
+                
+                let metPag = p.pagamento || "Dinheiro";
+                if (faturamentoPorMetodoPagamento[metPag] !== undefined) {
+                    faturamentoPorMetodoPagamento[metPag] += totalPedidoMatematico;
+                } else {
+                    faturamentoPorMetodoPagamento["Dinheiro"] += totalPedidoMatematico;
+                }
+
+                p.itens.forEach(i => {
+                    let itemQtd = parseInt(i.qtd || 1); 
+                    totalItens += itemQtd;
+                    if (faturamentoPorPrato[i.prato] !== undefined) {
+                        faturamentoPorPrato[i.prato] += parseFloat(i.valor || 0);
+                    }
+                });
+            });
+
+            let ticketMedio = faturamentoTotal / historicoGeralPedidos.length;
+            const agora = new Date();
+            const dataHoraString = `Emissão: ${agora.toLocaleDateString('pt-BR')} às ${agora.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})}`;
+
+            document.getElementById('t-dash-faturamento').innerText = 'R$ ' + faturamentoTotal.toFixed(2);
+            document.getElementById('t-dash-qtd-pedidos').innerText = historicoGeralPedidos.length + ` (${totalItens} un)`;
+            document.getElementById('t-dash-ticket-medio').innerText = 'R$ ' + ticketMedio.toFixed(2);
+            
+            document.getElementById('dashboard-vendas-tela').style.display = 'grid';
+
+            dadosFechamentoRelatorio = {
+                dataHora: dataHoraString,
+                faturamento: 'R$ ' + faturamentoTotal.toFixed(2),
+                pedidos: historicoGeralPedidos.length + ` pedidos (${totalItens} itens vendidos)`,
+                ticket: 'R$ ' + ticketMedio.toFixed(2),
+                porCategoria: faturamentoPorPrato,
+                porPagamento: faturamentoPorMetodoPagamento
+            };
+
+            const ctxPizza = document.getElementById('graficoPizzaFechamento').getContext('2d');
+            
+            if (chartPizzaInstancia) {
+                chartPizzaInstancia.destroy();
+            }
+
+            let labelsFiltrados = [];
+            let valoresFiltrados = [];
+            for (const [prato, valor] of Object.entries(faturamentoPorPrato)) {
+                if (valor > 0) {
+                    labelsFiltrados.push(prato);
+                    valoresFiltrados.push(valor);
+                }
+            }
+
+            if (labelsFiltrados.length === 0) {
+                labelsFiltrados = Object.keys(faturamentoPorPrato);
+                valoresFiltrados = Object.values(faturamentoPorPrato);
+            }
+
+            chartPizzaInstancia = new Chart(ctxPizza, {
+                type: 'pie',
+                data: {
+                    labels: labelsFiltrados,
+                    datasets: [{
+                        data: valoresFiltrados,
+                        backgroundColor: ['#cc1d1d', '#ed8936', '#ecc94b', '#48bb78', '#38b2ac', '#3182ce', '#9f7aea', '#ed64a6']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'right', labels: { boxWidth: 10, font: { size: 10 } } }
+                    }
+                }
+            });
+
+            document.getElementById('btn-pdf-id').style.display = 'flex';
+            document.getElementById('btn-reset-id').style.display = 'flex';
+            document.getElementById('dashboard-vendas-tela').scrollIntoView({ behavior: 'smooth' });
+        };
+
+        // --- EXPORTAÇÃO BLINDADA: INICIA RIGIDAMENTE NO INÍCIO DA PÁGINA A4 ---
+        window.exportarFechamentoPDF = function() {
+            if (!dadosFechamentoRelatorio) return;
+
+            const divPDF = document.createElement('div');
+            // Força o contêiner a se desprender do alinhamento centralizado do body do sistema
+            divPDF.style.position = 'absolute';
+            divPDF.style.top = '0';
+            divPDF.style.left = '0';
+            divPDF.style.textAlign = 'left';
+            divPDF.style.width = '790px'; 
+            divPDF.style.padding = '25px';
+            divPDF.style.fontFamily = 'Arial, sans-serif'; 
+            divPDF.style.color = '#1a202c';
+            divPDF.style.backgroundColor = '#ffffff'; 
+            divPDF.style.boxSizing = 'border-box';
+
+            let conteudoHTML = `
+                <div style="border-bottom: 3px solid #cc1d1d; padding-bottom: 12px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: flex-end;">
+                    <div>
+                        <h2 style="margin: 0; color: #cc1d1d; font-size: 26px; text-transform: uppercase; letter-spacing: 0.5px;">Tempero de Família</h2>
+                        <div style="font-size: 14px; font-weight: bold; color: #4a5568; margin-top: 5px;">Resumo Consolidado de Vendas Diárias</div>
+                    </div>
+                    <div style="font-size: 12px; color: #718096; text-align: right; font-weight: 600;">${dadosFechamentoRelatorio.dataHora}</div>
+                </div>
+
+                <div style="font-size: 14px; font-weight: bold; background-color: #edf2f7; padding: 10px; margin-top: 20px; margin-bottom: 12px; border-left: 4px solid #cc1d1d; text-transform: uppercase; color: #2d3748;">Resumo Financeiro Geral</div>
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13px; table-layout: fixed;">
+                    <tr><td style="padding: 8px 12px; border: 1px solid #cbd5e0; background-color: #f7fafc; font-weight: bold; width: 40%;">Faturamento Bruto Acumulado:</td><td style="padding: 8px 12px; border: 1px solid #cbd5e0; font-weight: bold; color: #cc1d1d; font-size: 15px;">${dadosFechamentoRelatorio.faturamento}</td></tr>
+                    <tr><td style="padding: 8px 12px; border: 1px solid #cbd5e0; background-color: #f7fafc; font-weight: bold;">Quantidade de Pedidos Atendidos:</td><td style="padding: 8px 12px; border: 1px solid #cbd5e0;">${dadosFechamentoRelatorio.pedidos}</td></tr>
+                    <tr><td style="padding: 8px 12px; border: 1px solid #cbd5e0; background-color: #f7fafc; font-weight: bold;">Valor do Ticket Médio Geral:</td><td style="padding: 8px 12px; border: 1px solid #cbd5e0; font-weight: bold;">${dadosFechamentoRelatorio.ticket}</td></tr>
+                </table>
+
+                <div style="font-size: 14px; font-weight: bold; background-color: #edf2f7; padding: 10px; margin-top: 20px; margin-bottom: 12px; border-left: 4px solid #cc1d1d; text-transform: uppercase; color: #2d3748;">Faturamento por Meios de Recebimento</div>
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13px; table-layout: fixed;">
+                    <thead><tr style="background-color: #f7fafc; font-weight: bold;"><th style="padding: 8px 12px; border: 1px solid #cbd5e0; text-align: left;">Forma de Pagamento</th><th style="padding: 8px 12px; border: 1px solid #cbd5e0; text-align: left;">Total Recebido</th></tr></thead>
+                    <tbody>
+            `;
+
+            for (const [metodo, valor] of Object.entries(dadosFechamentoRelatorio.porPagamento)) {
+                conteudoHTML += `<tr><td style="padding: 8px 12px; border: 1px solid #cbd5e0; font-weight: bold;">💵 ${metodo}</td><td style="padding: 8px 12px; border: 1px solid #cbd5e0; font-weight: 600; color:#2d3748;">R$ ${valor.toFixed(2)}</td></tr>`;
+            }
+
+            conteudoHTML += `
+                    </tbody>
+                </table>
+
+                <div style="font-size: 14px; font-weight: bold; background-color: #edf2f7; padding: 10px; margin-top: 20px; margin-bottom: 12px; border-left: 4px solid #cc1d1d; text-transform: uppercase; color: #2d3748;">Detalhamento de Faturamento por Produto</div>
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13px; table-layout: fixed;">
+                    <thead><tr style="background-color: #f7fafc; font-weight: bold;"><th style="padding: 8px 12px; border: 1px solid #cbd5e0; text-align: left;">Prato / Categoria</th><th style="padding: 8px 12px; border: 1px solid #cbd5e0; text-align: left;">Total Faturado</th></tr></thead>
+                    <tbody>
+            `;
+
+            for (const [categoria, valor] of Object.entries(dadosFechamentoRelatorio.porCategoria)) {
+                conteudoHTML += `<tr><td style="padding: 8px 12px; border: 1px solid #cbd5e0; font-weight: bold;">${categoria}</td><td style="padding: 8px 12px; border: 1px solid #cbd5e0; font-size: 12px; font-weight: 600; color: #4a5568;">R$ ${valor.toFixed(2)}</td></tr>`;
+            }
+
+            conteudoHTML += `
+                    </tbody>
+                </table>
+                
+                <div style="font-size: 14px; font-weight: bold; background-color: #edf2f7; padding: 10px; margin-top: 20px; margin-bottom: 12px; border-left: 4px solid #cc1d1d; text-transform: uppercase; color: #2d3748;">Relação Analítica de Pedidos</div>
+                <table style="width: 100%; border-collapse: collapse; font-size: 11px; table-layout: fixed;">
+                    <thead>
+                        <tr style="background-color: #f7fafc; font-weight: bold;">
+                            <th style="padding: 8px 6px; border: 1px solid #cbd5e0; text-align: left; width: 12%;">Nº / Hora</th>
+                            <th style="padding: 8px 6px; border: 1px solid #cbd5e0; text-align: left; width: 28%;">Cliente / Contato</th>
+                            <th style="padding: 8px 6px; border: 1px solid #cbd5e0; text-align: left; width: 40%;">Produtos Lançados</th>
+                            <th style="padding: 8px 6px; border: 1px solid #cbd5e0; text-align: center; width: 10%;">Forma</th>
+                            <th style="padding: 8px 6px; border: 1px solid #cbd5e0; text-align: right; width: 10%;">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+
+            historicoGeralPedidos.forEach(p => {
+                conteudoHTML += `
+                    <tr style="page-break-inside: avoid !important;">
+                        <td style="padding: 8px 6px; border: 1px solid #cbd5e0; vertical-align: top; white-space: normal; word-break: break-word;">
+                            <strong>#${String(p.numero).padStart(2, '0')}</strong><br><span style="color:#718096">${p.hora || '12:00'}</span>
+                        </td>
+                        <td style="padding: 8px 6px; border: 1px solid #cbd5e0; vertical-align: top; font-size: 10.5px; white-space: normal; word-break: break-all; max-width: 0;">
+                            ${p.clienteA4 || 'BALCÃO'}
+                        </td>
+                        <td style="padding: 8px 6px; border: 1px solid #cbd5e0; vertical-align: top; font-size: 10.5px; line-height: 1.4; white-space: normal; word-break: break-word;">
+                            ${p.itensTxt}
+                        </td>
+                        <td style="padding: 8px 6px; border: 1px solid #cbd5e0; vertical-align: top; text-align: center; white-space: normal; word-break: break-word;">
+                            ${p.pagamento || 'Dinheiro'}
+                        </td>
+                        <td style="padding: 8px 6px; border: 1px solid #cbd5e0; vertical-align: top; text-align: right; font-weight: bold; white-space: normal; word-break: break-word;">
+                            R$ ${parseFloat(p.total || 0).toFixed(2)}
+                        </td>
+                    </tr>`;
+            });
+
+            conteudoHTML += `</tbody></table>`;
+            divPDF.innerHTML = conteudoHTML;
+
+            const configuracoes = {
+                margin: [15, 12, 15, 12], 
+                filename: `Fechamento_Caixa_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.pdf`,
+                image: { type: 'jpeg', quality: 1.0 },
+                html2canvas: { 
+                    scale: 2, 
+                    logging: false, 
+                    useCORS: true,
+                    letterRendering: true,
+                    width: 790 
+                },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            html2pdf().set(configuracoes).from(divPDF).save();
+        };
+
+        window.reiniciarTurnoComSenha = function() {
+            const senhaDigitada = prompt("Para zerar o caixa e iniciar o próximo turno, digite a senha master:");
+            if (senhaDigitada === "1234") {
+                horarioCorteTurno = Date.now();
+                localStorage.setItem('horarioCorteTurno', horarioCorteTurno);
+
+                historicoGeralPedidos = [];
+                contadorPedidos = 1;
+                dadosFechamentoRelatorio = null;
+                
+                document.getElementById('corpo-historico').innerHTML = ''; 
+                document.getElementById('dashboard-vendas-tela').style.display = 'none';
+                document.getElementById('btn-pdf-id').style.display = 'none';
+                document.getElementById('btn-reset-id').style.display = 'none';
+                
+                alert("Turno encerrado!\nO caixa operacional local foi zerado e iniciou no Pedido #01.");
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                
+                carregarHistoricoDoFirebase();
+            } else if (senhaDigitada !== null) {
+                alert("Senha incorreta!");
+            }
+        };
+    </script>
+</body>
+</html>

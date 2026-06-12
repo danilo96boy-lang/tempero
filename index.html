@@ -10,28 +10,28 @@
 
     <style>
         /* ==========================================================================
-           --- SISTEMA DE DESIGN MODERNO (TELA DE USO) ---
+           --- DESIGN SYSTEM E INTERFACE OPERACIONAL PREMIUM ---
            ========================================================================== */
         :root {
-            --cor-principal: #d32f2f; 
+            --cor-principal: #cc1d1d; 
             --cor-principal-hover: #b71c1c;
-            --cor-fundo: #f4f6f8;
+            --cor-fundo: #f4f6f9;
             --cor-card: #ffffff;
-            --cor-texto: #2d3748;
-            --cor-texto-secundario: #718096;
+            --cor-texto: #1e293b;
+            --cor-texto-secundario: #64748b;
             --cor-borda: #e2e8f0;
-            --border-radius-lg: 14px;
+            --border-radius-lg: 12px;
             --border-radius-md: 8px;
-            --shadow-sm: 0 2px 4px rgba(0,0,0,0.02);
-            --shadow-md: 0 4px 12px rgba(0,0,0,0.05);
-            --transition: all 0.25s ease;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
+            --transition: all 0.2s ease-in-out;
         }
 
         body {
-            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
             background-color: var(--cor-fundo);
             margin: 0;
-            padding: 24px;
+            padding: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -56,16 +56,16 @@
             border-radius: var(--border-radius-lg);
             box-shadow: var(--shadow-md);
             width: 100%;
-            max-width: 400px;
+            max-width: 380px;
             box-sizing: border-box;
             text-align: center;
-            border-top: 6px solid var(--cor-principal);
+            border-top: 5px solid var(--cor-principal);
         }
 
         #conteudo-sistema {
             display: none;
             width: 100%;
-            max-width: 1200px;
+            max-width: 1180px;
         }
 
         .brand-header {
@@ -74,18 +74,18 @@
             justify-content: flex-start;
             gap: 16px;
             background: var(--cor-card);
-            padding: 20px 32px;
+            padding: 16px 28px;
             border-radius: var(--border-radius-lg);
             width: 100%;
             box-shadow: var(--shadow-sm);
             box-sizing: border-box;
-            border-bottom: 3px solid var(--cor-borda);
-            margin-bottom: 24px;
+            border: 1px solid var(--cor-borda);
+            margin-bottom: 20px;
         }
 
         .brand-logo {
-            width: 50px;
-            height: 50px;
+            width: 45px;
+            height: 45px;
             object-fit: cover;
             border-radius: 50%;
             border: 2px solid var(--cor-principal);
@@ -93,7 +93,7 @@
 
         .brand-header h1 {
             margin: 0;
-            font-size: 22px;
+            font-size: 20px;
             font-weight: 800;
             color: var(--cor-texto);
             letter-spacing: -0.5px;
@@ -102,7 +102,7 @@
         .main-grid {
             display: grid;
             grid-template-columns: 1fr;
-            gap: 24px;
+            gap: 20px;
             width: 100%;
             box-sizing: border-box;
         }
@@ -114,7 +114,7 @@
 
         .card {
             background-color: var(--cor-card);
-            padding: 30px;
+            padding: 24px;
             border-radius: var(--border-radius-lg);
             box-shadow: var(--shadow-sm);
             border: 1px solid var(--cor-borda);
@@ -122,13 +122,13 @@
         }
 
         .card.card-fechamento-compacto {
-            padding: 18px 30px;
+            padding: 15px 24px;
         }
 
         h3 {
-            margin: 0 0 24px 0;
+            margin: 0 0 20px 0;
             color: var(--cor-texto);
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -136,22 +136,22 @@
             align-items: center;
             gap: 8px;
             border-bottom: 1px solid var(--cor-borda);
-            padding-bottom: 12px;
+            padding-bottom: 10px;
         }
 
         .secao-titulo {
             font-size: 11px;
             text-transform: uppercase;
-            letter-spacing: 0.8px;
+            letter-spacing: 0.5px;
             color: var(--cor-principal);
-            margin: 20px 0 12px 0;
+            margin: 16px 0 10px 0;
             font-weight: 700;
         }
 
         .form-row {
             display: grid;
             grid-template-columns: 1fr;
-            gap: 16px;
+            gap: 12px;
         }
 
         @media(min-width: 480px) {
@@ -159,11 +159,11 @@
             .form-row.tres-campos { grid-template-columns: 1fr 1fr 1fr; }
         }
 
-        .form-group { margin-bottom: 14px; }
+        .form-group { margin-bottom: 12px; }
 
         label {
             display: block;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
             font-weight: 600;
             color: var(--cor-texto);
             font-size: 12px;
@@ -171,7 +171,7 @@
 
         input, select, textarea {
             width: 100%;
-            padding: 11px 14px;
+            padding: 10px 12px;
             border: 1px solid #cbd5e1;
             border-radius: var(--border-radius-md);
             box-sizing: border-box;
@@ -185,14 +185,14 @@
         input:focus, select:focus, textarea:focus {
             outline: none;
             border-color: var(--cor-principal);
-            box-shadow: 0 0 0 3px rgba(211, 47, 47, 0.12);
+            box-shadow: 0 0 0 3px rgba(204, 29, 29, 0.1);
         }
 
         textarea { resize: vertical; height: 60px; }
 
         .btn {
             border: none;
-            padding: 12px 24px;
+            padding: 10px 20px;
             font-size: 14px;
             border-radius: var(--border-radius-md);
             cursor: pointer;
@@ -206,30 +206,29 @@
 
         .btn-add { 
             background-color: var(--cor-principal); 
-            color: white; width: 100%; margin-top: 12px;
+            color: white; width: 100%; margin-top: 10px;
         }
         .btn-add:hover { background-color: var(--cor-principal-hover); }
 
         .btn-print { 
-            background-color: #2e7d32; color: white; font-size: 15px; width: 100%;
-            box-shadow: 0 2px 4px rgba(46,125,50,0.2);
+            background-color: #16a34a; color: white; font-size: 15px; width: 100%;
         }
-        .btn-print:hover { background-color: #1b5e20; }
+        .btn-print:hover { background-color: #15803d; }
 
         .btn-reprint {
-            background-color: #0288d1; color: white; padding: 6px 12px; font-size: 11px; border-radius: 6px;
+            background-color: #2563eb; color: white; padding: 6px 12px; font-size: 11px; border-radius: 6px;
             font-weight: bold; border: none; cursor: pointer;
         }
-        .btn-reprint:hover { background-color: #01579b; }
+        .btn-reprint:hover { background-color: #1d4ed8; }
 
         .btn-fechamento { background-color: #475569; color: white; }
         .btn-fechamento:hover { background-color: #334155; }
 
-        .btn-pdf { background-color: #0288d1; color: white; display: none; }
-        .btn-pdf:hover { background-color: #01579b; }
+        .btn-pdf { background-color: #2563eb; color: white; display: none; }
+        .btn-pdf:hover { background-color: #1d4ed8; }
 
-        .btn-reset { background-color: #ef4444; color: white; display: none; }
-        .btn-reset:hover { background-color: #dc2626; }
+        .btn-reset { background-color: #dc2626; color: white; display: none; }
+        .btn-reset:hover { background-color: #b91c1c; }
 
         .carrinho-container {
             display: flex;
@@ -238,42 +237,39 @@
             background: #f8fafc;
         }
 
-        .lista-itens { list-style: none; padding: 0; margin: 0; max-height: 280px; overflow-y: auto; }
+        .lista-itens { list-style: none; padding: 0; margin: 0; max-height: 260px; overflow-y: auto; }
 
         .item-carrinho {
-            background: white; padding: 14px; margin-bottom: 10px;
+            background: white; padding: 12px; margin-bottom: 8px;
             border-radius: var(--border-radius-md); font-size: 13px; display: flex;
             justify-content: space-between; align-items: center; border: 1px solid var(--cor-borda);
-            box-shadow: 0 1px 2px rgba(0,0,0,0.01);
         }
 
         .btn-del {
             background: #fee2e2; color: #ef4444; border: none; border-radius: 50%;
-            width: 24px; height: 24px; font-weight: bold; cursor: pointer; display: flex;
-            align-items: center; justify-content: center; font-size: 11px; transition: var(--transition);
+            width: 22px; height: 22px; font-weight: bold; cursor: pointer; display: flex;
+            align-items: center; justify-content: center; font-size: 11px;
         }
         .btn-del:hover { background: #fca5a5; }
 
         .total-tela {
-            font-size: 24px; font-weight: 800; text-align: right;
-            margin-top: 16px; padding-top: 16px; border-top: 2px dashed var(--cor-borda);
-            letter-spacing: -0.5px;
+            font-size: 22px; font-weight: 800; text-align: right;
+            margin-top: 14px; padding-top: 14px; border-top: 2px dashed var(--cor-borda);
         }
         .total-tela span { color: var(--cor-principal); }
 
         .tabela-wrapper { width: 100%; overflow-x: auto; }
         .tabela-comercial { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 13px; }
-        .tabela-comercial th, .tabela-comercial td { padding: 14px 16px; text-align: left; border-bottom: 1px solid var(--cor-borda); vertical-align: top; }
-        .tabela-comercial th { background-color: #f8fafc; color: #4a5568; font-weight: 700; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; }
+        .tabela-comercial th, .tabela-comercial td { padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--cor-borda); vertical-align: top; }
+        .tabela-comercial th { background-color: #f8fafc; color: #475569; font-weight: 700; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; }
         .tabela-comercial tbody tr:hover { background-color: #fafbfc; }
 
-        /* Dashboard Operacional Refinado */
         .dash-container-tela { 
             display: none; 
             grid-template-columns: 1fr; 
             gap: 20px; 
-            margin-top: 20px; 
-            padding: 20px; 
+            margin-top: 15px; 
+            padding: 15px; 
             background: #f8fafc; 
             border: 1px solid var(--cor-borda); 
             border-radius: var(--border-radius-lg); 
@@ -282,14 +278,14 @@
             .dash-container-tela { grid-template-columns: 1.1fr 1fr; } 
             .dash-full { grid-column: span 2; } 
         }
-        .bloco-metricas-caixa { display: flex; flex-direction: column; gap: 12px; }
-        .card-metrica { background: #fff; border: 1px solid var(--cor-borda); padding: 16px; border-radius: var(--border-radius-md); box-shadow: var(--shadow-sm); }
-        .card-metrica h4 { margin: 0; color: var(--cor-texto-secundario); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
-        .card-metrica p { margin: 6px 0 0 0; font-size: 22px; font-weight: 800; color: var(--cor-texto); letter-spacing: -0.5px; }
-        .bloco-grafico-caixa { background: #fff; border: 1px solid var(--cor-borda); padding: 16px; border-radius: var(--border-radius-md); display: flex; justify-content: center; align-items: center; max-height: 260px; box-shadow: var(--shadow-sm); }
+        .bloco-metricas-caixa { display: flex; flex-direction: column; gap: 10px; }
+        .card-metrica { background: #fff; border: 1px solid var(--cor-borda); padding: 14px; border-radius: var(--border-radius-md); box-shadow: var(--shadow-sm); }
+        .card-metrica h4 { margin: 0; color: var(--cor-texto-secundario); font-size: 11px; text-transform: uppercase; }
+        .card-metrica p { margin: 4px 0 0 0; font-size: 20px; font-weight: bold; color: var(--cor-texto); }
+        .bloco-grafico-caixa { background: #fff; border: 1px solid var(--cor-borda); padding: 14px; border-radius: var(--border-radius-md); display: flex; justify-content: center; align-items: center; max-height: 260px; box-shadow: var(--shadow-sm); }
 
         /* ==========================================================================
-           --- CONFIGURAÇÃO ULTRA COMPACTA PARA BOBINA DE 58MM ---
+           --- LAYOUT DA IMPRESSORA TÉRMICA DE 58MM (HIERARQUIA CLARA) ---
            ========================================================================== */
         #ticket-print { display: none; }
         @media print {
@@ -300,21 +296,46 @@
             #ticket-print {
                 display: block !important;
                 font-family: 'Courier New', Courier, monospace;
-                width: 48mm; max-width: 48mm; padding: 1mm 0.5mm; margin: 0; font-size: 11px; color: #000; line-height: 1.25; word-wrap: break-word;
+                width: 48mm;
+                max-width: 48mm;
+                padding: 1mm 0.5mm;
+                margin: 0;
+                font-size: 11px;
+                color: #000;
+                line-height: 1.3;
+                word-wrap: break-word;
             }
+            
             .ticket-header { text-align: center; margin-bottom: 2px; }
-            .ticket-via-tag { font-size: 12px; font-weight: bold; border: 1px solid #000; display: inline-block; padding: 2px 4px; margin-bottom: 3px; text-transform: uppercase; }
-            .ticket-header-title { font-size: 13px; font-weight: bold; letter-spacing: 0.5px; }
-            .ticket-header-num-destaque { font-size: 26px !important; font-weight: 950 !important; margin: 4px 0 !important; text-align: center !important; display: block !important; width: 100% !important; letter-spacing: -0.5px; }
-            .ticket-divider { text-align: center; margin: 2px 0; font-weight: bold; font-size: 11px; }
-            .ticket-client-info { font-size: 10.5px; margin-bottom: 2px; line-height: 1.2; }
-            .ticket-item { margin: 6px 0; page-break-inside: avoid; border-bottom: 1px dotted #ccc; padding-bottom: 4px; }
+            .ticket-via-tag { font-size: 11px; font-weight: bold; border: 1px solid #000; display: inline-block; padding: 1px 3px; margin-bottom: 3px; text-transform: uppercase; }
+            .ticket-header-title { font-size: 12px; font-weight: bold; letter-spacing: 0.5px; }
+            
+            /* CAIXA DE ALTO DESTAQUE HIERÁRQUICO PARA O PEDIDO DO HARDWARE */
+            .ticket-header-num-destaque {
+                font-size: 16px !important;
+                font-weight: bold !important;
+                margin: 5px 0 !important;
+                text-align: center !important;
+                display: block !important;
+                width: 100% !important;
+            }
+            
+            .ticket-divider { text-align: center; margin: 2px 0; font-weight: bold; font-size: 10px; }
+            .ticket-client-info { font-size: 10px; margin-bottom: 3px; line-height: 1.3; }
+            
+            /* Lista de Itens com espaçamento e quebra linear clara */
+            .ticket-item { margin: 6px 0; page-break-inside: avoid; border-bottom: 1px dotted #888; padding-bottom: 4px; }
             .ticket-item-main { width: 100%; display: block; text-align: left; }
             .ticket-item-name { display: block; font-weight: bold; font-size: 11px; line-height: 1.3; width: 100%; }
             .ticket-item-price { display: block; text-align: right; font-weight: bold; font-size: 11px; margin-top: 1px; }
-            .ticket-item-obs { font-size: 10px; padding-left: 1ch; margin-top: 1px; color: #333; font-style: italic; display: block; }
-            .ticket-total-container { font-size: 13px; font-weight: bold; display: flex; justify-content: space-between; margin-top: 4px; }
-            .ticket-wrapper-via { page-break-after: always !important; display: block; }
+            .ticket-item-obs { font-size: 9.5px; padding-left: 1ch; margin-top: 1px; color: #444; font-style: italic; display: block; }
+            
+            .ticket-total-container { font-size: 12.5px; font-weight: bold; display: flex; justify-content: space-between; margin-top: 5px; }
+            
+            .ticket-wrapper-via {
+                page-break-after: always !important;
+                display: block;
+            }
         }
     </style>
 </head>
@@ -323,18 +344,18 @@
     <div id="tela-login" class="no-print">
         <div class="card-login">
             <h2 style="color: var(--cor-principal); margin: 0 0 6px 0; text-transform: uppercase; font-size: 18px; font-weight: 800; letter-spacing: 0.5px;">Acesso Restrito</h2>
-            <p style="font-size: 13px; color: var(--cor-texto-secundario); margin: 0 0 28px 0;">Painel PDV comercial Cloud</p>
+            <p style="font-size: 13px; color: var(--cor-texto-secundario); margin: 0 0 24px 0;">Painel PDV Comercial Cloud</p>
             
             <form id="form-login-id" onsubmit="validarAcessoSecure(event)">
                 <div class="form-group" style="text-align: left;">
                     <label>Operador / Usuário:</label>
                     <input type="text" id="login-usuario" required placeholder="Digite o usuário">
                 </div>
-                <div class="form-group" style="text-align: left; margin-bottom: 28px;">
+                <div class="form-group" style="text-align: left; margin-bottom: 24px;">
                     <label>Senha de Acesso:</label>
                     <input type="password" id="login-senha" required placeholder="•••••">
                 </div>
-                <button type="submit" class="btn btn-add" style="margin: 0; box-shadow: 0 4px 12px rgba(211,47,47,0.25);">🔓 Confirmar Identidade</button>
+                <button type="submit" class="btn btn-add">🔓 Confirmar Identidade</button>
             </form>
         </div>
     </div>
@@ -651,6 +672,7 @@
             }
         }
 
+        // --- ENGENHARIA DE CUPOM DA FILA (HIERARQUIA CLARA EM BLOCOS COM DIVISORES) ---
         function gerarHtmlFitaVia(pedido, nomeVia) {
             let dadosCliente = '';
             if (pedido.clienteA4 && pedido.clienteA4 !== 'Consumidor Final') {
@@ -685,28 +707,32 @@
 
             let pulosDeLinhaFisicos = '<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>';
 
+            // ESTRUTURA REFORMULADA: HIERARQUIA POR LINHAS CLARAS DE TEXTO PURO (SEM PARECER UMA COISA SÓ)
             return `
                 <div class="ticket-wrapper-via">
                     <div class="ticket-header">
                         <div class="ticket-via-tag">--- VIA: ${nomeVia} ---</div><br>
                         <span class="ticket-header-title">TEMPERO DE FAMÍLIA</span>
-                        <div class="ticket-divider">================================</div>
-                        <div class="ticket-wrapper-via-num"><span class="ticket-header-num-destaque"><strong>PEDIDO #${String(pedido.numero).padStart(2, '0')}</strong></span></div>
-                        <div class="ticket-divider">================================</div>
-                        <div style="font-size: 10px; font-weight: bold; margin-top:3px;">${pedido.data}</div>
+                        <div class="ticket-divider">--------------------------------</div>
+                        <div class="ticket-header-num-destaque"><strong>[ PEDIDO #${String(pedido.numero).padStart(2, '0')} ]</strong></div>
+                        <div class="ticket-divider">--------------------------------</div>
+                        <div style="font-size: 10px; font-weight: bold; margin-top:2px;">HORA: ${pedido.hora} | ${pedido.data.split(' ')[0]}</div>
                     </div>
                     <div class="ticket-divider">--------------------------------</div>
-                    <div class="ticket-client-info">${dadosCliente}</div>
-                    <div class="ticket-divider">--------------------------------</div>
+                    <div class="ticket-client-info">
+                        ${dadosCliente}
+                    </div>
+                    <div class="ticket-divider">================================</div>
+                    <div style="font-weight: bold; font-size: 10px; margin-bottom: 2px; text-transform: uppercase;">ITENS DO PEDIDO:</div>
                     <div>${linesProdutosHtml}</div>
                     <div class="ticket-divider">--------------------------------</div>
                     <div class="ticket-total-container">
-                        <span>TOTAL:</span>
+                        <span>TOTAL GERAL:</span>
                         <span>R$ ${parseFloat(pedido.total || 0).toFixed(2)}</span>
                     </div>
                     <div class="ticket-divider">================================</div>
-                    <div style="text-align:center; font-size:10px; font-weight:bold;">Obrigado pela preferência!</div>
-                    <div class="ticket-divider">================================</div>
+                    <div style="text-align:center; font-size:9.5px; font-weight:bold;">Obrigado pela preferência!</div>
+                    <div class="ticket-divider">--------------------------------</div>
                     ${pulosDeLinhaFisicos}
                 </div>
             `;
@@ -803,18 +829,18 @@
             if (nomeCliente || celularCliente || enderecoCliente) {
                 detalheClienteRelatorio = '';
                 if (nomeCliente) {
-                    stringClienteHistorico += `<strong>${nomeCliente}</strong><br>`;
+                    stringClienteHistorico += `<strong>CLIENTE:</strong> ${nomeCliente}<br>`;
                     detalheClienteRelatorio += `<strong>${nomeCliente}</strong> `;
                 }
                 if (celularCliente) {
-                    stringClienteHistorico += `Tel: ${celularCliente}<br>`;
+                    stringClienteHistorico += `<strong>CONTATO:</strong> ${celularCliente}<br>`;
                     detalheClienteRelatorio += `<br>Tel: ${celularCliente}`;
                 }
                 if (enderecoCliente) {
-                    stringClienteHistorico += `<small>${enderecoCliente}</small>`;
+                    stringClienteHistorico += `<strong>END:</strong> <small>${enderecoCliente}</small>`;
                     detalheClienteRelatorio += `<br><small>End: ${enderecoCliente}</small>`;
                 } else {
-                    stringClienteHistorico += `<span style="color:#94a3b8; font-weight:bold;">BALCÃO</span>`;
+                    stringClienteHistorico += `<strong>LOCAL: BALCÃO</strong>`;
                     detalheClienteRelatorio += `<br><small>End: BALCÃO</small>`;
                 }
 
@@ -957,7 +983,7 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { position: 'right', labels: { boxWidth: 10, font: { size: 10, family: 'Inter' } } }
+                        legend: { position: 'right', labels: { boxWidth: 10, font: { size: 10, family: 'sans-serif' } } }
                     }
                 }
             });
@@ -967,7 +993,7 @@
             document.getElementById('dashboard-vendas-tela').scrollIntoView({ behavior: 'smooth' });
         };
 
-        // --- ENGENHARIA DE EXPORTAÇÃO PREMIUM EM IFRAME (IMPECÁVEL NO TOPO DO A4) ---
+        // --- RELATÓRIO PDF COM VISUAL ALTAMENTE COMERCIAL E LIMPO ---
         window.exportarFechamentoPDF = function() {
             if (!dadosFechamentoRelatorio) return;
 
@@ -1006,7 +1032,7 @@
 
             let stringMeiosPagamentoHtml = '';
             for (const [metodo, valor] of Object.entries(dadosFechamentoRelatorio.porPagamento)) {
-                stringMeiosPagamentoHtml += `<tr><td style="padding: 10px 12px; border-bottom: 1px solid #e2e8f0; font-weight: bold; color:#475569;">💵 ${metodo}</td><td style="padding: 10px 12px; border-bottom: 1px solid #e2e8f0; font-weight: 700; color:#d32f2f; text-align:right;">R$ ${valor.toFixed(2)}</td></tr>`;
+                stringMeiosPagamentoHtml += `<tr><td style="padding: 10px 12px; border-bottom: 1px solid #e2e8f0; font-weight: bold; color:#475569;">💵 ${metodo}</td><td style="padding: 10px 12px; border-bottom: 1px solid #e2e8f0; font-weight: 700; color:#cc1d1d; text-align:right;">R$ ${valor.toFixed(2)}</td></tr>`;
             }
 
             let stringProdutosHtml = '';
@@ -1020,8 +1046,8 @@
                     <style>
                         body { margin:0; padding: 20px; font-family: 'Segoe UI', Arial, sans-serif; color: #1e293b; background-color: #ffffff; }
                         .report-wrapper { width: 740px; }
-                        .header-table { width:100%; border-collapse:collapse; border-bottom: 3px solid #d32f2f; padding-bottom: 14px; margin-bottom: 25px; }
-                        .section-title { font-size: 12px; font-weight: bold; background-color: #f1f5f9; padding: 10px; margin-top: 24px; margin-bottom: 12px; border-left: 4px solid #d32f2f; text-transform: uppercase; color: #1e293b; letter-spacing:0.5px; }
+                        .header-table { width:100%; border-collapse:collapse; border-bottom: 3px solid #cc1d1d; padding-bottom: 14px; margin-bottom: 25px; }
+                        .section-title { font-size: 12px; font-weight: bold; background-color: #f1f5f9; padding: 10px; margin-top: 24px; margin-bottom: 12px; border-left: 4px solid #cc1d1d; text-transform: uppercase; color: #1e293b; letter-spacing:0.5px; }
                         .metrics-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13px; }
                         .metrics-table td { padding: 10px 12px; border: 1px solid #e2e8f0; }
                         .data-table { width: 100%; border-collapse: collapse; font-size: 12px; }
@@ -1033,7 +1059,7 @@
                         <table class="header-table">
                             <tr>
                                 <td style="vertical-align:bottom;">
-                                    <h2 style="margin: 0; color: #d32f2f; font-size: 26px; text-transform: uppercase; letter-spacing: -0.5px; font-weight:800;">Tempero de Família</h2>
+                                    <h2 style="margin: 0; color: #cc1d1d; font-size: 26px; text-transform: uppercase; letter-spacing: -0.5px; font-weight:800;">Tempero de Família</h2>
                                     <div style="font-size: 13px; font-weight: 600; color: #64748b; margin-top: 4px;">Relatório Consolidado de Fechamento Diário</div>
                                 </td>
                                 <td style="text-align: right; vertical-align: bottom; font-size: 11px; color: #64748b; font-weight: 600;">
@@ -1044,7 +1070,7 @@
 
                         <div class="section-title">Resumo Financeiro do Turno</div>
                         <table class="metrics-table">
-                            <tr><td style="background-color: #f8fafc; font-weight: bold; width: 45%;">Faturamento Bruto Total:</td><td style="font-weight: 800; color: #d32f2f; font-size: 15px;">${dadosFechamentoRelatorio.faturamento}</td></tr>
+                            <tr><td style="background-color: #f8fafc; font-weight: bold; width: 45%;">Faturamento Bruto Total:</td><td style="font-weight: 800; color: #cc1d1d; font-size: 15px;">${dadosFechamentoRelatorio.faturamento}</td></tr>
                             <tr><td style="background-color: #f8fafc; font-weight: bold;">Volume de Pedidos Atendidos:</td><td style="font-weight: 600;">${dadosFechamentoRelatorio.pedidos}</td></tr>
                             <tr><td style="background-color: #f8fafc; font-weight: bold;">Ticket Médio do Caixa:</td><td style="font-weight: 700; color:#334155;">${dadosFechamentoRelatorio.ticket}</td></tr>
                         </table>

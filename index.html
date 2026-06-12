@@ -293,7 +293,7 @@
             .ticket-header-title { font-size: 13px; font-weight: bold; letter-spacing: 0.5px; }
             
             .ticket-header-num-destaque {
-                font-size: 22px !important;
+                font-size: 26px !important;
                 font-weight: 950 !important;
                 margin: 4px 0 !important;
                 text-align: center !important;
@@ -970,12 +970,11 @@
             document.getElementById('dashboard-vendas-tela').scrollIntoView({ behavior: 'smooth' });
         };
 
-        // --- EXPORTAÇÃO BLINDADA: INICIA RIGIDAMENTE NO INÍCIO DA PÁGINA A4 ---
+        // --- EXPORTAÇÃO CORRIGIDA: ANEXA NO BODY PARA EVITAR RELATÓRIO EM BRANCO ---
         window.exportarFechamentoPDF = function() {
             if (!dadosFechamentoRelatorio) return;
 
             const divPDF = document.createElement('div');
-            // Força o contêiner a se desprender do alinhamento centralizado do body do sistema
             divPDF.style.position = 'absolute';
             divPDF.style.top = '0';
             divPDF.style.left = '0';
@@ -986,6 +985,7 @@
             divPDF.style.color = '#1a202c';
             divPDF.style.backgroundColor = '#ffffff'; 
             divPDF.style.boxSizing = 'border-box';
+            divPDF.style.zIndex = '-9999'; // Esconde atrás de tudo na tela de uso
 
             let conteudoHTML = `
                 <div style="border-bottom: 3px solid #cc1d1d; padding-bottom: 12px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: flex-end;">
@@ -1068,6 +1068,9 @@
             conteudoHTML += `</tbody></table>`;
             divPDF.innerHTML = conteudoHTML;
 
+            // CRÍTICO: Anexa o elemento na página para o html2pdf conseguir ler
+            document.body.appendChild(divPDF);
+
             const configuracoes = {
                 margin: [15, 12, 15, 12], 
                 filename: `Fechamento_Caixa_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.pdf`,
@@ -1082,7 +1085,10 @@
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
 
-            html2pdf().set(configuracoes).from(divPDF).save();
+            // Executa a captura e deleta o lixo da tela em seguida
+            html2pdf().set(configuracoes).from(divPDF).save().then(() => {
+                divPDF.remove();
+            });
         };
 
         window.reiniciarTurnoComSenha = function() {

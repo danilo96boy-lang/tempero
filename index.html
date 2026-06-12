@@ -6,6 +6,7 @@
     <title>Tempero de Família - PDV Comercial & Cloud</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
         /* ==========================================================================
@@ -114,7 +115,6 @@
             box-sizing: border-box;
         }
 
-        /* Aba de fechamento compactada menor como estava antes */
         .card.card-fechamento-compacto {
             padding: 15px 25px;
         }
@@ -245,6 +245,27 @@
         .tabela-comercial th, .tabela-comercial td { padding: 12px; text-align: left; border-bottom: 1px solid #edf2f7; vertical-align: top; }
         .tabela-comercial th { background-color: #f7fafc; color: #4a5568; font-weight: 700; }
 
+        /* Estilo do Dashboard Dinâmico com Layout de Gráfico */
+        .dash-container-tela { 
+            display: none; 
+            grid-template-columns: 1fr; 
+            gap: 15px; 
+            margin-top: 15px; 
+            padding: 15px; 
+            background: #fafafa; 
+            border: 1px solid #cbd5e0; 
+            border-radius: 8px; 
+        }
+        @media(min-width: 650px) { 
+            .dash-container-tela { grid-template-columns: 1.2fr 1fr; } 
+            .dash-full { grid-column: span 2; } 
+        }
+        .bloco-metricas-caixa { display: flex; flex-direction: column; gap: 10px; }
+        .card-metrica { background: #fff; border: 1px solid #e2e8f0; padding: 12px 15px; border-radius: 8px; }
+        .card-metrica h4 { margin: 0; color: #718096; font-size: 12px; text-transform: uppercase; }
+        .card-metrica p { margin: 5px 0 0 0; font-size: 20px; font-weight: bold; color: var(--cor-principal); }
+        .bloco-grafico-caixa { background: #fff; border: 1px solid #e2e8f0; padding: 15px; border-radius: 8px; display: flex; justify-content: center; align-items: center; max-height: 260px; }
+
         /* ==========================================================================
            --- AMBIENTE DE IMPRESSÃO COMPATÍVEL COM MINI TÉRMICA DE 58MM ---
            ========================================================================== */
@@ -271,21 +292,20 @@
             .ticket-via-tag { font-size: 12px; font-weight: bold; border: 1px solid #000; display: inline-block; padding: 2px 4px; margin-bottom: 3px; text-transform: uppercase; }
             .ticket-header-title { font-size: 13px; font-weight: bold; letter-spacing: 0.5px; }
             
-            /* DESTAQUE DO PEDIDO EM NEGRITO E EM TAMANHO GRANDE NATIVO */
+            /* AJUSTE DO TICKET: PEDIDO E NÚMERO NA MESMA LINHA E EM NEGRITO */
             .ticket-header-num-destaque {
-                font-size: 22px !important;
+                font-size: 15px !important;
                 font-weight: bold !important;
                 margin: 4px 0 !important;
                 text-align: center !important;
                 display: block !important;
                 width: 100% !important;
-                letter-spacing: 0.5px;
+                letter-spacing: 0.2px;
             }
             
             .ticket-divider { text-align: center; margin: 2px 0; font-weight: bold; font-size: 11px; }
             .ticket-client-info { font-size: 10.5px; margin-bottom: 2px; line-height: 1.2; }
             
-            /* Uso de largura contínua total da fita térmica de 58mm */
             .ticket-item { margin: 6px 0; page-break-inside: avoid; border-bottom: 1px dotted #ccc; padding-bottom: 4px; }
             .ticket-item-main { width: 100%; display: block; text-align: left; }
             .ticket-item-name { display: block; font-weight: bold; font-size: 11px; line-height: 1.3; width: 100%; }
@@ -294,7 +314,6 @@
             
             .ticket-total-container { font-size: 13px; font-weight: bold; display: flex; justify-content: space-between; margin-top: 4px; }
             
-            /* Separação dinâmica estável para a faca de corte */
             .ticket-wrapper-via {
                 page-break-after: always !important;
                 display: block;
@@ -421,20 +440,25 @@
                 </div>
                 
                 <div id="dashboard-vendas-tela" class="dash-container-tela">
-                    <div class="card-metrica">
-                        <h4>Faturamento Bruto</h4>
-                        <p id="t-dash-faturamento">R$ 0.00</p>
+                    <div class="bloco-metricas-caixa">
+                        <div class="card-metrica">
+                            <h4>Faturamento Bruto</h4>
+                            <p id="t-dash-faturamento">R$ 0.00</p>
+                        </div>
+                        <div class="card-metrica">
+                            <h4>Total de Pedidos</h4>
+                            <p id="t-dash-qtd-pedidos">0</p>
+                        </div>
+                        <div class="card-metrica">
+                            <h4>Ticket Médio</h4>
+                            <p id="t-dash-ticket-medio">R$ 0.00</p>
+                        </div>
                     </div>
-                    <div class="card-metrica">
-                        <h4>Total de Pedidos</h4>
-                        <p id="t-dash-qtd-pedidos">0</p>
+                    <div class="bloco-grafico-caixa">
+                        <canvas id="graficoPizzaFechamento"></canvas>
                     </div>
-                    <div class="card-metrica">
-                        <h4>Ticket Médio</h4>
-                        <p id="t-dash-ticket-medio">R$ 0.00</p>
-                    </div>
-                    <div class="dash-full" style="text-align:center; padding: 10px; font-weight: bold; color: #2b6cb0;">
-                        ✨ Fechamento processado com sucesso! Clique em 'Exportar Relatório (PDF)' para fazer o download.
+                    <div class="dash-full" style="text-align:center; padding: 5px; font-weight: bold; color: #2b6cb0; font-size: 13px;">
+                        ✨ Fechamento processado com sucesso! Clique em 'Exportar Relatório (PDF)' para baixar.
                     </div>
                 </div>
             </div>
@@ -484,6 +508,7 @@
         let historicoGeralPedidos = []; 
         let contadorPedidos = 1;
         let dadosFechamentoRelatorio = null;
+        let chartPizzaInstancia = null; // Instância do gráfico para reset/redesenho
 
         let horarioCorteTurno = localStorage.getItem('horarioCorteTurno') ? parseInt(localStorage.getItem('horarioCorteTurno')) : 0;
 
@@ -509,7 +534,6 @@
             "Outros Pratos": ["Marmita (P)", "Marmita (M)", "Marmita (G)", "Prato Feito (PF)"]
         };
 
-        // --- INTELLIGENT SEARCH: BUSCA E CADASTRO AUTOMÁTICO DE CLIENTE ---
         window.buscarClientePorTelefone = function(telDigitado) {
             const telLimpo = telDigitado.replace(/\D/g, ""); 
             if (telLimpo.length < 8) return;
@@ -562,7 +586,6 @@
             }
         };
 
-        // CORREÇÃO: Função sincronizada perfeitamente com o botão do HTML
         window.validarAcessoSecure = function(event) {
             event.preventDefault();
             const usuarioInput = document.getElementById('login-usuario').value.trim();
@@ -631,6 +654,8 @@
             }
         }
 
+        window.carregarHistoricoDoFirebase = carregarHistoricoDoFirebase;
+
         function gerarHtmlFitaVia(pedido, nomeVia) {
             let dadosCliente = '';
             if (pedido.clienteA4 && pedido.clienteA4 !== 'Consumidor Final') {
@@ -664,7 +689,6 @@
                 `;
             });
 
-            // Força 25 pulos de linha físicos para avançar 15cm na Goojprt/Pos-58
             let pulosDeLinhaFisicos = '<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>';
 
             return `
@@ -800,7 +824,6 @@
                     detalheClienteRelatorio += `<br><small>End: BALCÃO</small>`;
                 }
 
-                // Salva o vínculo no banco de dados local mantendo o histórico nos resets
                 if (celularCliente && nomeCliente) {
                     salvarCadastroCliente(celularCliente, nomeCliente, enderecoCliente);
                 }
@@ -852,6 +875,7 @@
             }
         };
 
+        // --- SISTEMA DE FECHAMENTO DINÂMICO COM GRÁFICO EM PIZZA REAL ---
         window.calcularFechamentoDiario = function() {
             if (historicoGeralPedidos.length === 0) {
                 alert("Não existem dados faturados no turno atual.");
@@ -882,7 +906,6 @@
                 p.itens.forEach(i => {
                     let itemQtd = parseInt(i.qtd || 1); 
                     totalItens += itemQtd;
-                    
                     if (faturamentoPorPrato[i.prato] !== undefined) {
                         faturamentoPorPrato[i.prato] += parseFloat(i.valor || 0);
                     }
@@ -893,9 +916,12 @@
             const agora = new Date();
             const dataHoraString = `Emissão: ${agora.toLocaleDateString('pt-BR')} às ${agora.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})}`;
 
+            // Renderiza as métricas nos blocos
             document.getElementById('t-dash-faturamento').innerText = 'R$ ' + faturamentoTotal.toFixed(2);
             document.getElementById('t-dash-qtd-pedidos').innerText = historicoGeralPedidos.length + ` (${totalItens} un)`;
             document.getElementById('t-dash-ticket-medio').innerText = 'R$ ' + ticketMedio.toFixed(2);
+            
+            // Abre o painel oculto responsivo na tela
             document.getElementById('dashboard-vendas-tela').style.display = 'grid';
 
             dadosFechamentoRelatorio = {
@@ -906,6 +932,47 @@
                 porCategoria: faturamentoPorPrato,
                 porPagamento: faturamentoPorMetodoPagamento
             };
+
+            // INJEÇÃO DO GRÁFICO EM PIZZA DINÂMICO (CHART.JS)
+            const ctxPizza = document.getElementById('graficoPizzaFechamento').getContext('2d');
+            
+            // Se já existir um gráfico renderizado de um fechamento anterior, destrói para não bugar a tela
+            if (chartPizzaInstancia) {
+                chartPizzaInstancia.destroy();
+            }
+
+            // Separa apenas as categorias que faturaram algo maior que zero para o gráfico ficar bonito
+            let labelsFiltrados = [];
+            let valoresFiltrados = [];
+            for (const [prato, valor] of Object.entries(faturamentoPorPrato)) {
+                if (valor > 0) {
+                    labelsFiltrados.push(prato);
+                    valoresFiltrados.push(valor);
+                }
+            }
+
+            // Se tudo estiver zerado, exibe os nomes padrão vazios
+            if (labelsFiltrados.length === 0) {
+                labelsFiltrados = Object.keys(faturamentoPorPrato);
+                valoresFiltrados = Object.values(faturamentoPorPrato);
+            }
+
+            chartPizzaInstancia = new Chart(ctxPizza, {
+                type: 'pie',
+                data: {
+                    labels: labelsFiltrados,
+                    datasets: [{
+                        data: valoresFiltrados,
+                        backgroundColor: ['#cc1d1d', '#ed8936', '#ecc94b', '#48bb78', '#38b2ac', '#3182ce', '#9f7aea', '#ed64a6']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'right', labels: { boxWidth: 12, font: { size: 11 } } }
+                    }
+                }
+            });
 
             document.getElementById('btn-pdf-id').style.display = 'flex';
             document.getElementById('btn-reset-id').style.display = 'flex';
@@ -1021,7 +1088,6 @@
             html2pdf().set(configuracoes).from(divPDF).save();
         };
 
-        // CORREÇÃO MASTER: Reseta o caixa mas NÃO apaga a base local de clientes
         window.reiniciarTurnoComSenha = function() {
             const senhaDigitada = prompt("Para zerar o caixa e iniciar o próximo turno, digite a senha master:");
             if (senhaDigitada === "1234") {

@@ -241,7 +241,7 @@
         .tabela-comercial th { background-color: #f7fafc; color: #4a5568; font-weight: 700; }
 
         /* ==========================================================================
-           --- LAYOUT DA IMPRESSORA TÉRMICA (58MM) - AJUSTE MASTER DE 15CM E FAIXA ---
+           --- AMBIENTE DE IMPRESSÃO COMPATÍVEL COM MINI TÉRMICA DE 58MM ---
            ========================================================================== */
         #ticket-print { display: none; }
         @media print {
@@ -263,28 +263,24 @@
             }
             
             .ticket-header { text-align: center; margin-bottom: 2px; }
-            .ticket-via-tag { font-size: 12px; font-weight: bold; border: 1px solid #000; display: inline-block; padding: 2px 4px; margin-bottom: 4px; text-transform: uppercase; }
+            .ticket-via-tag { font-size: 12px; font-weight: bold; border: 1px solid #000; display: inline-block; padding: 2px 4px; margin-bottom: 3px; text-transform: uppercase; }
             .ticket-header-title { font-size: 13px; font-weight: bold; letter-spacing: 0.5px; }
             
-            /* FAIXA PRETA DE ALTO DESTAQUE PARA O NÚMERO DO PEDIDO */
-            .ticket-faixa-num {
-                background-color: #000 !important;
-                color: #fff !important;
-                font-size: 22px !important;
+            /* DESTAQUE DO PEDIDO EM FORMATO DE TEXTO PURO STÁVEL PARA 58MM */
+            .ticket-destaque-num {
+                font-size: 18px !important;
                 font-weight: bold !important;
-                padding: 6px 2px !important;
-                margin: 5px 0 !important;
+                margin: 4px 0 !important;
                 text-align: center !important;
                 display: block !important;
                 width: 100% !important;
-                -webkit-print-color-adjust: exact; /* Força o Windows a imprimir o fundo preto */
-                print-color-adjust: exact;
+                letter-spacing: 0.5px;
             }
             
             .ticket-divider { text-align: center; margin: 2px 0; font-weight: bold; font-size: 11px; }
             .ticket-client-info { font-size: 10.5px; margin-bottom: 2px; line-height: 1.2; }
             
-            /* Uso contínuo de 100% da largura da fita térmica */
+            /* Uso de largura contínua total da fita */
             .ticket-item { margin: 6px 0; page-break-inside: avoid; border-bottom: 1px dotted #ccc; padding-bottom: 4px; }
             .ticket-item-main { width: 100%; display: block; text-align: left; }
             .ticket-item-name { display: block; font-weight: bold; font-size: 11px; line-height: 1.3; width: 100%; }
@@ -293,9 +289,8 @@
             
             .ticket-total-container { font-size: 13px; font-weight: bold; display: flex; justify-content: space-between; margin-top: 4px; }
             
-            /* ENGENHARIA DE CORTE EXTENSIVA: Injeta uma quebra livre de 15 centímetros em branco */
+            /* CORTE DE FLUXO EM LINHA: Garante salto físico real de página no driver de 90mm/s */
             .ticket-wrapper-via {
-                padding-bottom: 150mm !important; /* Margem ultra segura de 15cm para a serrilha */
                 page-break-after: always !important;
                 display: block;
             }
@@ -520,7 +515,7 @@
             }
             
             cardapioEstruturado[categoriaSel].forEach(opcao => {
-                selectTipo.innerHTML += `<option value="${opcao}">${opcao}</option>`;
+                selectTipo.innerHTML += `<option value="${opcao}">${opcao}</option>';`;
             });
             inserirPrecoSugerido();
         };
@@ -607,7 +602,7 @@
 
         window.carregarHistoricoDoFirebase = carregarHistoricoDoFirebase;
 
-        // --- ENGENHARIA DE TEXTO DO TICKET COM TRATAMENTO DE ENDEREÇO EM BALCÃO, FAIXA E 15CM ---
+        // --- ENGENHARIA DE CUPOM DA FILA (LINHAS EM BRANCO HARDWARE PARA OS 15CM DE CORTES) ---
         function gerarHtmlFitaVia(pedido, nomeVia) {
             let dadosCliente = '';
             if (pedido.clienteA4 && pedido.clienteA4 !== 'Consumidor Final') {
@@ -641,13 +636,18 @@
                 `;
             });
 
+            // Geração de 25 pulos de linha físicos no HTML para empurrar 15cm na impressora de 90mm/s
+            let pulosDeLinhaFisicos = '<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>';
+
             return `
                 <div class="ticket-wrapper-via">
                     <div class="ticket-header">
                         <div class="ticket-via-tag">--- VIA: ${nomeVia} ---</div><br>
                         <span class="ticket-header-title">TEMPERO DE FAMÍLIA</span>
-                        <div class="ticket-faixa-num">PEDIDO #${String(pedido.numero).padStart(2, '0')}</div>
-                        <div style="font-size: 10px; font-weight: bold;">${pedido.data}</div>
+                        <div class="ticket-divider">================================</div>
+                        <div class="ticket-header-num">>>>> PEDIDO #${String(pedido.numero).padStart(2, '0')} <<<<</div>
+                        <div class="ticket-divider">================================</div>
+                        <div style="font-size: 10px; font-weight: bold; margin-top:3px;">${pedido.data}</div>
                     </div>
                     <div class="ticket-divider">--------------------------------</div>
                     <div class="ticket-client-info">${dadosCliente}</div>
@@ -659,7 +659,9 @@
                         <span>R$ ${parseFloat(pedido.total || 0).toFixed(2)}</span>
                     </div>
                     <div class="ticket-divider">================================</div>
-                    <div class="ticket-footer">Obrigado pela preferência!</div>
+                    <div style="text-align:center; font-size:10px; font-weight:bold;">Obrigado pela preferência!</div>
+                    <div class="ticket-divider">================================</div>
+                    ${pulosDeLinhaFisicos}
                 </div>
             `;
         }

@@ -114,6 +114,11 @@
             box-sizing: border-box;
         }
 
+        /* AJUSTE: Caixa compacta para o painel de fechamento */
+        .card.card-fechamento-compacto {
+            padding: 15px 25px;
+        }
+
         h3 {
             margin: 0 0 20px 0;
             color: var(--cor-texto);
@@ -266,9 +271,8 @@
             .ticket-via-tag { font-size: 12px; font-weight: bold; border: 1px solid #000; display: inline-block; padding: 2px 4px; margin-bottom: 3px; text-transform: uppercase; }
             .ticket-header-title { font-size: 13px; font-weight: bold; letter-spacing: 0.5px; }
             
-            /* DESTAQUE DO PEDIDO EM FORMATO DE TEXTO PURO STÁVEL PARA 58MM */
-            .ticket-destaque-num {
-                font-size: 18px !important;
+            .ticket-header-num-destaque {
+                font-size: 22px !important;
                 font-weight: bold !important;
                 margin: 4px 0 !important;
                 text-align: center !important;
@@ -280,7 +284,6 @@
             .ticket-divider { text-align: center; margin: 2px 0; font-weight: bold; font-size: 11px; }
             .ticket-client-info { font-size: 10.5px; margin-bottom: 2px; line-height: 1.2; }
             
-            /* Uso de largura contínua total da fita */
             .ticket-item { margin: 6px 0; page-break-inside: avoid; border-bottom: 1px dotted #ccc; padding-bottom: 4px; }
             .ticket-item-main { width: 100%; display: block; text-align: left; }
             .ticket-item-name { display: block; font-weight: bold; font-size: 11px; line-height: 1.3; width: 100%; }
@@ -289,7 +292,6 @@
             
             .ticket-total-container { font-size: 13px; font-weight: bold; display: flex; justify-content: space-between; margin-top: 4px; }
             
-            /* CORTE DE FLUXO EM LINHA: Garante salto físico real de página no driver de 90mm/s */
             .ticket-wrapper-via {
                 page-break-after: always !important;
                 display: block;
@@ -331,12 +333,12 @@
                     <div class="secao-titulo">1. Identificação do Cliente (Opcional)</div>
                     <div class="form-row dois-campos">
                         <div class="form-group">
-                            <label>Nome do Cliente:</label>
-                            <input type="text" id="cliente-nome" placeholder="Nome">
+                            <label>Celular / WhatsApp:</label>
+                            <input type="tel" id="cliente-celular" oninput="buscarClientePorTelefone(this.value)" placeholder="(00) 00000-0000">
                         </div>
                         <div class="form-group">
-                            <label>Celular / WhatsApp:</label>
-                            <input type="tel" id="cliente-celular" placeholder="(00) 00000-0000">
+                            <label>Nome do Cliente:</label>
+                            <input type="text" id="cliente-nome" placeholder="Nome">
                         </div>
                     </div>
                     <div class="form-group">
@@ -405,7 +407,7 @@
                 </div>
             </div>
 
-            <div class="card full-width-grid">
+            <div class="card full-width-grid card-fechamento-compacto">
                 <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;">
                     <h3 style="margin:0;">🔒 Fechamento de Caixa Diário</h3>
                     <div style="display: flex; gap: 10px;">
@@ -504,6 +506,32 @@
             "Outros Pratos": ["Marmita (P)", "Marmita (M)", "Marmita (G)", "Prato Feito (PF)"]
         };
 
+        // --- SISTEMA DE VÍNCULO E BUSCA AUTOMÁTICA DE CLIENTE POR TELEFONE ---
+        window.buscarClientePorTelefone = function(telDigitado) {
+            const telLimpo = telDigitado.replace(/\D/g, ""); // Remove caracteres especiais para comparar limpo
+            if (telLimpo.length < 8) return;
+
+            // Busca na base persistida localmente do navegador
+            const databaseClientes local = JSON.parse(localStorage.getItem('databaseClientes')) || {};
+            if (databaseClientes local[telLimpo]) {
+                const clienteData = databaseClientes local[telLimpo];
+                document.getElementById('cliente-nome').value = clienteData.nome || '';
+                document.getElementById('cliente-endereco').value = clienteData.endereco || '';
+            }
+        };
+
+        function salvarOuAtualizarCadastroCliente(telefone, nome, endereco) {
+            const telLimpo = telefone.replace(/\D/g, "");
+            if (!telLimpo || !nome) return;
+
+            const databaseClientes local = JSON.parse(localStorage.getItem('databaseClientes')) || {};
+            databaseClientes local[telLimpo] = {
+                nome: nome,
+                endereco: endereco || ''
+            };
+            localStorage.setItem('databaseClientes', JSON.stringify(databaseClientes local));
+        }
+
         window.atualizarOpcoesMenu = function() {
             const categoriaSel = document.getElementById('categoria-prato').value;
             const selectTipo = document.getElementById('tipo');
@@ -515,7 +543,7 @@
             }
             
             cardapioEstruturado[categoriaSel].forEach(opcao => {
-                selectTipo.innerHTML += `<option value="${opcao}">${opcao}</option>';`;
+                selectTipo.innerHTML += `<option value="${opcao}">${opcao}</option>`;
             });
             inserirPrecoSugerido();
         };
@@ -602,7 +630,6 @@
 
         window.carregarHistoricoDoFirebase = carregarHistoricoDoFirebase;
 
-        // --- ENGENHARIA DE CUPOM DA FILA (LINHAS EM BRANCO HARDWARE PARA OS 15CM DE CORTES) ---
         function gerarHtmlFitaVia(pedido, nomeVia) {
             let dadosCliente = '';
             if (pedido.clienteA4 && pedido.clienteA4 !== 'Consumidor Final') {
@@ -636,7 +663,6 @@
                 `;
             });
 
-            // Geração de 25 pulos de linha físicos no HTML para empurrar 15cm na impressora de 90mm/s
             let pulosDeLinhaFisicos = '<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>';
 
             return `
@@ -645,7 +671,7 @@
                         <div class="ticket-via-tag">--- VIA: ${nomeVia} ---</div><br>
                         <span class="ticket-header-title">TEMPERO DE FAMÍLIA</span>
                         <div class="ticket-divider">================================</div>
-                        <div class="ticket-header-num">>>>> PEDIDO #${String(pedido.numero).padStart(2, '0')} <<<<</div>
+                        <div class="ticket-header-num-destaque"><strong>>>>> PEDIDO #${String(pedido.numero).padStart(2, '0')} <<<<</strong></div>
                         <div class="ticket-divider">================================</div>
                         <div style="font-size: 10px; font-weight: bold; margin-top:3px;">${pedido.data}</div>
                     </div>
@@ -770,6 +796,11 @@
                 } else {
                     stringClienteHistorico += `<strong>BALCÃO</strong>`;
                     detalheClienteRelatorio += `<br><small>End: BALCÃO</small>`;
+                }
+
+                // Salva ou atualiza o cliente na base local se tiver telefone e nome informados
+                if (celularCliente && nomeCliente) {
+                    salvarOuAtualizarCadastroCliente(celularCliente, nomeCliente, enderecoCliente);
                 }
             } else {
                 stringClienteHistorico = '<strong>BALCÃO</strong>';

@@ -254,7 +254,7 @@
 
         .total-tela {
             font-size: 22px; font-weight: 800; text-align: right;
-            margin-top: 14px; padding-top: 14px; border-top: 2px dashed var(--cor-borda);
+            margin-top: 14px; padding-top: 14px; border-top: 2px dashed #cbd5e0;
         }
         .total-tela span { color: var(--cor-principal); }
 
@@ -302,40 +302,23 @@
                 margin: 0;
                 font-size: 11px;
                 color: #000;
-                line-height: 1.3;
+                line-height: 1.25;
                 word-wrap: break-word;
             }
             
             .ticket-header { text-align: center; margin-bottom: 2px; }
-            .ticket-via-tag { font-size: 11px; font-weight: bold; border: 1px solid #000; display: inline-block; padding: 1px 3px; margin-bottom: 3px; text-transform: uppercase; }
-            .ticket-header-title { font-size: 12px; font-weight: bold; letter-spacing: 0.5px; }
-            
-            /* CAIXA DE ALTO DESTAQUE HIERÁRQUICO PARA O PEDIDO DO HARDWARE */
-            .ticket-header-num-destaque {
-                font-size: 16px !important;
-                font-weight: bold !important;
-                margin: 5px 0 !important;
-                text-align: center !important;
-                display: block !important;
-                width: 100% !important;
-            }
-            
-            .ticket-divider { text-align: center; margin: 2px 0; font-weight: bold; font-size: 10px; }
-            .ticket-client-info { font-size: 10px; margin-bottom: 3px; line-height: 1.3; }
-            
-            /* Lista de Itens com espaçamento e quebra linear clara */
-            .ticket-item { margin: 6px 0; page-break-inside: avoid; border-bottom: 1px dotted #888; padding-bottom: 4px; }
+            .ticket-via-tag { font-size: 12px; font-weight: bold; border: 1px solid #000; display: inline-block; padding: 2px 4px; margin-bottom: 3px; text-transform: uppercase; }
+            .ticket-header-title { font-size: 13px; font-weight: bold; letter-spacing: 0.5px; }
+            .ticket-header-num-destaque { font-size: 26px !important; font-weight: 950 !important; margin: 6px 0 !important; text-align: center !important; display: block !important; width: 100% !important; letter-spacing: -0.5px; }
+            .ticket-divider { text-align: center; margin: 2px 0; font-weight: bold; font-size: 11px; }
+            .ticket-client-info { font-size: 10.5px; margin-bottom: 2px; line-height: 1.2; }
+            .ticket-item { margin: 6px 0; page-break-inside: avoid; border-bottom: 1px dotted #ccc; padding-bottom: 4px; }
             .ticket-item-main { width: 100%; display: block; text-align: left; }
             .ticket-item-name { display: block; font-weight: bold; font-size: 11px; line-height: 1.3; width: 100%; }
             .ticket-item-price { display: block; text-align: right; font-weight: bold; font-size: 11px; margin-top: 1px; }
-            .ticket-item-obs { font-size: 9.5px; padding-left: 1ch; margin-top: 1px; color: #444; font-style: italic; display: block; }
-            
-            .ticket-total-container { font-size: 12.5px; font-weight: bold; display: flex; justify-content: space-between; margin-top: 5px; }
-            
-            .ticket-wrapper-via {
-                page-break-after: always !important;
-                display: block;
-            }
+            .ticket-item-obs { font-size: 10px; padding-left: 1ch; margin-top: 1px; color: #333; font-style: italic; display: block; }
+            .ticket-total-container { font-size: 13px; font-weight: bold; display: flex; justify-content: space-between; margin-top: 4px; }
+            .ticket-wrapper-via { page-break-after: always !important; display: block; }
         }
     </style>
 </head>
@@ -443,7 +426,7 @@
                 </div>
                 <div>
                     <div class="total-tela">Total: <span>R$ <span id="total-valor">0.00</span></span></div>
-                    <button type="button" class="btn btn-print" style="margin-top: 16px;" onclick="finalizarEImprimirTicket()">🖨️ Autenticar & Imprimir Dupla Via</button>
+                    <button type="button" class="btn btn-print" style="margin-top: 15px;" onclick="finalizarEImprimirTicket()">🖨️ Autenticar & Imprimir Dupla Via</button>
                 </div>
             </div>
 
@@ -453,7 +436,7 @@
                     <div style="display: flex; gap: 10px;">
                         <button type="button" class="btn btn-fechamento" onclick="calcularFechamentoDiario()">🔒 Processar Turno</button>
                         <button type="button" id="btn-pdf-id" class="btn btn-pdf" onclick="exportarFechamentoPDF()">📥 Gerar Relatório PDF (A4)</button>
-                        <button type="button" id="btn-reset-id" class="btn btn-reset" onclick="reiniciarTurnoComSenha()">⚠️ Resetar Caixa (Turno)</button>
+                        <button type="button" id="btn-reset-id" class="btn btn-reset" onclick="reiniciarTurnoComSenha()">⚠️ Reiniciar Turno (Zerar Caixa)</button>
                     </div>
                 </div>
                 
@@ -507,7 +490,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDocs, query, orderBy, Timestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, getDocs, doc, setDoc, getDoc, query, orderBy, Timestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyD1miyZUImKwCCNwbgppUjtni860Urt-z4",
@@ -552,28 +535,39 @@
             "Outros Pratos": ["Marmita (P)", "Marmita (M)", "Marmita (G)", "Prato Feito (PF)"]
         };
 
-        window.buscarClientePorTelefone = function(telDigitado) {
+        // --- SISTEMA CLOUD DE BUSCA DE CLIENTE NO FIREBASE ---
+        window.buscarClientePorTelefone = async function(telDigitado) {
             const telLimpo = telDigitado.replace(/\D/g, ""); 
             if (telLimpo.length < 8) return;
 
-            const databaseClientesLocal = JSON.parse(localStorage.getItem('databaseClientesLocal')) || {};
-            if (databaseClientesLocal[telLimpo]) {
-                const clienteData = databaseClientesLocal[telLimpo];
-                document.getElementById('cliente-nome').value = clienteData.nome || '';
-                document.getElementById('cliente-endereco').value = clienteData.endereco || '';
+            try {
+                const docRef = doc(db, "clientes", telLimpo);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    const clienteData = docSnap.data();
+                    document.getElementById('cliente-nome').value = clienteData.nome || '';
+                    document.getElementById('cliente-endereco').value = clienteData.endereco || '';
+                }
+            } catch (erro) {
+                console.error("Erro ao buscar cliente na nuvem:", erro);
             }
         };
 
-        function boxingCadastroCliente(telefone, nome, address) {
+        // --- SALVAMENTO DE CLIENTES DIRETAMENTE NO BANCO CLOUD ---
+        async function salvarCadastroClienteCloud(telefone, nome, address) {
             const telLimpo = telefone.replace(/\D/g, "");
             if (!telLimpo || !nome) return;
 
-            const databaseClientesLocal = JSON.parse(localStorage.getItem('databaseClientesLocal')) || {};
-            databaseClientesLocal[telLimpo] = {
-                nome: nome,
-                endereco: address || ''
-            };
-            localStorage.setItem('databaseClientesLocal', JSON.stringify(databaseClientesLocal));
+            try {
+                await setDoc(doc(db, "clientes", telLimpo), {
+                    nome: nome,
+                    endereco: address || '',
+                    atualizadoEm: Timestamp.now()
+                });
+            } catch (erro) {
+                console.error("Erro ao salvar cliente na nuvem:", erro);
+            }
         }
 
         window.atualizarOpcoesMenu = function() {
@@ -672,7 +666,6 @@
             }
         }
 
-        // --- ENGENHARIA DE CUPOM DA FILA (HIERARQUIA CLARA EM BLOCOS COM DIVISORES) ---
         function gerarHtmlFitaVia(pedido, nomeVia) {
             let dadosCliente = '';
             if (pedido.clienteA4 && pedido.clienteA4 !== 'Consumidor Final') {
@@ -707,7 +700,6 @@
 
             let pulosDeLinhaFisicos = '<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>';
 
-            // ESTRUTURA REFORMULADA: HIERARQUIA POR LINHAS CLARAS DE TEXTO PURO (SEM PARECER UMA COISA SÓ)
             return `
                 <div class="ticket-wrapper-via">
                     <div class="ticket-header">
@@ -845,7 +837,8 @@
                 }
 
                 if (celularCliente && nomeCliente) {
-                    boxingCadastroCliente(celularCliente, nomeCliente, enderecoCliente);
+                    // Executa o salvamento direto no Firebase de forma assíncrona
+                    await salvarCadastroClienteCloud(celularCliente, nomeCliente, enderecoCliente);
                 }
             } else {
                 stringClienteHistorico = '<span style="color:#94a3b8; font-weight:bold;">BALCÃO</span>';
@@ -993,7 +986,6 @@
             document.getElementById('dashboard-vendas-tela').scrollIntoView({ behavior: 'smooth' });
         };
 
-        // --- RELATÓRIO PDF COM VISUAL ALTAMENTE COMERCIAL E LIMPO ---
         window.exportarFechamentoPDF = function() {
             if (!dadosFechamentoRelatorio) return;
 
@@ -1070,7 +1062,7 @@
 
                         <div class="section-title">Resumo Financeiro do Turno</div>
                         <table class="metrics-table">
-                            <tr><td style="background-color: #f8fafc; font-weight: bold; width: 45%;">Faturamento Bruto Total:</td><td style="font-weight: 800; color: #cc1d1d; font-size: 15px;">${dadosFechamentoRelatorio.faturamento}</td></tr>
+                            <tr><td style="background-color: #f8fafc; font-weight: bold; width: 45%;">Faturamento Br Total:</td><td style="font-weight: 800; color: #cc1d1d; font-size: 15px;">${dadosFechamentoRelatorio.faturamento}</td></tr>
                             <tr><td style="background-color: #f8fafc; font-weight: bold;">Volume de Pedidos Atendidos:</td><td style="font-weight: 600;">${dadosFechamentoRelatorio.pedidos}</td></tr>
                             <tr><td style="background-color: #f8fafc; font-weight: bold;">Ticket Médio do Caixa:</td><td style="font-weight: 700; color:#334155;">${dadosFechamentoRelatorio.ticket}</td></tr>
                         </table>

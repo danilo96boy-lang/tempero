@@ -292,11 +292,10 @@
             .ticket-via-tag { font-size: 12px; font-weight: bold; border: 1px solid #000; display: inline-block; padding: 2px 4px; margin-bottom: 3px; text-transform: uppercase; }
             .ticket-header-title { font-size: 13px; font-weight: bold; letter-spacing: 0.5px; }
             
-            /* DESTAQUE MASTER: PEDIDO EM NEGRITO ULTRA BRUTO E FONTE GRANDE */
             .ticket-header-num-destaque {
                 font-size: 26px !important;
                 font-weight: 950 !important;
-                margin: 6px 0 !important;
+                margin: 4px 0 !important;
                 text-align: center !important;
                 display: block !important;
                 width: 100% !important;
@@ -534,7 +533,6 @@
             "Outros Pratos": ["Marmita (P)", "Marmita (M)", "Marmita (G)", "Prato Feito (PF)"]
         };
 
-        // CORREÇÃO: Variável local ajustada sem espaços em branco de sintaxe
         window.buscarClientePorTelefone = function(telDigitado) {
             const telLimpo = telDigitado.replace(/\D/g, ""); 
             if (telLimpo.length < 8) return;
@@ -824,7 +822,6 @@
                 }
 
                 if (celularCliente && nomeCliente) {
-                    // Chamada corrigida
                     boxingCadastroCliente(celularCliente, nomeCliente, enderecoCliente);
                 }
             } else {
@@ -973,121 +970,116 @@
             document.getElementById('dashboard-vendas-tela').scrollIntoView({ behavior: 'smooth' });
         };
 
+        // --- EXPORTAÇÃO COMPLETA CORRIGIDA VIA ISOLAMENTO EM IFRAME (FIM DO PDF EM BRANCO) ---
         window.exportarFechamentoPDF = function() {
             if (!dadosFechamentoRelatorio) return;
 
-            const divPDF = document.createElement('div');
-            divPDF.style.position = 'absolute';
-            divPDF.style.top = '0';
-            divPDF.style.left = '0';
-            divPDF.style.textAlign = 'left';
-            divPDF.style.width = '790px'; 
-            divPDF.style.padding = '25px';
-            divPDF.style.fontFamily = 'Arial, sans-serif'; 
-            divPDF.style.color = '#1a202c';
-            divPDF.style.backgroundColor = '#ffffff'; 
-            divPDF.style.boxSizing = 'border-box';
-            divPDF.style.zIndex = '-9999'; 
+            // Cria um iframe invisível para a renderização limpa e isolada no topo do A4
+            const iframePDF = document.createElement('iframe');
+            iframePDF.style.position = 'fixed';
+            iframePDF.style.width = '800px';
+            iframePDF.style.height = '600px';
+            iframePDF.style.top = '-10000px'; // Joga completamente para fora da tela de uso
+            document.body.appendChild(iframePDF);
 
-            let conteudoHTML = `
-                <div style="border-bottom: 3px solid #cc1d1d; padding-bottom: 12px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: flex-end;">
-                    <div>
-                        <h2 style="margin: 0; color: #cc1d1d; font-size: 26px; text-transform: uppercase; letter-spacing: 0.5px;">Tempero de Família</h2>
-                        <div style="font-size: 14px; font-weight: bold; color: #4a5568; margin-top: 5px;">Resumo Consolidado de Vendas Diárias</div>
-                    </div>
-                    <div style="font-size: 12px; color: #718096; text-align: right; font-weight: 600;">${dadosFechamentoRelatorio.dataHora}</div>
-                </div>
+            const iframeDoc = iframePDF.contentWindow.document;
+            iframeDoc.open();
 
-                <div style="font-size: 14px; font-weight: bold; background-color: #edf2f7; padding: 10px; margin-top: 20px; margin-bottom: 12px; border-left: 4px solid #cc1d1d; text-transform: uppercase; color: #2d3748;">Resumo Financeiro Geral</div>
-                <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13px; table-layout: fixed;">
-                    <tr><td style="padding: 8px 12px; border: 1px solid #cbd5e0; background-color: #f7fafc; font-weight: bold; width: 40%;">Faturamento Bruto Acumulado:</td><td style="padding: 8px 12px; border: 1px solid #cbd5e0; font-weight: bold; color: #cc1d1d; font-size: 15px;">${dadosFechamentoRelatorio.faturamento}</td></tr>
-                    <tr><td style="padding: 8px 12px; border: 1px solid #cbd5e0; background-color: #f7fafc; font-weight: bold;">Quantidade de Pedidos Atendidos:</td><td style="padding: 8px 12px; border: 1px solid #cbd5e0;">${dadosFechamentoRelatorio.pedidos}</td></tr>
-                    <tr><td style="padding: 8px 12px; border: 1px solid #cbd5e0; background-color: #f7fafc; font-weight: bold;">Valor do Ticket Médio Geral:</td><td style="padding: 8px 12px; border: 1px solid #cbd5e0; font-weight: bold;">${dadosFechamentoRelatorio.ticket}</td></tr>
-                </table>
-
-                <div style="font-size: 14px; font-weight: bold; background-color: #edf2f7; padding: 10px; margin-top: 20px; margin-bottom: 12px; border-left: 4px solid #cc1d1d; text-transform: uppercase; color: #2d3748;">Faturamento por Meios de Recebimento</div>
-                <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13px; table-layout: fixed;">
-                    <thead><tr style="background-color: #f7fafc; font-weight: bold;"><th style="padding: 8px 12px; border: 1px solid #cbd5e0; text-align: left;">Forma de Pagamento</th><th style="padding: 8px 12px; border: 1px solid #cbd5e0; text-align: left;">Total Recebido</th></tr></thead>
-                    <tbody>
-            `;
-
-            for (const [metodo, valor] of Object.entries(dadosFechamentoRelatorio.porPagamento)) {
-                conteudoHTML += `<tr><td style="padding: 8px 12px; border: 1px solid #cbd5e0; font-weight: bold;">💵 ${metodo}</td><td style="padding: 8px 12px; border: 1px solid #cbd5e0; font-weight: 600; color:#2d3748;">R$ ${valor.toFixed(2)}</td></tr>`;
-            }
-
-            conteudoHTML += `
-                    </tbody>
-                </table>
-
-                <div style="font-size: 14px; font-weight: bold; background-color: #edf2f7; padding: 10px; margin-top: 20px; margin-bottom: 12px; border-left: 4px solid #cc1d1d; text-transform: uppercase; color: #2d3748;">Detalhamento de Faturamento por Produto</div>
-                <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13px; table-layout: fixed;">
-                    <thead><tr style="background-color: #f7fafc; font-weight: bold;"><th style="padding: 8px 12px; border: 1px solid #cbd5e0; text-align: left;">Prato / Categoria</th><th style="padding: 8px 12px; border: 1px solid #cbd5e0; text-align: left;">Total Faturado</th></tr></thead>
-                    <tbody>
-            `;
-
-            for (const [categoria, valor] of Object.entries(dadosFechamentoRelatorio.porCategoria)) {
-                conteudoHTML += `<tr><td style="padding: 8px 12px; border: 1px solid #cbd5e0; font-weight: bold;">${categoria}</td><td style="padding: 8px 12px; border: 1px solid #cbd5e0; font-size: 12px; font-weight: 600; color: #4a5568;">R$ ${valor.toFixed(2)}</td></tr>`;
-            }
-
-            conteudoHTML += `
-                    </tbody>
-                </table>
-                
-                <div style="font-size: 14px; font-weight: bold; background-color: #edf2f7; padding: 10px; margin-top: 20px; margin-bottom: 12px; border-left: 4px solid #cc1d1d; text-transform: uppercase; color: #2d3748;">Relação Analítica de Pedidos</div>
-                <table style="width: 100%; border-collapse: collapse; font-size: 11px; table-layout: fixed;">
-                    <thead>
-                        <tr style="background-color: #f7fafc; font-weight: bold;">
-                            <th style="padding: 8px 6px; border: 1px solid #cbd5e0; text-align: left; width: 12%;">Nº / Hora</th>
-                            <th style="padding: 8px 6px; border: 1px solid #cbd5e0; text-align: left; width: 28%;">Cliente / Contato</th>
-                            <th style="padding: 8px 6px; border: 1px solid #cbd5e0; text-align: left; width: 40%;">Produtos Lançados</th>
-                            <th style="padding: 8px 6px; border: 1px solid #cbd5e0; text-align: center; width: 10%;">Forma</th>
-                            <th style="padding: 8px 6px; border: 1px solid #cbd5e0; text-align: right; width: 10%;">Total</th>
-                        </tr>
-                    </thead>
-                    <tbody>`;
-
+            let tabelaPedidosHtml = '';
             historicoGeralPedidos.forEach(p => {
-                conteudoHTML += `
+                tabelaPedidosHtml += `
                     <tr style="page-break-inside: avoid !important;">
-                        <td style="padding: 8px 6px; border: 1px solid #cbd5e0; vertical-align: top; white-space: normal; word-break: break-word;">
+                        <td style="padding: 8px 6px; border: 1px solid #cbd5e0; vertical-align: top;">
                             <strong>#${String(p.numero).padStart(2, '0')}</strong><br><span style="color:#718096">${p.hora || '12:00'}</span>
                         </td>
-                        <td style="padding: 8px 6px; border: 1px solid #cbd5e0; vertical-align: top; font-size: 10.5px; white-space: normal; word-break: break-all; max-width: 0;">
+                        <td style="padding: 8px 6px; border: 1px solid #cbd5e0; vertical-align: top; font-size: 10.5px;">
                             ${p.clienteA4 || 'BALCÃO'}
                         </td>
-                        <td style="padding: 8px 6px; border: 1px solid #cbd5e0; vertical-align: top; font-size: 10.5px; line-height: 1.4; white-space: normal; word-break: break-word;">
+                        <td style="padding: 8px 6px; border: 1px solid #cbd5e0; vertical-align: top; font-size: 10.5px; line-height: 1.4;">
                             ${p.itensTxt}
                         </td>
-                        <td style="padding: 8px 6px; border: 1px solid #cbd5e0; vertical-align: top; text-align: center; white-space: normal; word-break: break-word;">
+                        <td style="padding: 8px 6px; border: 1px solid #cbd5e0; vertical-align: top; text-align: center;">
                             ${p.pagamento || 'Dinheiro'}
                         </td>
-                        <td style="padding: 8px 6px; border: 1px solid #cbd5e0; vertical-align: top; text-align: right; font-weight: bold; white-space: normal; word-break: break-word;">
+                        <td style="padding: 8px 6px; border: 1px solid #cbd5e0; vertical-align: top; text-align: right; font-weight: bold;">
                             R$ ${parseFloat(p.total || 0).toFixed(2)}
                         </td>
                     </tr>`;
             });
 
-            conteudoHTML += `</tbody></table>`;
-            divPDF.innerHTML = conteudoHTML;
+            let stringMeiosPagamentoHtml = '';
+            for (const [metodo, valor] of Object.entries(dadosFechamentoRelatorio.porPagamento)) {
+                stringMeiosPagamentoHtml += `<tr><td style="padding: 8px 12px; border: 1px solid #cbd5e0; font-weight: bold;">💵 ${metodo}</td><td style="padding: 8px 12px; border: 1px solid #cbd5e0; font-weight: 600; color:#2d3748;">R$ ${valor.toFixed(2)}</td></tr>`;
+            }
 
-            document.body.appendChild(divPDF);
+            let stringProdutosHtml = '';
+            for (const [categoria, valor] of Object.entries(dadosFechamentoRelatorio.porCategoria)) {
+                stringProdutosHtml += `<tr><td style="padding: 8px 12px; border: 1px solid #cbd5e0; font-weight: bold;">${categoria}</td><td style="padding: 8px 12px; border: 1px solid #cbd5e0; font-size: 12px; font-weight: 600; color: #4a5568;">R$ ${valor.toFixed(2)}</td></tr>`;
+            }
 
+            // Injeta a estrutura estruturada direto no documento do iframe
+            iframeDoc.write(`
+                <html>
+                <body style="margin:0; padding: 25px; font-family: Arial, sans-serif; color: #1a202c; background-color: #ffffff;">
+                    <div style="width: 740px;">
+                        <div style="border-bottom: 3px solid #cc1d1d; padding-bottom: 12px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: flex-end;">
+                            <div>
+                                <h2 style="margin: 0; color: #cc1d1d; font-size: 26px; text-transform: uppercase; letter-spacing: 0.5px; font-family: sans-serif;">Tempero de Família</h2>
+                                <div style="font-size: 14px; font-weight: bold; color: #4a5568; margin-top: 5px;">Resumo Consolidado de Vendas Diárias</div>
+                            </div>
+                            <div style="font-size: 12px; color: #718096; text-align: right; font-weight: 600;">${dadosFechamentoRelatorio.dataHora}</div>
+                        </div>
+
+                        <div style="font-size: 14px; font-weight: bold; background-color: #edf2f7; padding: 10px; margin-top: 20px; margin-bottom: 12px; border-left: 4px solid #cc1d1d; text-transform: uppercase; color: #2d3748;">Resumo Financeiro Geral</div>
+                        <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13px;">
+                            <tr><td style="padding: 8px 12px; border: 1px solid #cbd5e0; background-color: #f7fafc; font-weight: bold; width: 40%;">Faturamento Bruto Acumulado:</td><td style="padding: 8px 12px; border: 1px solid #cbd5e0; font-weight: bold; color: #cc1d1d; font-size: 15px;">${dadosFechamentoRelatorio.faturamento}</td></tr>
+                            <tr><td style="padding: 8px 12px; border: 1px solid #cbd5e0; background-color: #f7fafc; font-weight: bold;">Quantidade de Pedidos Atendidos:</td><td style="padding: 8px 12px; border: 1px solid #cbd5e0;">${dadosFechamentoRelatorio.pedidos}</td></tr>
+                            <tr><td style="padding: 8px 12px; border: 1px solid #cbd5e0; background-color: #f7fafc; font-weight: bold;">Valor do Ticket Médio Geral:</td><td style="padding: 8px 12px; border: 1px solid #cbd5e0; font-weight: bold;">${dadosFechamentoRelatorio.ticket}</td></tr>
+                        </table>
+
+                        <div style="font-size: 14px; font-weight: bold; background-color: #edf2f7; padding: 10px; margin-top: 20px; margin-bottom: 12px; border-left: 4px solid #cc1d1d; text-transform: uppercase; color: #2d3748;">Faturamento por Meios de Recebimento</div>
+                        <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13px;">
+                            <thead><tr style="background-color: #f7fafc; font-weight: bold;"><th style="padding: 8px 12px; border: 1px solid #cbd5e0; text-align: left;">Forma de Pagamento</th><th style="padding: 8px 12px; border: 1px solid #cbd5e0; text-align: left;">Total Recebido</th></tr></thead>
+                            <tbody>${stringMeiosPagamentoHtml}</tbody>
+                        </table>
+
+                        <div style="font-size: 14px; font-weight: bold; background-color: #edf2f7; padding: 10px; margin-top: 20px; margin-bottom: 12px; border-left: 4px solid #cc1d1d; text-transform: uppercase; color: #2d3748;">Detalhamento de Faturamento por Produto</div>
+                        <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13px;">
+                            <thead><tr style="background-color: #f7fafc; font-weight: bold;"><th style="padding: 8px 12px; border: 1px solid #cbd5e0; text-align: left;">Prato / Categoria</th><th style="padding: 8px 12px; border: 1px solid #cbd5e0; text-align: left;">Total Faturado</th></tr></thead>
+                            <tbody>${stringProdutosHtml}</tbody>
+                        </table>
+                        
+                        <div style="font-size: 14px; font-weight: bold; background-color: #edf2f7; padding: 10px; margin-top: 20px; margin-bottom: 12px; border-left: 4px solid #cc1d1d; text-transform: uppercase; color: #2d3748;">Relação Analítica de Pedidos</div>
+                        <table style="width: 100%; border-collapse: collapse; font-size: 11px; table-layout: fixed;">
+                            <thead>
+                                <tr style="background-color: #f7fafc; font-weight: bold;">
+                                    <th style="padding: 8px 6px; border: 1px solid #cbd5e0; text-align: left; width: 12%;">Nº / Hora</th>
+                                    <th style="padding: 8px 6px; border: 1px solid #cbd5e0; text-align: left; width: 26%;">Cliente / Contato</th>
+                                    <th style="padding: 8px 6px; border: 1px solid #cbd5e0; text-align: left; width: 42%;">Produtos Lançados</th>
+                                    <th style="padding: 8px 6px; border: 1px solid #cbd5e0; text-align: center; width: 10%;">Forma</th>
+                                    <th style="padding: 8px 6px; border: 1px solid #cbd5e0; text-align: right; width: 10%;">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>${tabelaPedidosHtml}</tbody>
+                        </table>
+                    </div>
+                </body>
+                </html>
+            `);
+            iframeDoc.close();
+
+            const targetElement = iframeDoc.body;
             const configuracoes = {
                 margin: [15, 12, 15, 12], 
                 filename: `Fechamento_Caixa_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.pdf`,
                 image: { type: 'jpeg', quality: 1.0 },
-                html2canvas: { 
-                    scale: 2, 
-                    logging: false, 
-                    useCORS: true,
-                    letterRendering: true,
-                    width: 790 
-                },
+                html2canvas: { scale: 2, logging: false, useCORS: true, letterRendering: true, width: 790 },
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
 
-            html2pdf().set(configuracoes).from(divPDF).save().then(() => {
-                divPDF.remove();
+            // Captura e destrói o iframe oculto logo em seguida
+            html2pdf().set(configuracoes).from(targetElement).save().then(() => {
+                iframePDF.remove();
             });
         };
 

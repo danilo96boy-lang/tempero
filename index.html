@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Tempero de Família - PDV Comercial Premium</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -31,16 +31,17 @@
             font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
             background-color: var(--cor-fundo);
             margin: 0;
-            padding: 12px;
+            padding: 8px;
             display: flex;
             flex-direction: column;
             align-items: center;
             color: var(--cor-texto);
             -webkit-font-smoothing: antialiased;
+            padding-bottom: 70px; /* Espaço para o menu mobile fixo no rodapé */
         }
 
-        @media(min-width: 768px) {
-            body { padding: 20px; }
+        @media(min-width: 950px) {
+            body { padding: 20px; padding-bottom: 20px; }
         }
 
         #tela-login {
@@ -68,10 +69,6 @@
             border-top: 5px solid var(--cor-principal);
         }
 
-        @media(min-width: 480px) {
-            .card-login { padding: 40px; }
-        }
-
         #conteudo-sistema {
             display: none;
             width: 100%;
@@ -84,17 +81,17 @@
             justify-content: flex-start;
             gap: 12px;
             background: var(--cor-card);
-            padding: 14px 20px;
+            padding: 12px 16px;
             border-radius: var(--border-radius-lg);
             width: 100%;
             box-shadow: var(--shadow-sm);
             box-sizing: border-box;
             border: 1px solid var(--cor-borda);
-            margin-bottom: 16px;
+            margin-bottom: 12px;
         }
 
         .brand-logo {
-            width: 40px;
+            width: 35px;
             height: 40px;
             object-fit: cover;
             border-radius: 50%;
@@ -103,18 +100,51 @@
 
         .brand-header h1 {
             margin: 0;
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 800;
             color: var(--cor-texto);
             letter-spacing: -0.5px;
         }
 
-        @media(min-width: 768px) {
+        @media(min-width: 950px) {
             .brand-header { gap: 16px; padding: 16px 28px; margin-bottom: 20px; }
             .brand-logo { width: 45px; height: 45px; }
             .brand-header h1 { font-size: 20px; }
         }
 
+        /* Menu de abas inferiores exclusivo para Celular */
+        .mobile-tabs-nav {
+            display: flex;
+            justify-content: space-around;
+            position: fixed;
+            bottom: 0; left: 0; width: 100%;
+            background: #ffffff;
+            border-top: 1px solid var(--cor-borda);
+            padding: 10px 0;
+            z-index: 999;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+        }
+
+        .tab-btn {
+            background: none; border: none; font-size: 11px; font-weight: 700;
+            color: var(--cor-texto-secundario); display: flex; flex-direction: column;
+            align-items: center; gap: 4px; cursor: pointer; position: relative; width: 25%;
+        }
+
+        .tab-btn.active { color: var(--cor-principal); }
+        
+        .badge-carrinho {
+            position: absolute; top: -6px; right: 22%;
+            background: var(--cor-principal); color: white;
+            font-size: 10px; font-weight: bold; border-radius: 10px;
+            padding: 1px 6px; display: none;
+        }
+
+        @media(min-width: 950px) {
+            .mobile-tabs-nav { display: none !important; }
+        }
+
+        /* Grid Responsiva Controlada por Abas no Celular */
         .main-grid {
             display: grid;
             grid-template-columns: 1fr;
@@ -123,14 +153,20 @@
             box-sizing: border-box;
         }
 
+        @media(max-width: 949px) {
+            .main-grid > .card { display: none; }
+            .main-grid > .card.active-tab-card { display: block !important; }
+        }
+
         @media(min-width: 950px) {
-            .main-grid { grid-template-columns: 1.3fr 1fr; gap: 20px; }
+            .main-grid { grid-template-columns: 1.35fr 1fr; gap: 20px; }
             .full-width-grid { grid-column: span 2; }
+            .main-grid > .card { display: block !important; }
         }
 
         .card {
             background-color: var(--cor-card);
-            padding: 20px;
+            padding: 16px;
             border-radius: var(--border-radius-lg);
             box-shadow: var(--shadow-sm);
             border: 1px solid var(--cor-borda);
@@ -139,10 +175,6 @@
 
         @media(min-width: 768px) {
             .card { padding: 24px; }
-        }
-
-        .card.card-fechamento-compacto {
-            padding: 15px 20px;
         }
 
         h3 {
@@ -164,7 +196,7 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
             color: var(--cor-principal);
-            margin: 14px 0 8px 0;
+            margin: 12px 0 8px 0;
             font-weight: 700;
         }
 
@@ -174,12 +206,12 @@
             gap: 12px;
         }
 
-        @media(min-width: 580px) {
+        @media(min-width: 480px) {
             .form-row.dois-campos { grid-template-columns: 1fr 1fr; }
             .form-row.tres-campos { grid-template-columns: 1fr 1fr 1fr; }
         }
 
-        .form-group { margin-bottom: 8px; }
+        .form-group { margin-bottom: 10px; }
 
         label {
             display: block;
@@ -189,17 +221,22 @@
             font-size: 12px;
         }
 
+        /* Evita o zoom automático do iOS e Android usando tamanho mínimo de 16px */
         input, select, textarea {
             width: 100%;
-            padding: 11px 12px;
+            padding: 12px; 
             border: 1px solid #cbd5e1;
             border-radius: var(--border-radius-md);
             box-sizing: border-box;
-            font-size: 14px;
+            font-size: 16px; 
             font-family: inherit;
             background-color: #fff;
             color: var(--cor-texto);
             transition: var(--transition);
+        }
+
+        @media(min-width: 950px) {
+            input, select, textarea { font-size: 14px; padding: 10px 12px; }
         }
 
         input:focus, select:focus, textarea:focus {
@@ -208,11 +245,11 @@
             box-shadow: 0 0 0 3px rgba(204, 29, 29, 0.1);
         }
 
-        textarea { resize: vertical; height: 60px; }
+        textarea { resize: vertical; height: 55px; }
 
         .btn {
             border: none;
-            padding: 12px 20px;
+            padding: 14px 20px;
             font-size: 14px;
             border-radius: var(--border-radius-md);
             cursor: pointer;
@@ -225,50 +262,30 @@
             width: 100%;
         }
 
-        @media(min-width: 580px) {
-            .btn { width: auto; inline-size: max-content; }
-            .card-fechamento-compacto .btn { width: auto; }
+        @media(min-width: 950px) {
+            .btn { width: auto; padding: 10px 20px; }
         }
 
-        .btn-add { 
-            background-color: var(--cor-principal); 
-            color: white; width: 100%; margin-top: 10px;
-        }
+        .btn-add { background-color: var(--cor-principal); color: white; margin-top: 10px; }
         .btn-add:hover { background-color: var(--cor-principal-hover); }
 
-        .btn-print { 
-            background-color: #16a34a; color: white; font-size: 15px; width: 100%;
-        }
+        .btn-print { background-color: #16a34a; color: white; font-size: 15px; }
         .btn-print:hover { background-color: #15803d; }
 
-        .btn-reprint {
-            background-color: #2563eb; color: white; padding: 8px 12px; font-size: 11px; border-radius: 6px;
-            font-weight: bold; border: none; cursor: pointer; width: auto;
-        }
-        .btn-reprint:hover { background-color: #1d4ed8; }
+        .btn-reprint { background-color: #2563eb; color: white; padding: 8px 12px; font-size: 11px; border-radius: 6px; font-weight: bold; border: none; width: auto; }
 
-        .btn-fechamento { background-color: #475569; color: white; width: 100%; }
+        .btn-fechamento { background-color: #475569; color: white; }
         .btn-fechamento:hover { background-color: #334155; }
 
-        .btn-pdf { background-color: #2563eb; color: white; display: none; width: 100%; }
+        .btn-pdf { background-color: #2563eb; color: white; display: none; }
         .btn-pdf:hover { background-color: #1d4ed8; }
 
-        .btn-reset { background-color: #dc2626; color: white; display: none; width: 100%; }
+        .btn-reset { background-color: #dc2626; color: white; display: none; }
         .btn-reset:hover { background-color: #b91c1c; }
 
-        @media(min-width: 480px) {
-            .card-fechamento-compacto .container-botoes-fechamento { display: flex; gap: 10px; width: 100%; justify-content: flex-end; }
-            .card-fechamento-compacto .btn { width: auto; }
-        }
+        .carrinho-container { display: flex; flex-direction: column; justify-content: space-between; background: #f8fafc; }
 
-        .carrinho-container {
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            background: #f8fafc;
-        }
-
-        .lista-itens { list-style: none; padding: 0; margin: 0; max-height: 260px; overflow-y: auto; }
+        .lista-itens { list-style: none; padding: 0; margin: 0; max-height: 280px; overflow-y: auto; }
 
         .item-carrinho {
             background: white; padding: 12px; margin-bottom: 8px;
@@ -278,60 +295,34 @@
 
         .btn-del {
             background: #fee2e2; color: #ef4444; border: none; border-radius: 50%;
-            width: 24px; height: 24px; font-weight: bold; cursor: pointer; display: flex;
+            width: 26px; height: 24px; font-weight: bold; cursor: pointer; display: flex;
             align-items: center; justify-content: center; font-size: 11px; flex-shrink: 0;
         }
-        .btn-del:hover { background: #fca5a5; }
 
-        .total-tela {
-            font-size: 22px; font-weight: 800; text-align: right;
-            margin-top: 14px; padding-top: 14px; border-top: 2px dashed #cbd5e1;
-        }
+        .total-tela { font-size: 22px; font-weight: 800; text-align: right; margin-top: 14px; padding-top: 14px; border-top: 2px dashed #cbd5e0; }
         .total-tela span { color: var(--cor-principal); }
 
-        .tabela-wrapper { 
-            width: 100%; 
-            overflow-x: auto; 
-            -webkit-overflow-scrolling: touch;
-            border-radius: var(--border-radius-md);
-            border: 1px solid var(--cor-borda);
-        }
-        .tabela-comercial { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 600px; }
-        .tabela-comercial th, .tabela-comercial td { padding: 12px 14px; text-align: left; border-bottom: 1px solid #borda; vertical-align: top; }
+        .tabela-wrapper { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: var(--border-radius-md); border: 1px solid var(--cor-borda); }
+        .tabela-comercial { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 650px; }
+        .tabela-comercial th, .tabela-comercial td { padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--cor-borda); vertical-align: top; }
         .tabela-comercial th { background-color: #f8fafc; color: #475569; font-weight: 700; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; }
-        .tabela-comercial tbody tr:hover { background-color: #fafbfc; }
 
-        .dash-container-tela { 
-            display: none; 
-            grid-template-columns: 1fr; 
-            gap: 16px; 
-            margin-top: 15px; 
-            padding: 12px; 
-            background: #f8fafc; 
-            border: 1px solid var(--cor-borda); 
-            border-radius: var(--border-radius-lg); 
-        }
-        @media(min-width: 650px) { 
-            .dash-container-tela { grid-template-columns: 1fr 1fr; padding: 15px; } 
-            .dash-full { grid-column: span 2; } 
-        }
+        .dash-container-tela { display: none; grid-template-columns: 1fr; gap: 16px; margin-top: 15px; padding: 12px; background: #f8fafc; border: 1px solid var(--cor-borda); border-radius: var(--border-radius-lg); }
+        @media(min-width: 650px) { .dash-container-tela { grid-template-columns: 1fr 1fr; padding: 15px; } .dash-full { grid-column: span 2; } }
         .bloco-metricas-caixa { display: flex; flex-direction: column; gap: 10px; }
         .card-metrica { background: #fff; border: 1px solid var(--cor-borda); padding: 14px; border-radius: var(--border-radius-md); box-shadow: var(--shadow-sm); }
         .card-metrica h4 { margin: 0; color: var(--cor-texto-secundario); font-size: 11px; text-transform: uppercase; }
         .card-metrica p { margin: 4px 0 0 0; font-size: 20px; font-weight: bold; color: var(--cor-texto); }
         .bloco-grafico-caixa { background: #fff; border: 1px solid var(--cor-borda); padding: 14px; border-radius: var(--border-radius-md); display: flex; justify-content: center; align-items: center; min-height: 220px; max-height: 260px; box-shadow: var(--shadow-sm); }
 
-        #ticket-print { display: none; }
+        /* ==========================================================================
+           --- LAYOUT DA IMPRESSORA TÉRMICA DE 58MM ---
+           ========================================================================== */
         @media print {
             @page { size: 58mm auto; margin: 0mm; }
             .no-print { display: none !important; }
             body { background: #fff; padding: 0; margin: 0; display: block; width: 58mm; }
-            
-            #ticket-print {
-                display: block !important;
-                font-family: 'Courier New', Courier, monospace;
-                width: 48mm; max-width: 48mm; padding: 1mm 0.5mm; margin: 0; font-size: 11px; color: #000; line-height: 1.25; word-wrap: break-word;
-            }
+            #ticket-print { display: block !important; font-family: 'Courier New', Courier, monospace; width: 48mm; max-width: 48mm; padding: 1mm 0.5mm; margin: 0; font-size: 11px; color: #000; line-height: 1.25; word-wrap: break-word; }
             .ticket-header { text-align: center; margin-bottom: 2px; }
             .ticket-via-tag { font-size: 12px; font-weight: bold; border: 1px solid #000; display: inline-block; padding: 2px 4px; margin-bottom: 3px; text-transform: uppercase; }
             .ticket-header-title { font-size: 13px; font-weight: bold; letter-spacing: 0.5px; }
@@ -369,6 +360,16 @@
         </div>
     </div>
 
+    <nav class="mobile-tabs-nav no-print" id="navegacao-abas-id">
+        <button class="tab-btn active" onclick="alternarAbaMobile('venda', this)">📝 <span>Vender</span></button>
+        <button class="tab-btn" onclick="alternarAbaMobile('carrinho', this)">
+            🛒 <span>Carrinho</span>
+            <span class="badge-carrinho" id="badge-contador-id">0</span>
+        </button>
+        <button class="tab-btn" onclick="alternarAbaMobile('fechamento', this)">🔒 <span>Turno</span></button>
+        <button class="tab-btn" onclick="alternarAbaMobile('logs', this)">📋 <span>Logs</span></button>
+    </nav>
+
     <div id="conteudo-sistema">
         <div class="brand-header no-print">
             <img src="logo.png" alt="Logo" class="brand-logo" onerror="this.style.display='none'">
@@ -376,7 +377,7 @@
         </div>
 
         <div class="main-grid no-print">
-            <div class="card">
+            <div class="card active-tab-card" id="card-aba-venda">
                 <h3>📝 Registrar Venda</h3>
                 <form id="form-item" onsubmit="adicionarItem(event)">
                     <div class="secao-titulo">1. Dados do Cliente</div>
@@ -445,25 +446,21 @@
                 </form>
             </div>
 
-            <div class="card carrinho-container">
-                <div>
-                    <h3>🛒 Checkout do Pedido</h3>
-                    <ul id="lista-itens" class="lista-itens"></ul>
-                </div>
+            <div class="card carrinho-container" id="card-aba-carrinho">
+                <h3>🛒 Checkout do Pedido</h3>
+                <ul id="lista-itens" class="lista-itens"></ul>
                 <div>
                     <div class="total-tela">Total: <span>R$ <span id="total-valor">0.00</span></span></div>
                     <button type="button" class="btn btn-print" style="margin-top: 15px;" onclick="finalizarEImprimirTicket()">🖨️ Autenticar & Imprimir Dupla Via</button>
                 </div>
             </div>
 
-            <div class="card full-width-grid card-fechamento-compacto">
-                <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; width: 100%;">
-                    <h3 style="margin:0; border: none; padding: 0;">🔒 Fechamento Consolidado de Caixa</h3>
-                    <div class="container-botoes-fechamento" style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
-                        <button type="button" class="btn btn-fechamento" onclick="calcularFechamentoDiario()">🔒 Processar Turno</button>
-                        <button type="button" id="btn-pdf-id" class="btn btn-pdf" onclick="exportarFechamentoPDF()">📥 Gerar Relatório PDF (A4)</button>
-                        <button type="button" id="btn-reset-id" class="btn btn-reset" onclick="reiniciarTurnoComSenha()">⚠️ Reiniciar Turno (Zerar Caixa)</button>
-                    </div>
+            <div class="card card-fechamento-compacto" id="card-aba-fechamento">
+                <h3>🔒 Fechamento Consolidado de Caixa</h3>
+                <div class="container-botoes-fechamento" style="display: flex; flex-direction: column; gap: 8px;">
+                    <button type="button" class="btn btn-fechamento" onclick="calcularFechamentoDiario()">🔒 Processar Turno</button>
+                    <button type="button" id="btn-pdf-id" class="btn btn-pdf" onclick="exportarFechamentoPDF()">📥 Gerar Relatório PDF (A4)</button>
+                    <button type="button" id="btn-reset-id" class="btn btn-reset" onclick="reiniciarTurnoComSenha()">⚠️ Reiniciar Turno (Zerar Caixa)</button>
                 </div>
                 
                 <div id="dashboard-vendas-tela" class="dash-container-tela">
@@ -490,7 +487,7 @@
                 </div>
             </div>
 
-            <div class="card full-width-grid">
+            <div class="card" id="card-aba-logs">
                 <h3>📋 Logs Analíticos de Transações (Real-time Firebase)</h3>
                 <div class="tabela-wrapper">
                     <table class="tabela-comercial">
@@ -537,7 +534,28 @@
         let dadosFechamentoRelatorio = null;
         let chartPizzaInstancia = null; 
 
-        let horarioCorteTurno = 0; // Controlado via Cloud agora contra bugs de multi-navegador
+        let horarioCorteTurno = 0; 
+
+        // --- SISTEMA REVOLUCIONÁRIO DE ALTERNÂNCIA DE ABAS MOBILE ---
+        window.alternarAbaMobile = function(abaNome, elementoBtn) {
+            // Remove a marcação ativa de todos os botões do menu inferior
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            if(elementoBtn) elementoBtn.classList.add('active');
+
+            // Oculta todos os cards do grid operacional móvel
+            document.getElementById('card-aba-venda').classList.remove('active-tab-card');
+            document.getElementById('card-aba-carrinho').classList.remove('active-tab-card');
+            document.getElementById('card-aba-fechamento').classList.remove('active-tab-card');
+            document.getElementById('card-aba-logs').classList.remove('active-tab-card');
+
+            // Ativa o bloco correto baseado na seleção do operador
+            if(abaNome === 'venda') document.getElementById('card-aba-venda').classList.add('active-tab-card');
+            if(abaNome === 'carrinho') document.getElementById('card-aba-carrinho').classList.add('active-tab-card');
+            if(abaNome === 'fechamento') document.getElementById('card-aba-fechamento').classList.add('active-tab-card');
+            if(abaNome === 'logs') document.getElementById('card-aba-logs').classList.add('active-tab-card');
+            
+            window.scrollTo({ top: 0, behavior: 'instant' });
+        };
 
         window.buscarClientePorTelefone = async function(telDigitado) {
             const telLimpo = telDigitado.replace(/\D/g, ""); 
@@ -600,7 +618,6 @@
             }
         };
 
-        // --- CONTROLE DE CAIXA EM NUVEM FIRESTORE ---
         async function sincronizarHorarioCorteCloud() {
             try {
                 const docRef = doc(db, "configuracoes", "turno_atual");
@@ -793,6 +810,11 @@
             document.getElementById('categoria-prato').value = '';
             document.getElementById('tipo').innerHTML = '<option value="">-- Selecione o prato --</option>';
             document.getElementById('categoria-prato').focus();
+
+            // Retorno visual: muda automaticamente para a aba do carrinho no celular ao adicionar um prato
+            if(window.innerWidth < 950) {
+                alert("Item adicionado ao carrinho!");
+            }
         };
 
         window.removerItem = function(id) {
@@ -818,6 +840,15 @@
                 `;
             });
             document.getElementById('total-valor').innerText = total.toFixed(2);
+
+            // Atualiza o contador vermelho de itens do menu inferior mobile
+            const badge = document.getElementById('badge-contador-id');
+            if(pedidoAtual.length > 0) {
+                badge.innerText = pedidoAtual.length;
+                badge.style.display = 'block';
+            } else {
+                badge.style.display = 'none';
+            }
         }
 
         window.finalizarEImprimirTicket = async function() {
@@ -900,6 +931,11 @@
                 document.getElementById('cliente-celular').value = '';
                 document.getElementById('cliente-endereco').value = '';
                 atualizarInterface();
+
+                // Retorna automaticamente para a primeira tela no mobile após a impressão
+                if(window.innerWidth < 950) {
+                    alternarAbaMobile('venda', document.querySelector('.mobile-tabs-nav .tab-btn:first-child'));
+                }
             } catch (erro) {
                 alert("Erro ao conectar com o Firebase!");
                 console.error(erro);
@@ -1002,7 +1038,7 @@
             document.getElementById('btn-pdf-id').style.display = 'flex';
             document.getElementById('btn-reset-id').style.display = 'flex';
             
-            if(window.innerWidth > 768) {
+            if(window.innerWidth > 950) {
                 document.getElementById('dashboard-vendas-tela').scrollIntoView({ behavior: 'smooth' });
             }
         };
@@ -1133,14 +1169,12 @@
             });
         };
 
-        // --- REINICIAR TURNO COM GRAVAÇÃO CLOUD DIRETA NO BANCO ---
         window.reiniciarTurnoComSenha = async function() {
             const senhaDigitada = prompt("Para zerar o caixa e iniciar o próximo turno, digite a senha master:");
             if (senhaDigitada === "1234") {
                 const novoHorarioCorte = Date.now();
                 
                 try {
-                    // Salva rigidamente na nuvem para atualizar todos os outros celulares e PCs na mesma hora
                     await setDoc(doc(db, "configuracoes", "turno_atual"), {
                         horarioCorte: novoHorarioCorte,
                         atualizadoPor: "gabriele",
@@ -1160,7 +1194,13 @@
                     document.getElementById('btn-reset-id').style.display = 'none';
                     
                     alert("Sucesso!\nTurno encerrado globalmente na nuvem. O caixa iniciou no Pedido #01 em todos os aparelhos.");
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    
+                    // Reseta para a primeira aba no mobile após o wipe
+                    if(window.innerWidth < 950) {
+                        alternarAbaMobile('venda', document.querySelector('.mobile-tabs-nav .tab-btn:first-child'));
+                    } else {
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
                     
                     await carregarHistoricoDoFirebase();
                 } catch(e) {

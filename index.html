@@ -31,7 +31,7 @@
             font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
             background-color: var(--cor-fundo);
             margin: 0;
-            padding: 12px; /* Reduzido para melhor aproveitamento no celular */
+            padding: 12px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -174,7 +174,6 @@
             gap: 12px;
         }
 
-        /* Responsividade refinada de campos para telas mobile e desktop */
         @media(min-width: 580px) {
             .form-row.dois-campos { grid-template-columns: 1fr 1fr; }
             .form-row.tres-campos { grid-template-columns: 1fr 1fr 1fr; }
@@ -192,7 +191,7 @@
 
         input, select, textarea {
             width: 100%;
-            padding: 11px 12px; /* Aumentada área de toque no mobile */
+            padding: 11px 12px;
             border: 1px solid #cbd5e1;
             border-radius: var(--border-radius-md);
             box-sizing: border-box;
@@ -223,7 +222,7 @@
             justify-content: center;
             align-items: center;
             gap: 8px;
-            width: 100%; /* Botões ocupam largura total para facilitar o clique */
+            width: 100%;
         }
 
         @media(min-width: 580px) {
@@ -290,7 +289,6 @@
         }
         .total-tela span { color: var(--cor-principal); }
 
-        /* Proteção de usabilidade nas tabelas mobile */
         .tabela-wrapper { 
             width: 100%; 
             overflow-x: auto; 
@@ -299,11 +297,10 @@
             border: 1px solid var(--cor-borda);
         }
         .tabela-comercial { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 600px; }
-        .tabela-comercial th, .tabela-comercial td { padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--cor-borda); vertical-align: top; }
+        .tabela-comercial th, .tabela-comercial td { padding: 12px 14px; text-align: left; border-bottom: 1px solid #borda; vertical-align: top; }
         .tabela-comercial th { background-color: #f8fafc; color: #475569; font-weight: 700; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; }
         .tabela-comercial tbody tr:hover { background-color: #fafbfc; }
 
-        /* Dashboard de Métricas Responsivo */
         .dash-container-tela { 
             display: none; 
             grid-template-columns: 1fr; 
@@ -324,9 +321,6 @@
         .card-metrica p { margin: 4px 0 0 0; font-size: 20px; font-weight: bold; color: var(--cor-texto); }
         .bloco-grafico-caixa { background: #fff; border: 1px solid var(--cor-borda); padding: 14px; border-radius: var(--border-radius-md); display: flex; justify-content: center; align-items: center; min-height: 220px; max-height: 260px; box-shadow: var(--shadow-sm); }
 
-        /* ==========================================================================
-           --- LAYOUT DA IMPRESSORA TÉRMICA DE 58MM ---
-           ========================================================================== */
         #ticket-print { display: none; }
         @media print {
             @page { size: 58mm auto; margin: 0mm; }
@@ -543,29 +537,7 @@
         let dadosFechamentoRelatorio = null;
         let chartPizzaInstancia = null; 
 
-        let horarioCorteTurno = localStorage.getItem('horarioCorteTurno') ? parseInt(localStorage.getItem('horarioCorteTurno')) : 0;
-
-        const tabelaPrecosSugeridos = {
-            "Parmegiana de Frango": { "Marmita (P)": 18.00, "Marmita (M)": 22.00, "Marmita (G)": 26.00, "Prato Feito (PF)": 20.00 },
-            "Frango à Milanesa":    { "Marmita (P)": 16.00, "Marmita (M)": 20.00, "Marmita (G)": 24.00, "Prato Feito (PF)": 18.00 },
-            "Parmegiana de Berinjela": { "Marmita (P)": 17.00, "Marmita (M)": 21.00, "Marmita (G)": 25.00, "Prato Feito (PF)": 19.00 },
-            "Feijoada":               { "Marmita (P)": 20.00, "Marmita (M)": 25.00, "Marmita (G)": 30.00, "Prato Feito (PF)": 22.00 },
-            "Marmitex":               { "Marmitex P": 15.00, "Marmitex M": 18.00, "Marmitex G": 22.00 },
-            "Prato Feito":            { "Prato Feito Único": 16.00 },
-            "Bebidas":                { "Refrigerante Lata": 6.00, "Refrigerante 2L": 12.00, "Agua Normal": 4.00, "Agua com Gas": 5.00, "Outros": 0.00 },
-            "Outros Pratos":          { "Marmita (P)": 0.00, "Marmita (M)": 0.00, "Marmita (G)": 0.00, "Prato Feito (PF)": 0.00 }
-        };
-
-        const cardapioEstruturado = {
-            "Parmegiana de Frango": ["Marmita (P)", "Marmita (M)", "Marmita (G)", "Prato Feito (PF)"],
-            "Frango à Milanesa": ["Marmita (P)", "Marmita (M)", "Marmita (G)", "Prato Feito (PF)"],
-            "Parmegiana de Berinjela": ["Marmita (P)", "Marmita (M)", "Marmita (G)", "Prato Feito (PF)"],
-            "Feijoada": ["Marmita (P)", "Marmita (M)", "Marmita (G)", "Prato Feito (PF)"],
-            "Marmitex": ["Marmitex P", "Marmitex M", "Marmitex G"],
-            "Prato Feito": ["Prato Feito Único"],
-            "Bebidas": ["Refrigerante Lata", "Refrigerante 2L", "Agua Normal", "Agua com Gas", "Outros"],
-            "Outros Pratos": ["Marmita (P)", "Marmita (M)", "Marmita (G)", "Prato Feito (PF)"]
-        };
+        let horarioCorteTurno = 0; // Controlado via Cloud agora contra bugs de multi-navegador
 
         window.buscarClientePorTelefone = async function(telDigitado) {
             const telLimpo = telDigitado.replace(/\D/g, ""); 
@@ -628,7 +600,22 @@
             }
         };
 
-        window.validarAcessoSecure = function(event) {
+        // --- CONTROLE DE CAIXA EM NUVEM FIRESTORE ---
+        async function sincronizarHorarioCorteCloud() {
+            try {
+                const docRef = doc(db, "configuracoes", "turno_atual");
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    horarioCorteTurno = docSnap.data().horarioCorte || 0;
+                } else {
+                    horarioCorteTurno = 0;
+                }
+            } catch (e) {
+                horarioCorteTurno = localStorage.getItem('horarioCorteTurno') ? parseInt(localStorage.getItem('horarioCorteTurno')) : 0;
+            }
+        }
+
+        window.validarAcessoSecure = async function(event) {
             event.preventDefault();
             const usuarioInput = document.getElementById('login-usuario').value.trim();
             const senhaInput = document.getElementById('login-senha').value.trim();
@@ -637,6 +624,7 @@
             if (usuarioInput.toLowerCase() === "gabriele" && btoa(senhaInput) === hashValido) {
                 document.getElementById('tela-login').style.display = 'none';
                 document.getElementById('conteudo-sistema').style.display = 'block';
+                await sincronizarHorarioCorteCloud();
                 carregarHistoricoDoFirebase();
             } else {
                 alert("Usuário ou Senha incorretos!");
@@ -646,6 +634,7 @@
 
         async function carregarHistoricoDoFirebase() {
             try {
+                await sincronizarHorarioCorteCloud();
                 const q = query(collection(db, "pedidos"), orderBy("numero", "desc"));
                 const querySnapshot = await getDocs(q);
                 
@@ -1013,7 +1002,6 @@
             document.getElementById('btn-pdf-id').style.display = 'flex';
             document.getElementById('btn-reset-id').style.display = 'flex';
             
-            // Suaviza a rolagem de tela apenas no computador
             if(window.innerWidth > 768) {
                 document.getElementById('dashboard-vendas-tela').scrollIntoView({ behavior: 'smooth' });
             }
@@ -1145,25 +1133,39 @@
             });
         };
 
-        window.reiniciarTurnoComSenha = function() {
+        // --- REINICIAR TURNO COM GRAVAÇÃO CLOUD DIRETA NO BANCO ---
+        window.reiniciarTurnoComSenha = async function() {
             const senhaDigitada = prompt("Para zerar o caixa e iniciar o próximo turno, digite a senha master:");
             if (senhaDigitada === "1234") {
-                horarioCorteTurno = Date.now();
-                localStorage.setItem('horarioCorteTurno', horarioCorteTurno);
+                const novoHorarioCorte = Date.now();
+                
+                try {
+                    // Salva rigidamente na nuvem para atualizar todos os outros celulares e PCs na mesma hora
+                    await setDoc(doc(db, "configuracoes", "turno_atual"), {
+                        horarioCorte: novoHorarioCorte,
+                        atualizadoPor: "gabriele",
+                        timestamp: Timestamp.now()
+                    });
+                    
+                    localStorage.setItem('horarioCorteTurno', novoHorarioCorte);
+                    horarioCorteTurno = novoHorarioCorte;
 
-                historicoGeralPedidos = [];
-                contadorPedidos = 1;
-                dadosFechamentoRelatorio = null;
-                
-                document.getElementById('corpo-historico').innerHTML = ''; 
-                document.getElementById('dashboard-vendas-tela').style.display = 'none';
-                document.getElementById('btn-pdf-id').style.display = 'none';
-                document.getElementById('btn-reset-id').style.display = 'none';
-                
-                alert("Turno encerrado!\nO caixa operacional local foi zerado e iniciou no Pedido #01.");
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-                
-                carregarHistoricoDoFirebase();
+                    historicoGeralPedidos = [];
+                    contadorPedidos = 1;
+                    dadosFechamentoRelatorio = null;
+                    
+                    document.getElementById('corpo-historico').innerHTML = ''; 
+                    document.getElementById('dashboard-vendas-tela').style.display = 'none';
+                    document.getElementById('btn-pdf-id').style.display = 'none';
+                    document.getElementById('btn-reset-id').style.display = 'none';
+                    
+                    alert("Sucesso!\nTurno encerrado globalmente na nuvem. O caixa iniciou no Pedido #01 em todos os aparelhos.");
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    
+                    await carregarHistoricoDoFirebase();
+                } catch(e) {
+                    alert("Erro de conexão com o Firestore.");
+                }
             } else if (senhaDigitada !== null) {
                 alert("Senha incorreta!");
             }

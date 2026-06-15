@@ -37,7 +37,7 @@
             align-items: center;
             color: var(--cor-texto);
             -webkit-font-smoothing: antialiased;
-            padding-bottom: 70px; /* Espaço para o menu mobile fixo no rodapé */
+            padding-bottom: 70px;
         }
 
         @media(min-width: 950px) {
@@ -112,7 +112,6 @@
             .brand-header h1 { font-size: 20px; }
         }
 
-        /* Menu de abas inferiores exclusivo para Celular */
         .mobile-tabs-nav {
             display: flex;
             justify-content: space-around;
@@ -144,7 +143,6 @@
             .mobile-tabs-nav { display: none !important; }
         }
 
-        /* Grid Responsiva Controlada por Abas no Celular */
         .main-grid {
             display: grid;
             grid-template-columns: 1fr;
@@ -177,6 +175,10 @@
             .card { padding: 24px; }
         }
 
+        .card.card-fechamento-compacto {
+            padding: 15px 20px;
+        }
+
         h3 {
             margin: 0 0 16px 0;
             color: var(--cor-texto);
@@ -196,7 +198,7 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
             color: var(--cor-principal);
-            margin: 12px 0 8px 0;
+            margin: 14px 0 8px 0;
             font-weight: 700;
         }
 
@@ -221,7 +223,6 @@
             font-size: 12px;
         }
 
-        /* Evita o zoom automático do iOS e Android usando tamanho mínimo de 16px */
         input, select, textarea {
             width: 100%;
             padding: 12px; 
@@ -274,18 +275,23 @@
 
         .btn-reprint { background-color: #2563eb; color: white; padding: 8px 12px; font-size: 11px; border-radius: 6px; font-weight: bold; border: none; width: auto; }
 
-        .btn-fechamento { background-color: #475569; color: white; }
+        .btn-fechamento { background-color: #475569; color: white; width: 100%; }
         .btn-fechamento:hover { background-color: #334155; }
 
-        .btn-pdf { background-color: #2563eb; color: white; display: none; }
+        .btn-pdf { background-color: #2563eb; color: white; display: none; width: 100%; }
         .btn-pdf:hover { background-color: #1d4ed8; }
 
-        .btn-reset { background-color: #dc2626; color: white; display: none; }
+        .btn-reset { background-color: #dc2626; color: white; display: none; width: 100%; }
         .btn-reset:hover { background-color: #b91c1c; }
+
+        @media(min-width: 480px) {
+            .container-botoes-fechamento { display: flex; gap: 10px; width: 100%; justify-content: flex-end; }
+            .card-fechamento-compacto .btn { width: auto; }
+        }
 
         .carrinho-container { display: flex; flex-direction: column; justify-content: space-between; background: #f8fafc; }
 
-        .lista-itens { list-style: none; padding: 0; margin: 0; max-height: 280px; overflow-y: auto; }
+        .lista-itens { list-style: none; padding: 0; margin: 0; max-height: 260px; overflow-y: auto; }
 
         .item-carrinho {
             background: white; padding: 12px; margin-bottom: 8px;
@@ -295,7 +301,7 @@
 
         .btn-del {
             background: #fee2e2; color: #ef4444; border: none; border-radius: 50%;
-            width: 26px; height: 24px; font-weight: bold; cursor: pointer; display: flex;
+            width: 24px; height: 24px; font-weight: bold; cursor: pointer; display: flex;
             align-items: center; justify-content: center; font-size: 11px; flex-shrink: 0;
         }
 
@@ -315,9 +321,6 @@
         .card-metrica p { margin: 4px 0 0 0; font-size: 20px; font-weight: bold; color: var(--cor-texto); }
         .bloco-grafico-caixa { background: #fff; border: 1px solid var(--cor-borda); padding: 14px; border-radius: var(--border-radius-md); display: flex; justify-content: center; align-items: center; min-height: 220px; max-height: 260px; box-shadow: var(--shadow-sm); }
 
-        /* ==========================================================================
-           --- LAYOUT DA IMPRESSORA TÉRMICA DE 58MM ---
-           ========================================================================== */
         @media print {
             @page { size: 58mm auto; margin: 0mm; }
             .no-print { display: none !important; }
@@ -536,19 +539,37 @@
 
         let horarioCorteTurno = 0; 
 
-        // --- SISTEMA REVOLUCIONÁRIO DE ALTERNÂNCIA DE ABAS MOBILE ---
+        const tabelaPrecosSugeridos = {
+            "Parmegiana de Frango": { "Marmita (P)": 18.00, "Marmita (M)": 22.00, "Marmita (G)": 26.00, "Prato Feito (PF)": 20.00 },
+            "Frango à Milanesa":    { "Marmita (P)": 16.00, "Marmita (M)": 20.00, "Marmita (G)": 24.00, "Prato Feito (PF)": 18.00 },
+            "Parmegiana de Berinjela": { "Marmita (P)": 17.00, "Marmita (M)": 21.00, "Marmita (G)": 25.00, "Prato Feito (PF)": 19.00 },
+            "Feijoada":               { "Marmita (P)": 20.00, "Marmita (M)": 25.00, "Marmita (G)": 30.00, "Prato Feito (PF)": 22.00 },
+            "Marmitex":               { "Marmitex P": 15.00, "Marmitex M": 18.00, "Marmitex G": 22.00 },
+            "Prato Feito":            { "Prato Feito Único": 16.00 },
+            "Bebidas":                { "Refrigerante Lata": 6.00, "Refrigerante 2L": 12.00, "Agua Normal": 4.00, "Agua com Gas": 5.00, "Outros": 0.00 },
+            "Outros Pratos":          { "Marmita (P)": 0.00, "Marmita (M)": 0.00, "Marmita (G)": 0.00, "Prato Feito (PF)": 0.00 }
+        };
+
+        const cardapioEstruturado = {
+            "Parmegiana de Frango": ["Marmita (P)", "Marmita (M)", "Marmita (G)", "Prato Feito (PF)"],
+            "Frango à Milanesa": ["Marmita (P)", "Marmita (M)", "Marmita (G)", "Prato Feito (PF)"],
+            "Parmegiana de Berinjela": ["Marmita (P)", "Marmita (M)", "Marmita (G)", "Prato Feito (PF)"],
+            "Feijoada": ["Marmita (P)", "Marmita (M)", "Marmita (G)", "Prato Feito (PF)"],
+            "Marmitex": ["Marmitex P", "Marmitex M", "Marmitex G"],
+            "Prato Feito": ["Prato Feito Único"],
+            "Bebidas": ["Refrigerante Lata", "Refrigerante 2L", "Agua Normal", "Agua com Gas", "Outros"],
+            "Outros Pratos": ["Marmita (P)", "Marmita (M)", "Marmita (G)", "Prato Feito (PF)"]
+        };
+
         window.alternarAbaMobile = function(abaNome, elementoBtn) {
-            // Remove a marcação ativa de todos os botões do menu inferior
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             if(elementoBtn) elementoBtn.classList.add('active');
 
-            // Oculta todos os cards do grid operacional móvel
             document.getElementById('card-aba-venda').classList.remove('active-tab-card');
             document.getElementById('card-aba-carrinho').classList.remove('active-tab-card');
             document.getElementById('card-aba-fechamento').classList.remove('active-tab-card');
             document.getElementById('card-aba-logs').classList.remove('active-tab-card');
 
-            // Ativa o bloco correto baseado na seleção do operador
             if(abaNome === 'venda') document.getElementById('card-aba-venda').classList.add('active-tab-card');
             if(abaNome === 'carrinho') document.getElementById('card-aba-carrinho').classList.add('active-tab-card');
             if(abaNome === 'fechamento') document.getElementById('card-aba-fechamento').classList.add('active-tab-card');
@@ -590,13 +611,14 @@
             }
         }
 
+        // CORREÇÃO: Restaurada a leitura correta das variáveis do cardápio estruturado
         window.atualizarOpcoesMenu = function() {
             const categorySel = document.getElementById('categoria-prato').value;
             const selectTipo = document.getElementById('tipo');
             selectTipo.innerHTML = '';
             
             if (!categorySel || !cardapioEstruturado[categorySel]) {
-                selectTipo.innerHTML = '<option value="">-- Selecione o prato --</option>';
+                selectTipo.innerHTML = '<option value="">-- Selecione o prato primeiro --</option>';
                 return;
             }
             
@@ -808,10 +830,9 @@
             document.getElementById('valor').value = '';
             document.getElementById('quantidade').value = '1';
             document.getElementById('categoria-prato').value = '';
-            document.getElementById('tipo').innerHTML = '<option value="">-- Selecione o prato --</option>';
+            document.getElementById('tipo').innerHTML = '<option value="">-- Selecione o prato primeiro --</option>';
             document.getElementById('categoria-prato').focus();
 
-            // Retorno visual: muda automaticamente para a aba do carrinho no celular ao adicionar um prato
             if(window.innerWidth < 950) {
                 alert("Item adicionado ao carrinho!");
             }
@@ -841,7 +862,6 @@
             });
             document.getElementById('total-valor').innerText = total.toFixed(2);
 
-            // Atualiza o contador vermelho de itens do menu inferior mobile
             const badge = document.getElementById('badge-contador-id');
             if(pedidoAtual.length > 0) {
                 badge.innerText = pedidoAtual.length;
@@ -932,7 +952,6 @@
                 document.getElementById('cliente-endereco').value = '';
                 atualizarInterface();
 
-                // Retorna automaticamente para a primeira tela no mobile após a impressão
                 if(window.innerWidth < 950) {
                     alternarAbaMobile('venda', document.querySelector('.mobile-tabs-nav .tab-btn:first-child'));
                 }
@@ -1195,7 +1214,6 @@
                     
                     alert("Sucesso!\nTurno encerrado globalmente na nuvem. O caixa iniciou no Pedido #01 em todos os aparelhos.");
                     
-                    // Reseta para a primeira aba no mobile após o wipe
                     if(window.innerWidth < 950) {
                         alternarAbaMobile('venda', document.querySelector('.mobile-tabs-nav .tab-btn:first-child'));
                     } else {

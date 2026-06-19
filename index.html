@@ -15,7 +15,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // --- ALINHAMENTO DO CARDÁPIO COM A TABELA DE PREÇOS ---
+        // --- MAPAS FINANCEIROS E CARDÁPIO PADRÃO ---
         const cardapioEstruturado = {
             "Parmegiana de Frango": ["P", "M", "G"],
             "Frango à Milanesa": ["P", "M", "G"],
@@ -59,6 +59,15 @@
 
         window.alternarAbaMobile = function(abaNome, elementoBtn) {
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            
+            // Se não passar o elemento (chamada via código), localiza o botão correto
+            if (!elementoBtn) {
+                if (abaNome === 'venda') elementoBtn = document.querySelector(".mobile-tabs-nav .tab-btn:nth-child(1)");
+                if (abaNome === 'carrinho') elementoBtn = document.querySelector(".mobile-tabs-nav .tab-btn:nth-child(2)");
+                if (abaNome === 'fechamento') elementoBtn = document.querySelector(".mobile-tabs-nav .tab-btn:nth-child(3)");
+                if (abaNome === 'logs') elementoBtn = document.querySelector(".mobile-tabs-nav .tab-btn:nth-child(4)");
+            }
+            
             if(elementoBtn) elementoBtn.classList.add('active');
 
             document.getElementById('card-aba-venda').classList.remove('active-tab-card');
@@ -198,7 +207,7 @@
                             return `<span style="color:var(--cor-principal); font-weight:600;">(${itemQtd}x) [${itemPrato}]</span> ${tipoLimpo}`;
                         }).join('<br>');
                         
-                        // INJEÇÃO ATUALIZADA E CORRIGIDA COM OS BOTÕES DE AÇÃO VISÍVEIS
+                        // Renderização sem flexbox interno para evitar quebras de colunas no Safari/Chrome Mobile
                         corpoHistorico.innerHTML += `
                             <tr>
                                 <td><strong style="color:var(--cor-principal)">#${String(dados.numero).padStart(2, '0')}</strong></td>
@@ -207,12 +216,10 @@
                                 <td>${resumoItens}</td>
                                 <td><span style="font-size:11px; font-weight:700; padding:4px 8px; background:#f1f5f9; border-radius:6px; color:#475569;">${dados.pagamento || 'Dinheiro'}</span></td>
                                 <td><strong>R$ ${parseFloat(dados.total || 0).toFixed(2)}</strong></td>
-                                <td style="text-align:center;">
-                                    <div style="display: flex; gap: 4px; justify-content: center;">
-                                        <button class="btn-reprint" style="padding: 6px 8px;" onclick="reimprimirTicketPorId('${doc.id}')">🖨️ Rep</button>
-                                        <button class="btn-edit" style="padding: 6px 8px;" onclick="carregarPedidoParaEdicao('${doc.id}')">✏️ Edit</button>
-                                        <button class="btn-delete" style="padding: 6px 8px;" onclick="deletarPedidoCloud('${doc.id}')">❌ Exc</button>
-                                    </div>
+                                <td style="text-align:center; white-space: nowrap;">
+                                    <button class="btn-reprint" style="padding: 5px 8px; font-size:11px;" onclick="reimprimirTicketPorId('${doc.id}')">🖨️ Rep</button>
+                                    <button class="btn-edit" style="padding: 5px 8px; font-size:11px;" onclick="carregarPedidoParaEdicao('${doc.id}')">✏️ Edit</button>
+                                    <button class="btn-delete" style="padding: 5px 8px; font-size:11px;" onclick="deletarPedidoCloud('${doc.id}')">❌ Exc</button>
                                 </td>
                             </tr>
                         `;
@@ -226,41 +233,41 @@
             }
         }
 
-        // --- REMOVER PEDIDO DO CAIXA ---
+        // --- DELETAR PEDIDO DO FIRESTORE ---
         window.deletarPedidoCloud = async function(firebaseId) {
-            if(!confirm("Tem certeza que deseja excluir permanentemente este pedido da nuvem?")) return;
+            if(!confirm("Tem certeza que deseja excluir este pedido definitivamente?")) return;
             try {
                 await deleteDoc(doc(db, "pedidos", firebaseId));
-                alert("Pedido excluído!");
+                alert("Pedido deletado!");
                 await carregarHistoricoDoFirebase();
             } catch(e) {
                 alert("Erro ao excluir.");
             }
         };
 
-        // --- TRAZER O PEDIDO DE VOLTA PARA EDIÇÃO ---
+        // --- EDICAO TOTAL DE PEDIDO ---
         window.carregarPedidoParaEdicao = function(firebaseId) {
             const pedido = historicoGeralPedidos.find(p => p.firebaseId === firebaseId);
-            if(!pedido) return alert("Pedido não encontrado.");
+            if(!pedido) return alert("Pedido não localizado.");
 
             idPedidoEdicaoGlobal = firebaseId;
 
-            // Altera labels visuais da tela para o operador saber que está editando
+            // Altera interface para indicar modo edição
             document.getElementById('label-modo-venda').innerHTML = `✏️ Editando: Pedido #${String(pedido.numero).padStart(2, '0')}`;
-            document.getElementById('btn-finalizar-checkout').innerHTML = `💾 Salvar Alterações no Pedido #${String(pedido.numero).padStart(2, '0')}`;
+            document.getElementById('btn-finalizar-checkout').innerHTML = `💾 Atualizar Dados do Pedido #${String(pedido.numero).padStart(2, '0')}`;
             
-            // Restaura dados do Cliente
+            // Restaura dados brutos do cliente nos inputs
             document.getElementById('cliente-nome').value = pedido.rawClienteNome || '';
             document.getElementById('cliente-celular').value = pedido.rawClienteCelular || '';
             document.getElementById('cliente-endereco').value = pedido.rawClienteEndereco || '';
             document.getElementById('forma-pagamento').value = pedido.pagamento || 'Dinheiro';
 
-            // Carrega os itens brutos de volta no carrinho ativo
+            // Joga os itens de volta ao array de checkout
             pedidoAtual = [...pedido.itens];
             atualizarInterface();
 
-            alert(`Pedido #${pedido.numero} carregado! Altere os itens se necessário e finalize para salvar.`);
-            window.alternarAbaMobile('venda', document.querySelector('.mobile-tabs-nav .tab-btn:first-child'));
+            alert(`Pedido #${pedido.numero} carregado na aba 'Vender'! Modifique o que precisar e finalize.`);
+            window.alternarAbaMobile('venda');
         };
 
         function gerarHtmlFitaVia(pedido, nomeVia) {
@@ -494,9 +501,7 @@
                 document.getElementById('btn-finalizar-checkout').innerHTML = `🖨️ Autenticar & Imprimir Dupla Via`;
                 atualizarInterface();
 
-                if(window.innerWidth < 950) {
-                    alternarAbaMobile('venda', document.querySelector('.mobile-tabs-nav .tab-btn:first-child'));
-                }
+                window.alternarAbaMobile('venda');
             } catch (erro) {
                 alert("Erro ao conectar com o Firebase!");
                 console.error(erro);

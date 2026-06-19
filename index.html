@@ -274,9 +274,9 @@
         .btn-print:hover { background-color: #15803d; }
 
         /* Estilos e Cores Fixas dos Botões de Ação na Tabela de Logs */
-        .btn-reprint { background-color: #2563eb; color: white; padding: 6px 10px; font-size: 11px; border-radius: 6px; font-weight: bold; border: none; cursor: pointer; margin: 2px; }
-        .btn-edit { background-color: #f59e0b; color: white; padding: 6px 10px; font-size: 11px; border-radius: 6px; font-weight: bold; border: none; cursor: pointer; margin: 2px; }
-        .btn-delete { background-color: #dc2626; color: white; padding: 6px 10px; font-size: 11px; border-radius: 6px; font-weight: bold; border: none; cursor: pointer; margin: 2px; }
+        .btn-reprint { background-color: #2563eb; color: white; padding: 6px 12px; font-size: 11px; border-radius: 6px; font-weight: bold; border: none; cursor: pointer; margin: 2px; display: inline-block; }
+        .btn-edit { background-color: #f59e0b; color: white; padding: 6px 12px; font-size: 11px; border-radius: 6px; font-weight: bold; border: none; cursor: pointer; margin: 2px; display: inline-block; }
+        .btn-delete { background-color: #dc2626; color: white; padding: 6px 12px; font-size: 11px; border-radius: 6px; font-weight: bold; border: none; cursor: pointer; margin: 2px; display: inline-block; }
 
         .btn-fechamento { background-color: #475569; color: white; width: 100%; }
         .btn-fechamento:hover { background-color: #334155; }
@@ -311,9 +311,9 @@
         .total-tela { font-size: 22px; font-weight: 800; text-align: right; margin-top: 14px; padding-top: 14px; border-top: 2px dashed #cbd5e0; }
         .total-tela span { color: var(--cor-principal); }
 
-        /* Estrutura Garantida da Tabela de Logs com largura dinâmica e sem cortes */
+        /* Estrutura Corrigida da Tabela de Logs (Garante que a coluna de Ações não suma) */
         .tabela-wrapper { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: var(--border-radius-md); border: 1px solid var(--cor-borda); }
-        .tabela-comercial { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 900px; table-layout: fixed; }
+        .tabela-comercial { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 950px; table-layout: fixed; }
         .tabela-comercial th, .tabela-comercial td { padding: 12px 10px; text-align: left; border-bottom: 1px solid var(--cor-borda); vertical-align: top; word-wrap: break-word; }
         .tabela-comercial th { background-color: #f8fafc; color: #475569; font-weight: 700; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; }
 
@@ -452,7 +452,7 @@
                     <div class="form-row tres-campos">
                         <div class="form-group">
                             <label>Preço Unitário (R$):</label>
-                            <input type="number" id="valor" step="0.01" min="0.01" placeholder="0,00" required>
+                            <input type="number" id="valor" step="0.01" placeholder="0,00" required>
                         </div>
                         <div class="form-group">
                             <label>Quantidade:</label>
@@ -529,7 +529,7 @@
                                 <th style="width: 220px;">Produtos</th>
                                 <th style="width: 80px;">Método</th>
                                 <th style="width: 90px;">Total</th>
-                                <th style="width: 190px; text-align: center;">Ações</th>
+                                <th style="width: 220px; text-align: center;">Ações</th>
                             </tr>
                         </thead>
                         <tbody id="corpo-historico"></tbody>
@@ -558,7 +558,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // --- MAPAS DO CARDÁPIO ATUALIZADOS PARA BATER EXATAMENTE COM AS STRINGS DO SELECT ---
+        // --- MAPAS DO CARDÁPIO CONFIGURADOS ATÉ AS STRINGS COM PARÊNTESES ---
         const cardapioEstruturado = {
             "Parmegiana de Frango": ["Marmita (P)", "Marmita (M)", "Marmita (G)"],
             "Frango à Milanesa": ["Marmita (P)", "Marmita (M)", "Marmita (G)"],
@@ -749,7 +749,7 @@
                             return `<span style="color:var(--cor-principal); font-weight:600;">(${itemQtd}x) [${itemPrato}]</span> ${tipoLimpo}`;
                         }).join('<br>');
                         
-                        // Renderização inline limpa com largura controlada via cabeçalho
+                        // Renderização sem quebras de layout usando alinhamento inline absoluto
                         corpoHistorico.innerHTML += `
                             <tr>
                                 <td><strong style="color:var(--cor-principal)">#${String(dados.numero).padStart(2, '0')}</strong></td>
@@ -892,9 +892,10 @@
             const qtd = parseInt(document.getElementById('quantidade').value);
             const pagamento = document.getElementById('forma-pagamento').value;
 
-            // BLOQUEIO TOTAL CONTRA PREÇO R$ 0,00 OU EM BRANCO (NaN)
+            // BLOQUEIO ABSOLUTO CONTRA PREÇO R$ 0,00 OU EM BRANCO (NaN)
             if (isNaN(precoUnitario) || precoUnitario <= 0) {
-                alert("🚫 OPERAÇÃO NEGADA!\nO preço unitário do item não pode ser R$ 0,00 ou vazio.");
+                alert("🚫 VALOR INVÁLIDO!\nO preço unitário do prato não pode ser R$ 0,00 ou vazio. Insira um valor maior que zero.");
+                document.getElementById('valor').value = '';
                 document.getElementById('valor').focus();
                 return;
             }

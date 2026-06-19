@@ -273,7 +273,9 @@
         .btn-print { background-color: #16a34a; color: white; font-size: 15px; }
         .btn-print:hover { background-color: #15803d; }
 
-        .btn-reprint { background-color: #2563eb; color: white; padding: 8px 12px; font-size: 11px; border-radius: 6px; font-weight: bold; border: none; width: auto; }
+        .btn-reprint { background-color: #2563eb; color: white; padding: 6px 10px; font-size: 11px; border-radius: 6px; font-weight: bold; border: none; width: auto; cursor: pointer; }
+        .btn-edit { background-color: #f59e0b; color: white; padding: 6px 10px; font-size: 11px; border-radius: 6px; font-weight: bold; border: none; width: auto; cursor: pointer; margin-left: 2px;}
+        .btn-delete { background-color: #dc2626; color: white; padding: 6px 10px; font-size: 11px; border-radius: 6px; font-weight: bold; border: none; width: auto; cursor: pointer; margin-left: 2px;}
 
         .btn-fechamento { background-color: #475569; color: white; width: 100%; }
         .btn-fechamento:hover { background-color: #334155; }
@@ -309,7 +311,7 @@
         .total-tela span { color: var(--cor-principal); }
 
         .tabela-wrapper { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: var(--border-radius-md); border: 1px solid var(--cor-borda); }
-        .tabela-comercial { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 650px; }
+        .tabela-comercial { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 750px; }
         .tabela-comercial th, .tabela-comercial td { padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--cor-borda); vertical-align: top; }
         .tabela-comercial th { background-color: #f8fafc; color: #475569; font-weight: 700; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; }
 
@@ -399,12 +401,12 @@
     <div id="conteudo-sistema">
         <div class="brand-header no-print">
             <img src="logo.png" alt="Logo" class="brand-logo" onerror="this.style.display='none'">
-            <h1>Tempero de Família</h1>
+            <h1 id="titulo-sistema-venda">Tempero de Família</h1>
         </div>
 
         <div class="main-grid no-print">
             <div class="card active-tab-card" id="card-aba-venda">
-                <h3>📝 Registrar Venda</h3>
+                <h3 id="label-modo-venda">📝 Registrar Venda</h3>
                 <form id="form-item" onsubmit="adicionarItem(event)">
                     <div class="secao-titulo">1. Dados do Cliente</div>
                     <div class="form-row dois-campos">
@@ -468,7 +470,7 @@
                         <textarea id="descricao" placeholder="Ex: Sem cebola, Coca normal..."></textarea>
                     </div>
 
-                    <button type="submit" class="btn btn-add">＋ Lançar no Carrinho</button>
+                    <button type="submit" class="btn btn-add" id="btn-add-carrinho">＋ Lançar no Carrinho</button>
                 </form>
             </div>
 
@@ -477,7 +479,7 @@
                 <ul id="lista-itens" class="lista-itens"></ul>
                 <div>
                     <div class="total-tela">Total: <span>R$ <span id="total-valor">0.00</span></span></div>
-                    <button type="button" class="btn btn-print" style="margin-top: 15px;" onclick="finalizarEImprimirTicket()">🖨️ Autenticar & Imprimir Dupla Via</button>
+                    <button type="button" class="btn btn-print" style="margin-top: 15px;" id="btn-finalizar-checkout" onclick="finalizarEImprimirTicket()">🖨️ Autenticar & Imprimir Dupla Via</button>
                 </div>
             </div>
 
@@ -519,13 +521,13 @@
                     <table class="tabela-comercial">
                         <thead>
                             <tr>
-                                <th style="width: 8%;">Nº</th>
-                                <th style="width: 10%;">Hora</th>
-                                <th style="width: 22%;">Cliente / Canal</th>
-                                <th style="width: 33%;">Produtos</th>
+                                <th style="width: 6%;">Nº</th>
+                                <th style="width: 8%;">Hora</th>
+                                <th style="width: 20%;">Cliente / Canal</th>
+                                <th style="width: 30%;">Produtos</th>
                                 <th style="width: 10%;">Método</th>
                                 <th style="width: 8%;">Total</th>
-                                <th style="width: 9%; text-align: center;">Ações</th>
+                                <th style="width: 18%; text-align: center;">Ações</th>
                             </tr>
                         </thead>
                         <tbody id="corpo-historico"></tbody>
@@ -539,7 +541,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDocs, doc, setDoc, getDoc, query, orderBy, Timestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, getDocs, doc, setDoc, getDoc, deleteDoc, query, orderBy, Timestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyD1miyZUImKwCCNwbgppUjtni860Urt-z4",
@@ -554,15 +556,38 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
+        // --- MAPAS FINANCEIROS E CARDÁPIO PADRÃO ---
+        const cardapioEstruturado = {
+            "Parmegiana de Frango": ["P", "M", "G"],
+            "Frango à Milanesa": ["P", "M", "G"],
+            "Parmegiana de Berinjela": ["P", "M", "G"],
+            "Feijoada": ["Completa", "Média"],
+            "Marmitex": ["Pequena", "Média", "Grande"],
+            "Prato Feito": ["Tradicional", "Especial"],
+            "Bebidas": ["Refrigerante Lata", "Suco Natural", "Água Mineral"],
+            "Outros Pratos": ["Especial do Dia"]
+        };
+
+        const tabelaPrecosSugeridos = {
+            "Parmegiana de Frango": {"P": 22.00, "M": 28.00, "G": 35.00},
+            "Frango à Milanesa": {"P": 20.00, "M": 26.00, "G": 32.00},
+            "Parmegiana de Berinjela": {"P": 21.00, "M": 27.00, "G": 34.00},
+            "Feijoada": {"Completa": 45.00, "Média": 32.00},
+            "Marmitex": {"Pequena": 18.00, "Média": 22.00, "Grande": 26.00},
+            "Prato Feito": {"Tradicional": 20.00, "Especial": 25.00},
+            "Bebidas": {"Refrigerante Lata": 6.00, "Suco Natural": 8.00, "Água Mineral": 4.00},
+            "Outros Pratos": {"Especial do Dia": 30.00}
+        };
+
         let pedidoAtual = [];
         let historicoGeralPedidos = []; 
         let contadorPedidos = 1;
         let dadosFechamentoRelatorio = null;
         let chartPizzaInstancia = null; 
+        let idPedidoEdicaoGlobal = null; // Controla se estamos editando um pedido existente
 
         let horarioCorteTurno = 0; 
 
-        // GATILHO COMPLETO E ESTÁVEL NATÍVÕ CONTRA TRAVAMENTO DE TELA POST-PRINT
         window.onbeforeprint = function() {
             document.body.classList.add("modo-impressao-ticket");
         };
@@ -570,7 +595,7 @@
         window.onafterprint = function() {
             document.body.classList.remove("modo-impressao-ticket");
             const containerFita = document.getElementById('ticket-print');
-            if(containerFita) containerFita.innerHTML = ''; // Limpa o buffer de impressão do hardware
+            if(containerFita) containerFita.innerHTML = ''; 
         };
 
         window.alternarAbaMobile = function(abaNome, elementoBtn) {
@@ -718,11 +743,15 @@
                             <tr>
                                 <td><strong style="color:var(--cor-principal)">#${String(dados.numero).padStart(2, '0')}</strong></td>
                                 <td>${dados.hora || '12:00'}</td>
-                                <td>${dados.clienteHtml || '<span style="color:#94a3b8; font-weight:bold;">BALCÃO</span>'}</td>
+                                <td>${dados.clientFormatadoLogs || dados.clienteHtml || '<span style="color:#94a3b8; font-weight:bold;">BALCÃO</span>'}</td>
                                 <td>${resumoItens}</td>
                                 <td><span style="font-size:11px; font-weight:700; padding:4px 8px; background:#f1f5f9; border-radius:6px; color:#475569;">${dados.pagamento || 'Dinheiro'}</span></td>
                                 <td><strong>R$ ${parseFloat(dados.total || 0).toFixed(2)}</strong></td>
-                                <td style="text-align:center;"><button class="btn-reprint" onclick="reimprimirTicketPorId('${doc.id}')">🖨️ Rep</button></td>
+                                <td style="text-align:center; display: flex; justify-content: center; gap: 4px;">
+                                    <button class="btn-reprint" onclick="reimprimirTicketPorId('${doc.id}')">🖨️ Rep</button>
+                                    <button class="btn-edit" onclick="carregarPedidoParaEdicao('${doc.id}')">✏️ Edit</button>
+                                    <button class="btn-delete" onclick="deletarPedidoCloud('${doc.id}')">❌ Exc</button>
+                                </td>
                             </tr>
                         `;
                     }
@@ -731,19 +760,52 @@
                 contadorPedidos = maiorNumeroTurnoAtual + 1;
                 historicoGeralPedidos.reverse();
             } catch (erro) {
-                console.error("Erro Firebase: ", erro);
+                console.error("Erro Firebase ao carregar logs: ", erro);
             }
         }
 
-        function gerarHtmlFitaVia(pedido, nomeVia) {
-            let dadosCliente = '';
-            if (pedido.clienteA4 && pedido.clienteA4 !== 'Consumidor Final') {
-                dadosCliente = pedido.clienteHtml;
-            } else {
-                dadosCliente = '<strong>BALCÃO</strong>';
+        // --- EXCLUSÃO DE PEDIDO DA NUVEM ---
+        window.deletarPedidoCloud = async function(firebaseId) {
+            if(!confirm("Tem certeza que deseja excluir permanentemente este pedido da nuvem? Isso mudará as métricas do caixa ativo.")) return;
+            try {
+                await deleteDoc(doc(db, "pedidos", firebaseId));
+                alert("Pedido deletado com sucesso!");
+                await carregarHistoricoDoFirebase();
+            } catch(e) {
+                alert("Erro ao excluir documento.");
+                console.error(e);
             }
+        };
 
+        // --- CARREGAR PEDIDO PARA EDIÇÃO NO FORMULÁRIO PRINCIPAL ---
+        window.carregarPedidoParaEdicao = function(firebaseId) {
+            const pedido = historicoGeralPedidos.find(p => p.firebaseId === firebaseId);
+            if(!pedido) return alert("Pedido não encontrado.");
+
+            idPedidoEdicaoGlobal = firebaseId; // Guarda o ID para o update por cima do antigo
+
+            // Altera elementos Visuais do Menu de Entrada
+            document.getElementById('label-modo-venda').innerHTML = `✏️ Editando Histórico: Pedido #${String(pedido.numero).padStart(2, '0')}`;
+            document.getElementById('btn-finalizar-checkout').innerHTML = `💾 Atualizar Pedido #${String(pedido.numero).padStart(2, '0')} & Imprimir`;
+            
+            // Restaura campos do Cliente desestruturando o objeto bruto se existente
+            document.getElementById('cliente-nome').value = pedido.rawClienteNome || '';
+            document.getElementById('cliente-celular').value = pedido.rawClienteCelular || '';
+            document.getElementById('cliente-endereco').value = pedido.rawClienteEndereco || '';
+            document.getElementById('forma-pagamento').value = pedido.pagamento || 'Dinheiro';
+
+            // Carrega os itens brutos de volta no array de modificação ativo
+            pedidoAtual = [...pedido.itens];
+            atualizarInterface();
+
+            alert(`Pedido #${pedido.numero} carregado no Painel de Vendas!\nModifique os itens e clique em "Atualizar Pedido" para salvar.`);
+            alternarAbaMobile('venda', document.querySelector('.mobile-tabs-nav b'));
+        };
+
+        function gerarHtmlFitaVia(pedido, nomeVia) {
+            let dadosCliente = pedido.clienteHtml || '<strong>BALCÃO</strong>';
             let linesProdutosHtml = '';
+            
             pedido.itens.forEach((item) => {
                 let itemQtd = item.qtd || 1;
                 let itemPrato = item.prato || "Marmita";
@@ -767,7 +829,7 @@
                 `;
             });
 
-            let pulosDeLinhaFisicos = '<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>';
+            let pulosDeLinhaFisicos = '<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>';
 
             return `
                 <div class="ticket-wrapper-via">
@@ -799,18 +861,13 @@
             `;
         }
 
-        // --- ENGENHARIA DE IMPRESSÃO ASSÍNCRONA SEM SEGUNDOS BLOQUEADOS ---
         window.reimprimirTicketPorId = function(firebaseId) {
             const pedidoMestre = historicoGeralPedidos.find(p => p.firebaseId === firebaseId);
-            if (!pedidoMestre) {
-                alert("Pedido não localizado.");
-                return;
-            }
+            if (!pedidoMestre) return alert("Pedido não localizado.");
 
             const containerFita = document.getElementById('ticket-print');
             containerFita.innerHTML = gerarHtmlFitaVia(pedidoMestre, "COZINHA") + gerarHtmlFitaVia(pedidoMestre, "CLIENTE");
 
-            // Executa com um delay assíncrono sutil para limpar o fluxo de processamento de UI do Chrome/Safari
             setTimeout(() => {
                 window.print();
             }, 150);
@@ -846,10 +903,6 @@
             document.getElementById('categoria-prato').value = '';
             document.getElementById('tipo').innerHTML = '<option value="">-- Selecione o prato primeiro --</option>';
             document.getElementById('categoria-prato').focus();
-
-            if(window.innerWidth < 950) {
-                alert("Item adicionado ao carrinho!");
-            }
         };
 
         window.removerItem = function(id) {
@@ -886,10 +939,7 @@
         }
 
         window.finalizarEImprimirTicket = async function() {
-            if (pedidoAtual.length === 0) {
-                alert("Nenhum item inserido no pedido!");
-                return;
-            }
+            if (pedidoAtual.length === 0) return alert("Nenhum item inserido no pedido!");
 
             const nomeCliente = document.getElementById('cliente-nome').value.trim();
             const celularCliente = document.getElementById('cliente-celular').value.trim();
@@ -929,59 +979,76 @@
 
             let totalPedido = 0;
             let itensListaSimples = [];
-            let formaPagamentoFinal = pedidoAtual[0].pagamento;
+            let formaPagamentoFinal = document.getElementById('forma-pagamento').value;
 
             pedidoAtual.forEach((item) => {
                 totalPedido += item.valor;
                 itensListaSimples.push(`(${item.qtd}x) [${item.prato}] ${item.tipo} - ${item.descricao}`);
             });
 
+            // Se for uma Edição, mantém o número do pedido antigo. Se for novo, gera o próximo da sequência.
+            let numeroPedidoDefinido = contadorPedidos;
+            if(idPedidoEdicaoGlobal !== null){
+                const pedidoAntigo = historicoGeralPedidos.find(p => p.firebaseId === idPedidoEdicaoGlobal);
+                if(pedidoAntigo) numeroPedidoDefinido = pedidoAntigo.numero;
+            }
+
             const documentoPedido = {
-                numero: contadorPedidos,
+                numero: numeroPedidoDefinido,
                 data: dataFormatada,
                 hora: horaSimples,
                 clienteHtml: stringClienteHistorico,
+                clientFormatadoLogs: stringClienteHistorico,
                 clienteA4: detalheClienteRelatorio,
                 itens: [...pedidoAtual],
                 itensTxt: itensListaSimples.join('<br>'),
                 pagamento: formaPagamentoFinal,
                 total: totalPedido,
-                timestamp: Timestamp.now()
+                timestamp: Timestamp.now(),
+                rawClienteNome: nomeCliente,
+                rawClienteCelular: celularCliente,
+                rawClienteEndereco: enderecoCliente
             };
 
             try {
-                await addDoc(collection(db, "pedidos"), documentoPedido);
+                if(idPedidoEdicaoGlobal !== null) {
+                    // Update/Sobrescreve o documento existente na nuvem
+                    await setDoc(doc(db, "pedidos", idPedidoEdicaoGlobal), documentoPedido);
+                    idPedidoEdicaoGlobal = null; // Reseta o estado global de edição
+                } else {
+                    // Adiciona um novo pedido padrão
+                    await addDoc(collection(db, "pedidos"), documentoPedido);
+                }
                 
                 const containerFita = document.getElementById('ticket-print');
                 containerFita.innerHTML = gerarHtmlFitaVia(documentoPedido, "COZINHA") + gerarHtmlFitaVia(documentoPedido, "CLIENTE");
 
                 await carregarHistoricoDoFirebase();
                 
-                // Dispara o spooler de forma assíncrona blindada contra BFCache congelado
                 setTimeout(() => {
                     window.print();
                 }, 150);
 
+                // Limpeza e Restauração de Layout Padrão
                 pedidoAtual = [];
                 document.getElementById('cliente-nome').value = '';
                 document.getElementById('cliente-celular').value = '';
                 document.getElementById('cliente-endereco').value = '';
+                document.getElementById('label-modo-venda').innerHTML = `📝 Registrar Venda`;
+                document.getElementById('btn-finalizar-checkout').innerHTML = `🖨️ Autenticar & Imprimir Dupla Via`;
                 atualizarInterface();
 
                 if(window.innerWidth < 950) {
                     alternarAbaMobile('venda', document.querySelector('.mobile-tabs-nav .tab-btn:first-child'));
                 }
             } catch (erro) {
-                alert("Erro ao conectar com o Firebase!");
+                alert("Erro ao conectar ou gravar dados com o Firebase!");
                 console.error(erro);
             }
         };
 
         window.calcularFechamentoDiario = function() {
-            if (historicoGeralPedidos.length === 0) {
-                alert("Não existem dados faturados no turno atual.");
-                return;
-            }
+            if (historicoGeralPedidos.length === 0) return alert("Não existem dados faturados no turno atual.");
 
             let faturamentoTotal = 0;
             let totalItens = 0;
@@ -1228,7 +1295,7 @@
                     document.getElementById('btn-pdf-id').style.display = 'none';
                     document.getElementById('btn-reset-id').style.display = 'none';
                     
-                    alert("Sucesso!\nTurno encerrado globalmente na nuvem. O caixa iniciou no Pedido #01 em todos os aparelhos.");
+                    alert("Sucesso!\nTurno encerrado globalmente na nuvem. O caixa iniciou no Pedido #01.");
                     
                     if(window.innerWidth < 950) {
                         alternarAbaMobile('venda', document.querySelector('.mobile-tabs-nav .tab-btn:first-child'));

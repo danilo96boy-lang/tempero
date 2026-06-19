@@ -256,10 +256,12 @@
         .btn-add:hover { background-color: var(--cor-principal-hover); }
         .btn-print { background-color: #16a34a; color: white; font-size: 15px; }
 
-        /* Estilização limpa e inline para impedir sobreposição na tabela */
-        .btn-action-rep { background-color: #2563eb; color: white; padding: 6px 10px; font-size: 11px; border-radius: 5px; font-weight: bold; border: none; cursor: pointer; display: inline-block; margin-right: 3px; }
-        .btn-action-edit { background-color: #f59e0b; color: white; padding: 6px 10px; font-size: 11px; border-radius: 5px; font-weight: bold; border: none; cursor: pointer; display: inline-block; margin-right: 3px; }
-        .btn-action-del { background-color: #dc2626; color: white; padding: 6px 10px; font-size: 11px; border-radius: 5px; font-weight: bold; border: none; cursor: pointer; display: inline-block; }
+        /* Estilos da nova barra gerencial de ações fixas */
+        .painel-acoes-logs { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; background: #f8fafc; padding: 12px; border-radius: var(--border-radius-md); border: 1px solid var(--cor-borda); margin-bottom: 15px; }
+        .btn-log-edit { background-color: #f59e0b; color: white; border: none; padding: 10px 16px; font-weight: bold; border-radius: 6px; cursor: pointer; font-size: 13px; }
+        .btn-log-del { background-color: #dc2626; color: white; border: none; padding: 10px 16px; font-weight: bold; border-radius: 6px; cursor: pointer; font-size: 13px; }
+
+        .btn-reprint-tabela { background-color: #2563eb; color: white; padding: 6px 12px; font-size: 11px; border-radius: 6px; font-weight: bold; border: none; cursor: pointer; }
 
         .carrinho-container { display: flex; flex-direction: column; justify-content: space-between; background: #f8fafc; }
         .lista-itens { list-style: none; padding: 0; margin: 0; max-height: 260px; overflow-y: auto; }
@@ -270,7 +272,7 @@
         .total-tela span { color: var(--cor-principal); }
 
         .tabela-wrapper { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: var(--border-radius-md); border: 1px solid var(--cor-borda); }
-        .tabela-comercial { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 980px; }
+        .tabela-comercial { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 750px; }
         .tabela-comercial th, .tabela-comercial td { padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--cor-borda); vertical-align: top; }
         .tabela-comercial th { background-color: #f8fafc; color: #475569; font-weight: 700; text-transform: uppercase; font-size: 11px; }
 
@@ -442,17 +444,27 @@
 
             <div class="card" id="card-aba-logs">
                 <h3>📋 Logs Analíticos de Transações (Real-time Firebase)</h3>
+                
+                <div class="painel-acoes-logs">
+                    <div class="form-group" style="margin: 0; min-width: 140px;">
+                        <label style="color: var(--cor-principal); font-weight: bold;">Nº do Pedido:</label>
+                        <input type="number" id="input-num-gerencial" placeholder="Ex: 12" style="padding: 8px;">
+                    </div>
+                    <button class="btn-log-edit" onclick="executarAcaoGerencial('editar')">✏️ Editar Pedido Selecionado</button>
+                    <button class="btn-log-del" onclick="executarAcaoGerencial('excluir')">❌ Excluir do Banco</button>
+                </div>
+
                 <div class="tabela-wrapper">
                     <table class="tabela-comercial">
                         <thead>
                             <tr>
-                                <th style="width: 60px;">Nº</th>
-                                <th style="width: 70px;">Hora</th>
-                                <th style="width: 230px;">Cliente / Canal</th>
-                                <th style="width: 230px;">Produtos</th>
-                                <th style="width: 90px;">Método</th>
-                                <th style="width: 90px;">Total</th>
-                                <th style="width: 210px; text-align: center;">Ações Gerenciais</th>
+                                <th style="width: 80px;">Nº</th>
+                                <th style="width: 90px;">Hora</th>
+                                <th style="width: 260px;">Cliente / Canal</th>
+                                <th style="width: 260px;">Produtos</th>
+                                <th style="width: 100px;">Método</th>
+                                <th style="width: 100px;">Total</th>
+                                <th style="width: 100px; text-align: center;">Vias</th>
                             </tr>
                         </thead>
                         <tbody id="corpo-historico"></tbody>
@@ -601,19 +613,16 @@
 
                         let resumoItens = dados.itens.map(i => `<span>(${i.qtd || 1}x) [${i.prato || 'Item'}]</span> ${i.tipo || ''}`).join('<br>');
                         
-                        // Aqui está a injeção inline limpa sem bloqueio de overflow por largura
                         corpoHistorico.innerHTML += `
                             <tr>
-                                <td><strong>#${String(dados.numero).padStart(2, '0')}</strong></td>
+                                <td><strong style="color:var(--cor-principal)">#${String(dados.numero).padStart(2, '0')}</strong></td>
                                 <td>${dados.hora || '12:00'}</td>
                                 <td>${dados.clienteHtml || 'BALCÃO'}</td>
                                 <td>${resumoItens}</td>
                                 <td><span style="font-size:11px; font-weight:700; padding:4px 8px; background:#f1f5f9; border-radius:6px;">${dados.pagamento || 'Pix'}</span></td>
                                 <td><strong>R$ ${parseFloat(dados.total || 0).toFixed(2)}</strong></td>
-                                <td style="text-align:center; white-space: nowrap;">
-                                    <button class="btn-action-rep" onclick="reimprimirTicketPorId('${doc.id}')">🖨️ Rep</button>
-                                    <button class="btn-action-edit" onclick="carregarPedidoParaEdicao('${doc.id}')">✏️ Edit</button>
-                                    <button class="btn-action-del" onclick="deletarPedidoCloud('${doc.id}')">❌ Exc</button>
+                                <td style="text-align:center;">
+                                    <button class="btn-reprint-tabela" onclick="reimprimirTicketPorId('${doc.id}')">🖨️ Rep</button>
                                 </td>
                             </tr>
                         `;
@@ -624,30 +633,44 @@
             } catch (erro) { console.error(erro); }
         }
 
-        window.deletarPedidoCloud = async function(firebaseId) {
-            if(!confirm("Deseja deletar este pedido permanentemente do banco?")) return;
-            try {
-                await deleteDoc(doc(db, "pedidos", firebaseId));
-                alert("Pedido excluído!"); await carregarHistoricoDoFirebase();
-            } catch(e) { alert("Erro ao deletar."); }
-        };
+        // --- ENGENHARIA FIXA DAS AÇÕES GERENCIAIS POR SELEÇÃO DE NÚMERO ---
+        window.executarAcaoGerencial = async function(tipoAcao) {
+            const numDigitado = parseInt(document.getElementById('input-num-gerencial').value);
+            if(!numDigitado || numDigitado <= 0) return alert("Por favor, digite um número de pedido válido.");
 
-        window.carregarPedidoParaEdicao = function(firebaseId) {
-            const pedido = historicoGeralPedidos.find(p => p.firebaseId === firebaseId);
-            if(!pedido) return alert("Pedido não localizado.");
-            idPedidoEdicaoGlobal = firebaseId;
+            const pedido = historicoGeralPedidos.find(x => x.numero === numDigitado);
+            if(!pedido) return alert(`Pedido #${numDigitado} não foi localizado no turno ativo.`);
 
-            document.getElementById('label-modo-venda').innerHTML = `✏️ Editando: Pedido #${String(pedido.numero).padStart(2, '0')}`;
-            document.getElementById('btn-finalizar-checkout').innerHTML = `💾 Atualizar Pedido #${String(pedido.numero).padStart(2, '0')}`;
+            if(tipoAcao === 'excluir') {
+                if(!confirm(`Tem certeza que deseja apagar o Pedido #${numDigitado} permanentemente do Firebase?`)) return;
+                try {
+                    await deleteDoc(doc(db, "pedidos", pedido.firebaseId));
+                    alert(`Sucesso! Pedido #${numDigitado} foi removido.`);
+                    document.getElementById('input-num-gerencial').value = '';
+                    await carregarHistoricoDoFirebase();
+                } catch(e) { alert("Erro ao deletar documento."); }
+            } 
             
-            document.getElementById('cliente-nome').value = pedido.rawClienteNome || '';
-            document.getElementById('cliente-celular').value = pedido.rawClienteCelular || '';
-            document.getElementById('cliente-endereco').value = pedido.rawClienteEndereco || '';
-            document.getElementById('forma-pagamento').value = pedido.pagamento || 'Dinheiro';
+            else if(tipoAcao === 'editar') {
+                idPedidoEdicaoGlobal = pedido.firebaseId;
 
-            pedidoAtual = [...pedido.itens];
-            atualizarInterface();
-            window.alternarAbaMobile('venda');
+                // Altera o formulário para modo Edição ativa
+                document.getElementById('label-modo-venda').innerHTML = `✏️ Editando: Pedido #${String(pedido.numero).padStart(2, '0')}`;
+                document.getElementById('btn-finalizar-checkout').innerHTML = `💾 Atualizar Dados do Pedido #${String(pedido.numero).padStart(2, '0')}`;
+                
+                // Restaura os dados
+                document.getElementById('cliente-nome').value = pedido.rawClienteNome || '';
+                document.getElementById('cliente-celular').value = pedido.rawClienteCelular || '';
+                document.getElementById('cliente-endereco').value = pedido.rawClienteEndereco || '';
+                document.getElementById('forma-pagamento').value = pedido.pagamento || 'Dinheiro';
+
+                pedidoAtual = [...pedido.itens];
+                atualizarInterface();
+                
+                document.getElementById('input-num-gerencial').value = '';
+                alert(`Pedido #${numDigitado} carregado no Painel principal de vendas.`);
+                window.alternarAbaMobile('venda');
+            }
         };
 
         window.adicionarItem = function(event) {
@@ -655,9 +678,9 @@
             const precoUnitario = parseFloat(document.getElementById('valor').value);
             const qtd = parseInt(document.getElementById('quantidade').value);
 
-            // TRAVA DE PREÇO ZERO: O sistema recusa o clique imediatamente se estiver zerado
+            // Bloqueio matemático estrito contra R$ 0,00 manual ou automático
             if (isNaN(precoUnitario) || precoUnitario <= 0) {
-                alert("🚫 ERRO: Lançamento bloqueado! O valor do item deve ser maior que R$ 0,00.");
+                alert("🚫 OPERAÇÃO CANCELADA!\nO preço unitário do item não pode ser igual ou menor que R$ 0,00.");
                 document.getElementById('valor').focus(); return;
             }
 
@@ -705,7 +728,7 @@
             });
 
             if(possuiItemZerado || totalPedido <= 0) {
-                alert("🚫 OPERAÇÃO ENVIADA AO FIRESTORE RECUSADA: O valor total não pode ser R$ 0,00."); return;
+                alert("🚫 FINALIZAÇÃO RECUSADA: O valor acumulado da venda não pode ser R$ 0,00."); return;
             }
 
             const nomeCliente = document.getElementById('cliente-nome').value.trim();

@@ -256,10 +256,18 @@
         .btn-add:hover { background-color: var(--cor-principal-hover); }
         .btn-print { background-color: #16a34a; color: white; font-size: 15px; }
 
-        /* Estilização limpa para os botões inline na tabela */
-        .btn-action-rep { background-color: #2563eb; color: white; padding: 6px 10px; font-size: 11px; border-radius: 5px; font-weight: bold; border: none; cursor: pointer; display: inline-block; margin-right: 3px; }
-        .btn-action-edit { background-color: #f59e0b; color: white; padding: 6px 10px; font-size: 11px; border-radius: 5px; font-weight: bold; border: none; cursor: pointer; display: inline-block; margin-right: 3px; }
-        .btn-action-del { background-color: #dc2626; color: white; padding: 6px 10px; font-size: 11px; border-radius: 5px; font-weight: bold; border: none; cursor: pointer; display: inline-block; }
+        /* Estilos dos novos Cards de Histórico (Substitutos da Tabela) */
+        .container-logs-cards { display: grid; grid-template-columns: 1fr; gap: 12px; margin-top: 10px; }
+        @media(min-width: 750px) { .container-logs-cards { grid-template-columns: 1fr 1fr; } }
+        
+        .pedido-log-card { background: #f8fafc; border: 1px solid var(--cor-borda); border-radius: var(--border-radius-md); padding: 14px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: var(--shadow-sm); }
+        .pedido-log-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed var(--cor-borda); padding-bottom: 6px; margin-bottom: 8px; }
+        .pedido-log-corpo { font-size: 13px; color: var(--cor-texto); line-height: 1.4; margin-bottom: 12px; }
+        .pedido-log-footer { display: flex; gap: 6px; justify-content: flex-end; border-top: 1px solid var(--cor-borda); padding-top: 10px; }
+        
+        .btn-card-rep { background-color: #2563eb; color: white; border: none; padding: 6px 12px; font-weight: bold; border-radius: 4px; cursor: pointer; font-size: 12px; }
+        .btn-card-edit { background-color: #f59e0b; color: white; border: none; padding: 6px 12px; font-weight: bold; border-radius: 4px; cursor: pointer; font-size: 12px; }
+        .btn-card-del { background-color: #dc2626; color: white; border: none; padding: 6px 12px; font-weight: bold; border-radius: 4px; cursor: pointer; font-size: 12px; }
 
         .carrinho-container { display: flex; flex-direction: column; justify-content: space-between; background: #f8fafc; }
         .lista-itens { list-style: none; padding: 0; margin: 0; max-height: 260px; overflow-y: auto; }
@@ -269,17 +277,11 @@
         .total-tela { font-size: 22px; font-weight: 800; text-align: right; margin-top: 14px; padding-top: 14px; border-top: 2px dashed #cbd5e0; }
         .total-tela span { color: var(--cor-principal); }
 
-        .tabela-wrapper { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: var(--border-radius-md); border: 1px solid var(--cor-borda); }
-        .tabela-comercial { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 950px; table-layout: fixed; }
-        .tabela-comercial th, .tabela-comercial td { padding: 12px 10px; text-align: left; border-bottom: 1px solid var(--cor-borda); vertical-align: top; word-wrap: break-word; }
-        .tabela-comercial th { background-color: #f8fafc; color: #475569; font-weight: 700; text-transform: uppercase; font-size: 11px; }
-
         .dash-container-tela { display: none; grid-template-columns: 1fr; gap: 16px; margin-top: 15px; padding: 12px; background: #f8fafc; border: 1px solid var(--cor-borda); border-radius: var(--border-radius-lg); }
         @media(min-width: 650px) { .dash-container-tela { grid-template-columns: 1fr 1fr; } .dash-full { grid-column: span 2; } }
         .bloco-metricas-caixa { display: flex; flex-direction: column; gap: 10px; }
         .card-metrica { background: #fff; border: 1px solid var(--cor-borda); padding: 14px; border-radius: var(--border-radius-md); }
         .card-metrica p { margin: 4px 0 0 0; font-size: 20px; font-weight: bold; }
-        .bloco-grafico-caixa { background: #fff; border: 1px solid var(--cor-borda); padding: 14px; border-radius: var(--border-radius-md); min-height: 220px; display: flex; align-items: center; justify-content: center; }
 
         #ticket-print { display: none; }
         body.modo-impressao-ticket #conteudo-sistema, body.modo-impressao-ticket #navegacao-abas-id, body.modo-impressao-ticket #tela-login { display: none !important; }
@@ -441,23 +443,8 @@
             </div>
 
             <div class="card" id="card-aba-logs">
-                <h3>📋 Logs Analíticos de Transações (Real-time Firebase)</h3>
-                <div class="tabela-wrapper">
-                    <table class="tabela-comercial">
-                        <thead>
-                            <tr>
-                                <th style="width: 50px;">Nº</th>
-                                <th style="width: 65px;">Hora</th>
-                                <th style="width: 200px;">Cliente / Canal</th>
-                                <th style="width: 220px;">Produtos</th>
-                                <th style="width: 80px;">Método</th>
-                                <th style="width: 90px;">Total</th>
-                                <th style="width: 195px; text-align: center;">Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="corpo-historico"></tbody>
-                    </table>
-                </div>
+                <h3>📋 Histórico Analítico de Transações Cloud</h3>
+                <div class="container-logs-cards" id="container-historico-cards"></div>
             </div>
         </div>
     </div>
@@ -586,8 +573,8 @@
                 await sincronizarHorarioCorteCloud();
                 const querySnapshot = await getDocs(query(collection(db, "pedidos"), orderBy("numero", "desc")));
                 historicoGeralPedidos = [];
-                const corpoHistorico = document.getElementById('corpo-historico');
-                corpoHistorico.innerHTML = '';
+                const containerCards = document.getElementById('container-historico-cards');
+                containerCards.innerHTML = '';
                 let maiorNumeroTurnoAtual = 0;
 
                 querySnapshot.forEach((doc) => {
@@ -599,23 +586,27 @@
                         historicoGeralPedidos.push(dados);
                         if (dados.numero > maiorNumeroTurnoAtual) maiorNumeroTurnoAtual = dados.numero;
 
-                        let resumoItens = dados.itens.map(i => `<span>(${i.qtd || 1}x) [${i.prato || 'Item'}]</span> ${i.tipo || ''}`).join('<br>');
+                        let resumoItens = dados.itens.map(i => `<span style="color:var(--cor-principal); font-weight:bold;">(${i.qtd || 1}x) ${i.prato || 'Item'}</span> [${i.tipo || ''}]`).join('<br>');
                         
-                        // RESOLVIDO: Injeção exata de 7 colunas correspondendo com o cabeçalho do HTML
-                        corpoHistorico.innerHTML += `
-                            <tr>
-                                <td><strong style="color:var(--cor-principal)">#${String(dados.numero).padStart(2, '0')}</strong></td>
-                                <td>${dados.hora || '12:00'}</td>
-                                <td>${dados.clienteHtml || 'BALCÃO'}</td>
-                                <td>${resumoItens}</td>
-                                <td><span style="font-size:11px; font-weight:700; padding:4px 8px; background:#f1f5f9; border-radius:6px;">${dados.pagamento || 'Pix'}</span></td>
-                                <td><strong>R$ ${parseFloat(dados.total || 0).toFixed(2)}</strong></td>
-                                <td style="text-align:center; white-space: nowrap;">
-                                    <button class="btn-action-rep" onclick="reimprimirTicketPorId('${doc.id}')">🖨️ Rep</button>
-                                    <button class="btn-action-edit" onclick="carregarPedidoParaEdicao('${doc.id}')">✏️ Edit</button>
-                                    <button class="btn-action-del" onclick="deletarPedidoCloud('${doc.id}')">❌ Exc</button>
-                                </td>
-                            </tr>
+                        // Renderização à prova de falhas: Bloco de Card Independente estruturado
+                        containerCards.innerHTML += `
+                            <div class="pedido-log-card">
+                                <div class="pedido-log-header">
+                                    <span style="font-size: 16px; font-weight:800; color:var(--cor-principal);">PEDIDO #${String(dados.numero).padStart(2, '0')}</span>
+                                    <span style="font-size: 12px; font-weight:600; color:var(--cor-texto-secundario);">${dados.hora || '12:00'}</span>
+                                </div>
+                                <div class="pedido-log-corpo">
+                                    <div style="margin-bottom: 6px;">${dados.clienteHtml || '<strong>BALCÃO</strong>'}</div>
+                                    <div style="background:#fff; padding:8px; border-radius:6px; border:1px solid var(--cor-borda); margin-bottom:6px;">${resumoItens}</div>
+                                    <div><strong>Pagamento:</strong> ${dados.pagamento || 'Dinheiro'}</div>
+                                    <div style="font-size:15px; margin-top:4px;"><strong>Total: <span style="color:var(--cor-principal)">R$ ${parseFloat(dados.total || 0).toFixed(2)}</span></strong></div>
+                                </div>
+                                <div class="pedido-log-footer">
+                                    <button class="btn-card-rep" onclick="reimprimirTicketPorId('${doc.id}')">🖨️ Rep</button>
+                                    <button class="btn-card-edit" onclick="carregarPedidoParaEdicao('${doc.id}')">✏️ Edit</button>
+                                    <button class="btn-card-del" onclick="deletarPedidoCloud('${doc.id}')">❌ Exc</button>
+                                </div>
+                            </div>
                         `;
                     }
                 });
@@ -625,10 +616,10 @@
         }
 
         window.deletarPedidoCloud = async function(firebaseId) {
-            if(!confirm("Deseja apagar este pedido definitivamente do sistema cloud?")) return;
+            if(!confirm("Tem certeza que deseja apagar permanentemente esse pedido da nuvem?")) return;
             try {
                 await deleteDoc(doc(db, "pedidos", firebaseId));
-                alert("Pedido deletado com sucesso!"); await carregarHistoricoDoFirebase();
+                alert("Pedido excluído!"); await carregarHistoricoDoFirebase();
             } catch(e) { alert("Erro ao deletar."); }
         };
 
@@ -655,10 +646,12 @@
             const precoUnitario = parseFloat(document.getElementById('valor').value);
             const qtd = parseInt(document.getElementById('quantidade').value);
 
-            // TRAVA DE MATEMÁTICA ESTRITA CONTRA R$ 0,00
+            // TRAVA INLINE COMPLETA E ABSOLUTA CONTRA LANÇAMENTOS ZERADOS
             if (isNaN(precoUnitario) || precoUnitario <= 0) {
-                alert("🚫 OPERAÇÃO RECUSADA!\nO preço unitário do item deve ser maior que R$ 0,00.");
-                document.getElementById('valor').focus(); return;
+                alert("🚫 VALOR ZERADO RECUSADO!\nO preço do prato deve ser maior que R$ 0,00.");
+                document.getElementById('valor').value = '';
+                document.getElementById('valor').focus(); 
+                return;
             }
 
             pedidoAtual.push({ 
@@ -705,7 +698,7 @@
             });
 
             if(possuiItemZerado || totalPedido <= 0) {
-                alert("🚫 FINALIZAÇÃO TRAVADA: O valor total não pode ser R$ 0,00."); return;
+                alert("🚫 SISTEMA TRAVOU A GRAVAÇÃO: Valor acumulado inválido (R$ 0,00)."); return;
             }
 
             const nomeCliente = document.getElementById('cliente-nome').value.trim();

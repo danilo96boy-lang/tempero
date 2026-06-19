@@ -273,10 +273,10 @@
         .btn-print { background-color: #16a34a; color: white; font-size: 15px; }
         .btn-print:hover { background-color: #15803d; }
 
-        /* Ajustes de estilo nos botões de Ações para caberem perfeitamente */
-        .btn-reprint { background-color: #2563eb; color: white; padding: 6px 10px; font-size: 11px; border-radius: 6px; font-weight: bold; border: none; cursor: pointer; }
-        .btn-edit { background-color: #f59e0b; color: white; padding: 6px 10px; font-size: 11px; border-radius: 6px; font-weight: bold; border: none; cursor: pointer; }
-        .btn-delete { background-color: #dc2626; color: white; padding: 6px 10px; font-size: 11px; border-radius: 6px; font-weight: bold; border: none; cursor: pointer; }
+        /* Estilos explícitos e sem flex interno para evitar quebra horizontal dos botões de ação */
+        .btn-reprint { background-color: #2563eb; color: white; padding: 6px 12px; font-size: 11px; border-radius: 6px; font-weight: bold; border: none; cursor: pointer; display: inline-block; margin: 2px; }
+        .btn-edit { background-color: #f59e0b; color: white; padding: 6px 12px; font-size: 11px; border-radius: 6px; font-weight: bold; border: none; cursor: pointer; display: inline-block; margin: 2px; }
+        .btn-delete { background-color: #dc2626; color: white; padding: 6px 12px; font-size: 11px; border-radius: 6px; font-weight: bold; border: none; cursor: pointer; display: inline-block; margin: 2px; }
 
         .btn-fechamento { background-color: #475569; color: white; width: 100%; }
         .btn-fechamento:hover { background-color: #334155; }
@@ -311,10 +311,10 @@
         .total-tela { font-size: 22px; font-weight: 800; text-align: right; margin-top: 14px; padding-top: 14px; border-top: 2px dashed #cbd5e0; }
         .total-tela span { color: var(--cor-principal); }
 
-        /* Ajuste crucial na tabela para evitar colunas espremidas */
+        /* Engenharia de Tabela comercial limpa com rolagem suave contra overflow lateral */
         .tabela-wrapper { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: var(--border-radius-md); border: 1px solid var(--cor-borda); }
-        .tabela-comercial { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 850px; table-layout: fixed; }
-        .tabela-comercial th, .tabela-comercial td { padding: 12px 10px; text-align: left; border-bottom: 1px solid var(--cor-borda); vertical-align: top; word-wrap: break-word; }
+        .tabela-comercial { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 850px; }
+        .tabela-comercial th, .tabela-comercial td { padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--cor-borda); vertical-align: top; }
         .tabela-comercial th { background-color: #f8fafc; color: #475569; font-weight: 700; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; }
 
         .dash-container-tela { display: none; grid-template-columns: 1fr; gap: 16px; margin-top: 15px; padding: 12px; background: #f8fafc; border: 1px solid var(--cor-borda); border-radius: var(--border-radius-lg); }
@@ -523,13 +523,13 @@
                     <table class="tabela-comercial">
                         <thead>
                             <tr>
-                                <th style="width: 50px;">Nº</th>
-                                <th style="width: 60px;">Hora</th>
-                                <th style="width: 230px;">Cliente / Canal</th>
-                                <th style="width: 220px;">Produtos</th>
-                                <th style="width: 80px;">Método</th>
-                                <th style="width: 80px;">Total</th>
-                                <th style="width: 170px; text-align: center;">Ações</th>
+                                <th style="width: 8%;">Nº</th>
+                                <th style="width: 10%;">Hora</th>
+                                <th style="width: 25%;">Cliente / Canal</th>
+                                <th style="width: 25%;">Produtos</th>
+                                <th style="width: 10%;">Método</th>
+                                <th style="width: 10%;">Total</th>
+                                <th style="width: 180px; text-align: center;">Ações</th>
                             </tr>
                         </thead>
                         <tbody id="corpo-historico"></tbody>
@@ -749,7 +749,7 @@
                             return `<span style="color:var(--cor-principal); font-weight:600;">(${itemQtd}x) [${itemPrato}]</span> ${tipoLimpo}`;
                         }).join('<br>');
                         
-                        // Renderização com largura fixa em bloco e sem flex interno
+                        // Renderização sem blocos flex internos que quebram o fluxo inline das larguras de colunas
                         corpoHistorico.innerHTML += `
                             <tr>
                                 <td><strong style="color:var(--cor-principal)">#${String(dados.numero).padStart(2, '0')}</strong></td>

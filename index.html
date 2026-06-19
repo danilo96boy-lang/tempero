@@ -1,545 +1,4 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Tempero de Família - PDV Comercial Premium</title>
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-    <style>
-        /* ==========================================================================
-           --- DESIGN SYSTEM E INTERFACE OPERACIONAL PREMIUM (RESPONSIVO) ---
-           ========================================================================== */
-        :root {
-            --cor-principal: #cc1d1d; 
-            --cor-principal-hover: #b71c1c;
-            --cor-fundo: #f4f6f9;
-            --cor-card: #ffffff;
-            --cor-texto: #1e293b;
-            --cor-texto-secundario: #64748b;
-            --cor-borda: #e2e8f0;
-            --border-radius-lg: 12px;
-            --border-radius-md: 8px;
-            --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
-            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
-            --transition: all 0.2s ease-in-out;
-        }
-
-        body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background-color: var(--cor-fundo);
-            margin: 0;
-            padding: 8px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            color: var(--cor-texto);
-            -webkit-font-smoothing: antialiased;
-            padding-bottom: 70px;
-        }
-
-        @media(min-width: 950px) {
-            body { padding: 20px; padding-bottom: 20px; }
-        }
-
-        #tela-login {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            position: fixed;
-            top: 0; left: 0; width: 100vw; height: 100vh;
-            background-color: var(--cor-fundo);
-            z-index: 9999;
-            padding: 16px;
-            box-sizing: border-box;
-        }
-
-        .card-login {
-            background: var(--cor-card);
-            padding: 30px 20px;
-            border-radius: var(--border-radius-lg);
-            box-shadow: var(--shadow-md);
-            width: 100%;
-            max-width: 380px;
-            box-sizing: border-box;
-            text-align: center;
-            border-top: 5px solid var(--cor-principal);
-        }
-
-        #conteudo-sistema {
-            display: none;
-            width: 100%;
-            max-width: 1180px;
-        }
-
-        .brand-header {
-            display: flex;
-            align-items: center;
-            justify-content: flex-start;
-            gap: 12px;
-            background: var(--cor-card);
-            padding: 12px 16px;
-            border-radius: var(--border-radius-lg);
-            width: 100%;
-            box-shadow: var(--shadow-sm);
-            box-sizing: border-box;
-            border: 1px solid var(--cor-borda);
-            margin-bottom: 12px;
-        }
-
-        .brand-logo {
-            width: 35px;
-            height: 40px;
-            object-fit: cover;
-            border-radius: 50%;
-            border: 2px solid var(--cor-principal);
-        }
-
-        .brand-header h1 {
-            margin: 0;
-            font-size: 16px;
-            font-weight: 800;
-            color: var(--cor-texto);
-            letter-spacing: -0.5px;
-        }
-
-        @media(min-width: 950px) {
-            .brand-header { gap: 16px; padding: 16px 28px; margin-bottom: 20px; }
-            .brand-logo { width: 45px; height: 45px; }
-            .brand-header h1 { font-size: 20px; }
-        }
-
-        .mobile-tabs-nav {
-            display: flex;
-            justify-content: space-around;
-            position: fixed;
-            bottom: 0; left: 0; width: 100%;
-            background: #ffffff;
-            border-top: 1px solid var(--cor-borda);
-            padding: 10px 0;
-            z-index: 999;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
-        }
-
-        .tab-btn {
-            background: none; border: none; font-size: 11px; font-weight: 700;
-            color: var(--cor-texto-secundario); display: flex; flex-direction: column;
-            align-items: center; gap: 4px; cursor: pointer; position: relative; width: 25%;
-        }
-
-        .tab-btn.active { color: var(--cor-principal); }
-        
-        .badge-carrinho {
-            position: absolute; top: -6px; right: 22%;
-            background: var(--cor-principal); color: white;
-            font-size: 10px; font-weight: bold; border-radius: 10px;
-            padding: 1px 6px; display: none;
-        }
-
-        @media(min-width: 950px) {
-            .mobile-tabs-nav { display: none !important; }
-        }
-
-        .main-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 16px;
-            width: 100%;
-            box-sizing: border-box;
-        }
-
-        @media(max-width: 949px) {
-            .main-grid > .card { display: none; }
-            .main-grid > .card.active-tab-card { display: block !important; }
-        }
-
-        @media(min-width: 950px) {
-            .main-grid { grid-template-columns: 1.35fr 1fr; gap: 20px; }
-            .full-width-grid { grid-column: span 2; }
-            .main-grid > .card { display: block !important; }
-        }
-
-        .card {
-            background-color: var(--cor-card);
-            padding: 16px;
-            border-radius: var(--border-radius-lg);
-            box-shadow: var(--shadow-sm);
-            border: 1px solid var(--cor-borda);
-            box-sizing: border-box;
-        }
-
-        @media(min-width: 768px) {
-            .card { padding: 24px; }
-        }
-
-        .card.card-fechamento-compacto {
-            padding: 15px 20px;
-        }
-
-        h3 {
-            margin: 0 0 16px 0;
-            color: var(--cor-texto);
-            font-size: 14px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            border-bottom: 1px solid var(--cor-borda);
-            padding-bottom: 8px;
-        }
-
-        .secao-titulo {
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: var(--cor-principal);
-            margin: 14px 0 8px 0;
-            font-weight: 700;
-        }
-
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 12px;
-        }
-
-        @media(min-width: 480px) {
-            .form-row.dois-campos { grid-template-columns: 1fr 1fr; }
-            .form-row.tres-campos { grid-template-columns: 1fr 1fr 1fr; }
-        }
-
-        .form-group { margin-bottom: 10px; }
-
-        label {
-            display: block;
-            margin-bottom: 4px;
-            font-weight: 600;
-            color: var(--cor-texto);
-            font-size: 12px;
-        }
-
-        input, select, textarea {
-            width: 100%;
-            padding: 12px; 
-            border: 1px solid #cbd5e1;
-            border-radius: var(--border-radius-md);
-            box-sizing: border-box;
-            font-size: 16px; 
-            font-family: inherit;
-            background-color: #fff;
-            color: var(--cor-texto);
-            transition: var(--transition);
-        }
-
-        @media(min-width: 950px) {
-            input, select, textarea { font-size: 14px; padding: 10px 12px; }
-        }
-
-        input:focus, select:focus, textarea:focus {
-            outline: none;
-            border-color: var(--cor-principal);
-            box-shadow: 0 0 0 3px rgba(204, 29, 29, 0.1);
-        }
-
-        textarea { resize: vertical; height: 55px; }
-
-        .btn {
-            border: none;
-            padding: 14px 20px;
-            font-size: 14px;
-            border-radius: var(--border-radius-md);
-            cursor: pointer;
-            font-weight: 700;
-            transition: var(--transition);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 8px;
-            width: 100%;
-        }
-
-        @media(min-width: 950px) {
-            .btn { width: auto; padding: 10px 20px; }
-        }
-
-        .btn-add { background-color: var(--cor-principal); color: white; margin-top: 10px; }
-        .btn-add:hover { background-color: var(--cor-principal-hover); }
-
-        .btn-print { background-color: #16a34a; color: white; font-size: 15px; }
-        .btn-print:hover { background-color: #15803d; }
-
-        .btn-reprint { background-color: #2563eb; color: white; padding: 6px 10px; font-size: 11px; border-radius: 6px; font-weight: bold; border: none; width: auto; cursor: pointer; }
-        .btn-edit { background-color: #f59e0b; color: white; padding: 6px 10px; font-size: 11px; border-radius: 6px; font-weight: bold; border: none; width: auto; cursor: pointer; margin-left: 2px;}
-        .btn-delete { background-color: #dc2626; color: white; padding: 6px 10px; font-size: 11px; border-radius: 6px; font-weight: bold; border: none; width: auto; cursor: pointer; margin-left: 2px;}
-
-        .btn-fechamento { background-color: #475569; color: white; width: 100%; }
-        .btn-fechamento:hover { background-color: #334155; }
-
-        .btn-pdf { background-color: #2563eb; color: white; display: none; width: 100%; }
-        .btn-pdf:hover { background-color: #1d4ed8; }
-
-        .btn-reset { background-color: #dc2626; color: white; display: none; width: 100%; }
-        .btn-reset:hover { background-color: #b91c1c; }
-
-        @media(min-width: 480px) {
-            .container-botoes-fechamento { display: flex; gap: 10px; width: 100%; justify-content: flex-end; }
-            .card-fechamento-compacto .btn { width: auto; }
-        }
-
-        .carrinho-container { display: flex; flex-direction: column; justify-content: space-between; background: #f8fafc; }
-
-        .lista-itens { list-style: none; padding: 0; margin: 0; max-height: 260px; overflow-y: auto; }
-
-        .item-carrinho {
-            background: white; padding: 12px; margin-bottom: 8px;
-            border-radius: var(--border-radius-md); font-size: 13px; display: flex;
-            justify-content: space-between; align-items: center; border: 1px solid var(--cor-borda);
-        }
-
-        .btn-del {
-            background: #fee2e2; color: #ef4444; border: none; border-radius: 50%;
-            width: 24px; height: 24px; font-weight: bold; cursor: pointer; display: flex;
-            align-items: center; justify-content: center; font-size: 11px; flex-shrink: 0;
-        }
-
-        .total-tela { font-size: 22px; font-weight: 800; text-align: right; margin-top: 14px; padding-top: 14px; border-top: 2px dashed #cbd5e0; }
-        .total-tela span { color: var(--cor-principal); }
-
-        .tabela-wrapper { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: var(--border-radius-md); border: 1px solid var(--cor-borda); }
-        .tabela-comercial { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 750px; }
-        .tabela-comercial th, .tabela-comercial td { padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--cor-borda); vertical-align: top; }
-        .tabela-comercial th { background-color: #f8fafc; color: #475569; font-weight: 700; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; }
-
-        .dash-container-tela { display: none; grid-template-columns: 1fr; gap: 16px; margin-top: 15px; padding: 12px; background: #f8fafc; border: 1px solid var(--cor-borda); border-radius: var(--border-radius-lg); }
-        @media(min-width: 650px) { .dash-container-tela { grid-template-columns: 1fr 1fr; padding: 15px; } .dash-full { grid-column: span 2; } }
-        .bloco-metricas-caixa { display: flex; flex-direction: column; gap: 10px; }
-        .card-metrica { background: #fff; border: 1px solid var(--cor-borda); padding: 14px; border-radius: var(--border-radius-md); box-shadow: var(--shadow-sm); }
-        .card-metrica h4 { margin: 0; color: var(--cor-texto-secundario); font-size: 11px; text-transform: uppercase; }
-        .card-metrica p { margin: 4px 0 0 0; font-size: 20px; font-weight: bold; color: var(--cor-texto); }
-        .bloco-grafico-caixa { background: #fff; border: 1px solid var(--cor-borda); padding: 14px; border-radius: var(--border-radius-md); display: flex; justify-content: center; align-items: center; min-height: 220px; max-height: 260px; box-shadow: var(--shadow-sm); }
-
-        /* ==========================================================================
-           --- AMBIENTE DE IMPRESSÃO ISOLADO E PROTEGIDO CONTRA TRAVAMENTOS ---
-           ========================================================================== */
-        #ticket-print { display: none; }
-        
-        body.modo-impressao-ticket #conteudo-sistema,
-        body.modo-impressao-ticket #navegacao-abas-id,
-        body.modo-impressao-ticket #tela-login {
-            display: none !important;
-        }
-
-        @media print {
-            @page { size: 58mm auto; margin: 0mm; }
-            .no-print { display: none !important; }
-            body { background: #fff; padding: 0; margin: 0; display: block; width: 58mm; }
-            
-            #ticket-print { 
-                display: block !important; 
-                font-family: 'Courier New', Courier, monospace; 
-                width: 48mm; 
-                max-width: 48mm; 
-                padding: 1mm 0.5mm; 
-                margin: 0; 
-                font-size: 11px; 
-                color: #000; 
-                line-height: 1.25; 
-                word-wrap: break-word; 
-            }
-            .ticket-header { text-align: center; margin-bottom: 2px; }
-            .ticket-via-tag { font-size: 12px; font-weight: bold; border: 1px solid #000; display: inline-block; padding: 2px 4px; margin-bottom: 3px; text-transform: uppercase; }
-            .ticket-header-title { font-size: 13px; font-weight: bold; letter-spacing: 0.5px; }
-            .ticket-header-num-destaque { font-size: 26px !important; font-weight: 950 !important; margin: 6px 0 !important; text-align: center !important; display: block !important; width: 100% !important; letter-spacing: -0.5px; }
-            .ticket-divider { text-align: center; margin: 2px 0; font-weight: bold; font-size: 11px; }
-            .ticket-client-info { font-size: 10.5px; margin-bottom: 2px; line-height: 1.2; }
-            .ticket-item { margin: 6px 0; page-break-inside: avoid; border-bottom: 1px dotted #ccc; padding-bottom: 4px; }
-            .ticket-item-main { width: 100%; display: block; text-align: left; }
-            .ticket-item-name { display: block; font-weight: bold; font-size: 11px; line-height: 1.3; width: 100%; }
-            .ticket-item-price { display: block; text-align: right; font-weight: bold; font-size: 11px; margin-top: 1px; }
-            .ticket-item-obs { font-size: 10px; padding-left: 1ch; margin-top: 1px; color: #333; font-style: italic; display: block; }
-            .ticket-total-container { font-size: 13px; font-weight: bold; display: flex; justify-content: space-between; margin-top: 4px; }
-            .ticket-wrapper-via { page-break-after: always !important; display: block; }
-        }
-    </style>
-</head>
-<body>
-
-    <div id="tela-login" class="no-print">
-        <div class="card-login">
-            <h2 style="color: var(--cor-principal); margin: 0 0 6px 0; text-transform: uppercase; font-size: 18px; font-weight: 800; letter-spacing: 0.5px;">Acesso Restrito</h2>
-            <p style="font-size: 13px; color: var(--cor-texto-secundario); margin: 0 0 24px 0;">Painel PDV Comercial Cloud</p>
-            
-            <form id="form-login-id" onsubmit="validarAcessoSecure(event)">
-                <div class="form-group" style="text-align: left;">
-                    <label>Operador / Usuário:</label>
-                    <input type="text" id="login-usuario" required placeholder="Digite o usuário">
-                </div>
-                <div class="form-group" style="text-align: left; margin-bottom: 24px;">
-                    <label>Senha de Acesso:</label>
-                    <input type="password" id="login-senha" required placeholder="•••••">
-                </div>
-                <button type="submit" class="btn btn-add">🔓 Confirmar Identidade</button>
-            </form>
-        </div>
-    </div>
-
-    <nav class="mobile-tabs-nav no-print" id="navegacao-abas-id">
-        <button class="tab-btn active" onclick="alternarAbaMobile('venda', this)">📝 <span>Vender</span></button>
-        <button class="tab-btn" onclick="alternarAbaMobile('carrinho', this)">
-            🛒 <span>Carrinho</span>
-            <span class="badge-carrinho" id="badge-contador-id">0</span>
-        </button>
-        <button class="tab-btn" onclick="alternarAbaMobile('fechamento', this)">🔒 <span>Turno</span></button>
-        <button class="tab-btn" onclick="alternarAbaMobile('logs', this)">📋 <span>Logs</span></button>
-    </nav>
-
-    <div id="conteudo-sistema">
-        <div class="brand-header no-print">
-            <img src="logo.png" alt="Logo" class="brand-logo" onerror="this.style.display='none'">
-            <h1 id="titulo-sistema-venda">Tempero de Família</h1>
-        </div>
-
-        <div class="main-grid no-print">
-            <div class="card active-tab-card" id="card-aba-venda">
-                <h3 id="label-modo-venda">📝 Registrar Venda</h3>
-                <form id="form-item" onsubmit="adicionarItem(event)">
-                    <div class="secao-titulo">1. Dados do Cliente</div>
-                    <div class="form-row dois-campos">
-                        <div class="form-group">
-                            <label>Celular / WhatsApp:</label>
-                            <input type="tel" id="cliente-celular" oninput="buscarClientePorTelefone(this.value)" placeholder="(00) 00000-0000">
-                        </div>
-                        <div class="form-group">
-                            <label>Nome Completo:</label>
-                            <input type="text" id="cliente-nome" placeholder="Nome">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>Endereço de Entrega:</label>
-                        <input type="text" id="cliente-endereco" placeholder="Deixe em branco para BALCÃO...">
-                    </div>
-
-                    <div class="secao-titulo">2. Seleção de Itens</div>
-                    <div class="form-row dois-campos">
-                        <div class="form-group">
-                            <label>Produto / Categoria:</label>
-                            <select id="categoria-prato" onchange="atualizarOpcoesMenu()" required>
-                                <option value="">-- Selecione o Prato --</option>
-                                <option value="Parmegiana de Frango">🍗 Parmegiana de Frango</option>
-                                <option value="Frango à Milanesa">🍗 Frango à Milanesa</option>
-                                <option value="Parmegiana de Berinjela">🍆 Parmegiana de Berinjela</option>
-                                <option value="Feijoada">🥘 Feijoada</option>
-                                <option value="Marmitex">🍛 Marmitex Simples</option>
-                                <option value="Prato Feito">🍽️ Prato Feito Tradicional</option>
-                                <option value="Bebidas">🥤 Bebidas</option>
-                                <option value="Outros Pratos">✨ Outros Pratos / Especial</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Tamanho / Especificação:</label>
-                            <select id="tipo" onchange="inserirPrecoSugerido()" required>
-                                <option value="">-- Selecione o prato primeiro --</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="form-row tres-campos">
-                        <div class="form-group">
-                            <label>Preço Unitário (R$):</label>
-                            <input type="number" id="valor" step="0.01" min="0" placeholder="0,00" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Quantidade:</label>
-                            <input type="number" id="quantidade" min="1" value="1" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Forma de Pagamento:</label>
-                            <select id="forma-pagamento" required>
-                                <option value="Dinheiro">💵 Dinheiro</option>
-                                <option value="Pix">⚡ Pix</option>
-                                <option value="Cartão">💳 Cartão</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>Observações:</label>
-                        <textarea id="descricao" placeholder="Ex: Sem cebola, Coca normal..."></textarea>
-                    </div>
-
-                    <button type="submit" class="btn btn-add" id="btn-add-carrinho">＋ Lançar no Carrinho</button>
-                </form>
-            </div>
-
-            <div class="card carrinho-container" id="card-aba-carrinho">
-                <h3>🛒 Checkout do Pedido</h3>
-                <ul id="lista-itens" class="lista-itens"></ul>
-                <div>
-                    <div class="total-tela">Total: <span>R$ <span id="total-valor">0.00</span></span></div>
-                    <button type="button" class="btn btn-print" style="margin-top: 15px;" id="btn-finalizar-checkout" onclick="finalizarEImprimirTicket()">🖨️ Autenticar & Imprimir Dupla Via</button>
-                </div>
-            </div>
-
-            <div class="card card-fechamento-compacto" id="card-aba-fechamento">
-                <h3>🔒 Fechamento Consolidado de Caixa</h3>
-                <div class="container-botoes-fechamento">
-                    <button type="button" class="btn btn-fechamento" onclick="calcularFechamentoDiario()">🔒 Processar Turno</button>
-                    <button type="button" id="btn-pdf-id" class="btn btn-pdf" onclick="exportarFechamentoPDF()">📥 Gerar Relatório PDF (A4)</button>
-                    <button type="button" id="btn-reset-id" class="btn btn-reset" onclick="reiniciarTurnoComSenha()">⚠️ Reiniciar Turno (Zerar Caixa)</button>
-                </div>
-                
-                <div id="dashboard-vendas-tela" class="dash-container-tela">
-                    <div class="bloco-metricas-caixa">
-                        <div class="card-metrica">
-                            <h4>Faturamento Bruto Acumulado</h4>
-                            <p id="t-dash-faturamento">R$ 0.00</p>
-                        </div>
-                        <div class="card-metrica">
-                            <h4>Total de Pedidos Processados</h4>
-                            <p id="t-dash-qtd-pedidos">0</p>
-                        </div>
-                        <div class="card-metrica">
-                            <h4>Ticket Médio do Turno</h4>
-                            <p id="t-dash-ticket-medio">R$ 0.00</p>
-                        </div>
-                    </div>
-                    <div class="bloco-grafico-caixa">
-                        <canvas id="graficoPizzaFechamento"></canvas>
-                    </div>
-                    <div class="dash-full" style="text-align:center; padding: 5px; font-weight: bold; color: #2563eb; font-size: 13px;">
-                        🎯 Relatório financeiro compilado com sucesso! Pronto para exportação.
-                    </div>
-                </div>
-            </div>
-
-            <div class="card" id="card-aba-logs">
-                <h3>📋 Logs Analíticos de Transações (Real-time Firebase)</h3>
-                <div class="tabela-wrapper">
-                    <table class="tabela-comercial">
-                        <thead>
-                            <tr>
-                                <th style="width: 6%;">Nº</th>
-                                <th style="width: 8%;">Hora</th>
-                                <th style="width: 20%;">Cliente / Canal</th>
-                                <th style="width: 30%;">Produtos</th>
-                                <th style="width: 10%;">Método</th>
-                                <th style="width: 8%;">Total</th>
-                                <th style="width: 18%; text-align: center;">Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="corpo-historico"></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="ticket-print"></div>
-
-    <script type="module">
+<script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getFirestore, collection, addDoc, getDocs, doc, setDoc, getDoc, deleteDoc, query, orderBy, Timestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
@@ -556,13 +15,13 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // --- MAPAS FINANCEIROS E CARDÁPIO PADRÃO ---
+        // --- ALINHAMENTO DO CARDÁPIO COM A TABELA DE PREÇOS ---
         const cardapioEstruturado = {
             "Parmegiana de Frango": ["P", "M", "G"],
             "Frango à Milanesa": ["P", "M", "G"],
             "Parmegiana de Berinjela": ["P", "M", "G"],
-            "Feijoada": ["Completa", "Média"],
-            "Marmitex": ["Pequena", "Média", "Grande"],
+            "Feijoada": ["M", "G", "Completa"],
+            "Marmitex": ["P", "M", "G"],
             "Prato Feito": ["Tradicional", "Especial"],
             "Bebidas": ["Refrigerante Lata", "Suco Natural", "Água Mineral"],
             "Outros Pratos": ["Especial do Dia"]
@@ -570,10 +29,10 @@
 
         const tabelaPrecosSugeridos = {
             "Parmegiana de Frango": {"P": 22.00, "M": 28.00, "G": 35.00},
-            "Frango à Milanesa": {"P": 20.00, "M": 26.00, "G": 32.00},
+            "Frango à Milanesa": {"P": 16.00, "M": 26.00, "G": 32.00},
             "Parmegiana de Berinjela": {"P": 21.00, "M": 27.00, "G": 34.00},
-            "Feijoada": {"Completa": 45.00, "Média": 32.00},
-            "Marmitex": {"Pequena": 18.00, "Média": 22.00, "Grande": 26.00},
+            "Feijoada": {"M": 27.00, "G": 35.00, "Completa": 45.00},
+            "Marmitex": {"P": 18.00, "M": 22.00, "G": 26.00},
             "Prato Feito": {"Tradicional": 20.00, "Especial": 25.00},
             "Bebidas": {"Refrigerante Lata": 6.00, "Suco Natural": 8.00, "Água Mineral": 4.00},
             "Outros Pratos": {"Especial do Dia": 30.00}
@@ -584,7 +43,7 @@
         let contadorPedidos = 1;
         let dadosFechamentoRelatorio = null;
         let chartPizzaInstancia = null; 
-        let idPedidoEdicaoGlobal = null; // Controla se estamos editando um pedido existente
+        let idPedidoEdicaoGlobal = null; 
 
         let horarioCorteTurno = 0; 
 
@@ -739,18 +198,21 @@
                             return `<span style="color:var(--cor-principal); font-weight:600;">(${itemQtd}x) [${itemPrato}]</span> ${tipoLimpo}`;
                         }).join('<br>');
                         
+                        // INJEÇÃO ATUALIZADA E CORRIGIDA COM OS BOTÕES DE AÇÃO VISÍVEIS
                         corpoHistorico.innerHTML += `
                             <tr>
                                 <td><strong style="color:var(--cor-principal)">#${String(dados.numero).padStart(2, '0')}</strong></td>
                                 <td>${dados.hora || '12:00'}</td>
-                                <td>${dados.clientFormatadoLogs || dados.clienteHtml || '<span style="color:#94a3b8; font-weight:bold;">BALCÃO</span>'}</td>
+                                <td>${dados.clienteHtml || '<span style="color:#94a3b8; font-weight:bold;">BALCÃO</span>'}</td>
                                 <td>${resumoItens}</td>
                                 <td><span style="font-size:11px; font-weight:700; padding:4px 8px; background:#f1f5f9; border-radius:6px; color:#475569;">${dados.pagamento || 'Dinheiro'}</span></td>
                                 <td><strong>R$ ${parseFloat(dados.total || 0).toFixed(2)}</strong></td>
-                                <td style="text-align:center; display: flex; justify-content: center; gap: 4px;">
-                                    <button class="btn-reprint" onclick="reimprimirTicketPorId('${doc.id}')">🖨️ Rep</button>
-                                    <button class="btn-edit" onclick="carregarPedidoParaEdicao('${doc.id}')">✏️ Edit</button>
-                                    <button class="btn-delete" onclick="deletarPedidoCloud('${doc.id}')">❌ Exc</button>
+                                <td style="text-align:center;">
+                                    <div style="display: flex; gap: 4px; justify-content: center;">
+                                        <button class="btn-reprint" style="padding: 6px 8px;" onclick="reimprimirTicketPorId('${doc.id}')">🖨️ Rep</button>
+                                        <button class="btn-edit" style="padding: 6px 8px;" onclick="carregarPedidoParaEdicao('${doc.id}')">✏️ Edit</button>
+                                        <button class="btn-delete" style="padding: 6px 8px;" onclick="deletarPedidoCloud('${doc.id}')">❌ Exc</button>
+                                    </div>
                                 </td>
                             </tr>
                         `;
@@ -764,42 +226,41 @@
             }
         }
 
-        // --- EXCLUSÃO DE PEDIDO DA NUVEM ---
+        // --- REMOVER PEDIDO DO CAIXA ---
         window.deletarPedidoCloud = async function(firebaseId) {
-            if(!confirm("Tem certeza que deseja excluir permanentemente este pedido da nuvem? Isso mudará as métricas do caixa ativo.")) return;
+            if(!confirm("Tem certeza que deseja excluir permanentemente este pedido da nuvem?")) return;
             try {
                 await deleteDoc(doc(db, "pedidos", firebaseId));
-                alert("Pedido deletado com sucesso!");
+                alert("Pedido excluído!");
                 await carregarHistoricoDoFirebase();
             } catch(e) {
-                alert("Erro ao excluir documento.");
-                console.error(e);
+                alert("Erro ao excluir.");
             }
         };
 
-        // --- CARREGAR PEDIDO PARA EDIÇÃO NO FORMULÁRIO PRINCIPAL ---
+        // --- TRAZER O PEDIDO DE VOLTA PARA EDIÇÃO ---
         window.carregarPedidoParaEdicao = function(firebaseId) {
             const pedido = historicoGeralPedidos.find(p => p.firebaseId === firebaseId);
             if(!pedido) return alert("Pedido não encontrado.");
 
-            idPedidoEdicaoGlobal = firebaseId; // Guarda o ID para o update por cima do antigo
+            idPedidoEdicaoGlobal = firebaseId;
 
-            // Altera elementos Visuais do Menu de Entrada
-            document.getElementById('label-modo-venda').innerHTML = `✏️ Editando Histórico: Pedido #${String(pedido.numero).padStart(2, '0')}`;
-            document.getElementById('btn-finalizar-checkout').innerHTML = `💾 Atualizar Pedido #${String(pedido.numero).padStart(2, '0')} & Imprimir`;
+            // Altera labels visuais da tela para o operador saber que está editando
+            document.getElementById('label-modo-venda').innerHTML = `✏️ Editando: Pedido #${String(pedido.numero).padStart(2, '0')}`;
+            document.getElementById('btn-finalizar-checkout').innerHTML = `💾 Salvar Alterações no Pedido #${String(pedido.numero).padStart(2, '0')}`;
             
-            // Restaura campos do Cliente desestruturando o objeto bruto se existente
+            // Restaura dados do Cliente
             document.getElementById('cliente-nome').value = pedido.rawClienteNome || '';
             document.getElementById('cliente-celular').value = pedido.rawClienteCelular || '';
             document.getElementById('cliente-endereco').value = pedido.rawClienteEndereco || '';
             document.getElementById('forma-pagamento').value = pedido.pagamento || 'Dinheiro';
 
-            // Carrega os itens brutos de volta no array de modificação ativo
+            // Carrega os itens brutos de volta no carrinho ativo
             pedidoAtual = [...pedido.itens];
             atualizarInterface();
 
-            alert(`Pedido #${pedido.numero} carregado no Painel de Vendas!\nModifique os itens e clique em "Atualizar Pedido" para salvar.`);
-            alternarAbaMobile('venda', document.querySelector('.mobile-tabs-nav b'));
+            alert(`Pedido #${pedido.numero} carregado! Altere os itens se necessário e finalize para salvar.`);
+            window.alternarAbaMobile('venda', document.querySelector('.mobile-tabs-nav .tab-btn:first-child'));
         };
 
         function gerarHtmlFitaVia(pedido, nomeVia) {
@@ -829,7 +290,7 @@
                 `;
             });
 
-            let pulosDeLinhaFisicos = '<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>';
+            let pulosDeLinhaFisicos = '<br><br><br><br><br><br><br><br>';
 
             return `
                 <div class="ticket-wrapper-via">
@@ -986,7 +447,6 @@
                 itensListaSimples.push(`(${item.qtd}x) [${item.prato}] ${item.tipo} - ${item.descricao}`);
             });
 
-            // Se for uma Edição, mantém o número do pedido antigo. Se for novo, gera o próximo da sequência.
             let numeroPedidoDefinido = contadorPedidos;
             if(idPedidoEdicaoGlobal !== null){
                 const pedidoAntigo = historicoGeralPedidos.find(p => p.firebaseId === idPedidoEdicaoGlobal);
@@ -998,7 +458,6 @@
                 data: dataFormatada,
                 hora: horaSimples,
                 clienteHtml: stringClienteHistorico,
-                clientFormatadoLogs: stringClienteHistorico,
                 clienteA4: detalheClienteRelatorio,
                 itens: [...pedidoAtual],
                 itensTxt: itensListaSimples.join('<br>'),
@@ -1012,11 +471,9 @@
 
             try {
                 if(idPedidoEdicaoGlobal !== null) {
-                    // Update/Sobrescreve o documento existente na nuvem
                     await setDoc(doc(db, "pedidos", idPedidoEdicaoGlobal), documentoPedido);
-                    idPedidoEdicaoGlobal = null; // Reseta o estado global de edição
+                    idPedidoEdicaoGlobal = null; 
                 } else {
-                    // Adiciona um novo pedido padrão
                     await addDoc(collection(db, "pedidos"), documentoPedido);
                 }
                 
@@ -1029,7 +486,6 @@
                     window.print();
                 }, 150);
 
-                // Limpeza e Restauração de Layout Padrão
                 pedidoAtual = [];
                 document.getElementById('cliente-nome').value = '';
                 document.getElementById('cliente-celular').value = '';
@@ -1042,7 +498,7 @@
                     alternarAbaMobile('venda', document.querySelector('.mobile-tabs-nav .tab-btn:first-child'));
                 }
             } catch (erro) {
-                alert("Erro ao conectar ou gravar dados com o Firebase!");
+                alert("Erro ao conectar com o Firebase!");
                 console.error(erro);
             }
         };
@@ -1139,10 +595,6 @@
 
             document.getElementById('btn-pdf-id').style.display = 'flex';
             document.getElementById('btn-reset-id').style.display = 'flex';
-            
-            if(window.innerWidth > 950) {
-                document.getElementById('dashboard-vendas-tela').scrollIntoView({ behavior: 'smooth' });
-            }
         };
 
         window.exportarFechamentoPDF = function() {
@@ -1295,22 +747,13 @@
                     document.getElementById('btn-pdf-id').style.display = 'none';
                     document.getElementById('btn-reset-id').style.display = 'none';
                     
-                    alert("Sucesso!\nTurno encerrado globalmente na nuvem. O caixa iniciou no Pedido #01.");
-                    
-                    if(window.innerWidth < 950) {
-                        alternarAbaMobile('venda', document.querySelector('.mobile-tabs-nav .tab-btn:first-child'));
-                    } else {
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                    }
-                    
+                    alert("Turno encerrado globalmente.");
                     await carregarHistoricoDoFirebase();
                 } catch(e) {
-                    alert("Erro de conexão com o Firestore.");
+                    alert("Erro de conexão.");
                 }
             } else if (senhaDigitada !== null) {
                 alert("Senha incorreta!");
             }
         };
     </script>
-</body>
-</html>
